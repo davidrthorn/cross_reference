@@ -15,7 +15,7 @@ At its core, Cross Reference does two things: 1) automatically numbers and style
 
 #### Labels
 
-An example of label in Cross Reference would be *Figure 1* written below a graph in a document. Labels are unique--there can only be a single figure 1, namely the first figure in a document.
+An example of a label would be *Figure 1* written below a graph in a document. Labels are unique--there can only be a single figure 1, namely the first figure in a document.
 
 Cross Reference detects labels and references in a document. It numbers labels sequentially based on their position in the text. So if there are three figures in a document, Cross Reference numbers them 1, 2, and 3 as it goes down through the document. For example, suppose that you moved the second figure in your document to the beginning. Cross Reference would detect this and relabel it *figure 1* instead of *figure 2*.
 
