@@ -1,6 +1,6 @@
 # Cross Reference for Google Docs
 
-Cross Reference is a free add-on for Google Docs that allows users to label elements such as tables and figures, and then updates in-text references to those elements with the right number, text and formatting. Users can customise the text and the style of the text for labels and references.
+Cross Reference is a free add-on for Google Docs that allows users to label equations, figures and tables, and then updates in-text references to those elements with the right number, text and formatting. Users can customise the text and the style of the text for labels and references.
 
 *Version 2 of Cross Reference will allow users to create their own label/reference pairings, which they can use to reference equations, sections, chapters and so on.*
 
@@ -11,7 +11,7 @@ Cross Reference is available free of charge in the Google Add-ons store, which c
 ## Usage
 ### What it does
 
-At its core, Cross Reference does two things: 1) it formats labels applied to figures and tables; 2) it updates in-text references to those figures and table so that they refer to the right thing.
+At its core, Cross Reference does two things: 1) it formats labels applied to equations, figures and tables; 2) it updates in-text references to those elements so that they refer to the right thing.
 
 **Labels:** An example of label in Cross Reference would be *Figure 1* written below a graph in a document. Labels are unique, since there can only be a single figure 1.
 
@@ -27,7 +27,7 @@ Cross Reference also applies the user's choice of text and style to labels and r
 
 Cross Reference needs to be told that a piece of text is a label or a reference. This is done using Docs' hyperlink function. Instead of adding a web address, you will use special code to indicate a label or a reference along with the name of the figure or table. Cross Reference uses two codes, one for labels and one for references. The user chooses the names. It's best to use meaningful names, rather than numbers. For example, a graph showing the heights of a group of people could be called 'heights'.
 
-The code for a figure label is `#figur`; for a table, it's `#table`. (Notice that the code is not figure with an 'e' because label codes in Cross Reference are 5 letters long.) This code is followed by an underscore and then the name. For our figure called 'heights', the complete label identifier would be `#figur_heights`.
+The code for an equation label is `#equat`; for a figure it's `#figur`; for a table, it's `#table`. (Notice that the code is not figure with an 'e' because label codes in Cross Reference are 5 letters long.) This code is followed by an underscore and then the name. For our figure called 'heights', the complete label identifier would be `#figur_heights`.
 
 To create a label for our graph of people's heights, we take the following steps:
 
@@ -38,7 +38,7 @@ To create a label for our graph of people's heights, we take the following steps
 
 We have now created a label for our graph, which should appear as a link (blue and underlined).
 
-We can now refer to our graph in the text. To do this, follow exactly the same steps, but use the reference code. This code is the first three letters of the label code. So for figures, the code is `#fig` and for tables it's `#tab`. A reference to the graph called 'heights' would be a link with the url `#fig_heights`.
+We can now refer to our graph in the text. To do this, follow exactly the same steps, but use the reference code. This code is the first three letters of the label code. So for equations, the code is `#equ`; for figures, it's `#fig`; for tables it's `#tab`. A reference to the graph called 'heights' would be a link with the url `#fig_heights`.
 
 ### Updating the document
 
