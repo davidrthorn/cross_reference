@@ -1,8 +1,6 @@
 # Cross Reference for Google Docs
 
-Cross Reference is a free add-on for Google Docs that allows users to label equations, figures and tables, and then updates in-text references to those elements with the right number, text and formatting. Users can customise the text and the style of the text for labels and references.
-
-*Version 2 of Cross Reference will allow users to create their own label/reference pairings, which they can use to reference equations, sections, chapters and so on.*
+Cross Reference is a free Google Docs add-on that allows users to label equations, figures and tables and then refer to them within the text body. The add-on takes care of numbering these elements, updating labels and references automatically. It also allows users to choose the text and style of their labels and references.
 
 ## Installation
 
