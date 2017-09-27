@@ -4,7 +4,7 @@ Cross Reference is a free Google Docs add-on that allows users to label equation
 
 ## Installation
 
-Cross Reference is available free of charge in the Google Add-ons store, which can be accessed from within an open Google Document. From the *Add-ons* menu, go to *Get add-ons...* and search for 'Cross Reference'. Click on the blue *Free +* button in the Cross Reference panel. Once installed, Cross Reference will appear under the *Add-ons* menu.
+Cross Reference is available free of charge in the Google Add-ons store, which can be accessed from within an open Google Document. From the *Add-ons* menu, go to *Get add-ons...* and search for 'Cross Reference'. Click on the blue *Free* button in the Cross Reference panel to install the add-on. Once installed, Cross Reference will appear in the *Add-ons* menu.
 
 ## Usage
 ### What it does
