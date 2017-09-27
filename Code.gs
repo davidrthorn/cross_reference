@@ -332,6 +332,12 @@ function retrieveStoredLabs(docProps,userProps) {
   
   var labprops = {};
   
+  labprops = {
+      fig:['figure ',null, null,null],
+      tab:['table ',null,null,null],
+      equ:['equation ',null,null,null]
+    }
+  
   for  (var i in docProps) {
     if (i.substr(0,5) === 'cross') {
       var code = i.substr(6,9);
@@ -354,14 +360,6 @@ function retrieveStoredLabs(docProps,userProps) {
       }
     }
   }
-  
-  if(!propstored) {
-    labprops = {
-      fig:['figure ',null, null,null],
-      tab:['table ',null,null,null]
-    }
-  }
-  
   return labprops
 }
 
@@ -370,6 +368,12 @@ function retrieveStoredLabs(docProps,userProps) {
 function retrieveStoredRefs(docProps,userProps) {
 
   var refprops = {};
+  
+  refprops = {
+      fig:['figure ',null, null,null],
+      tab:['table ',null,null,null],
+      equ:['equation ',null,null,null]
+    }
   
   for  (var i in docProps) {
     if (i.substr(0,5) === 'cross') {
@@ -393,14 +397,6 @@ function retrieveStoredRefs(docProps,userProps) {
       }
     }
   }
-  
-  if (!propstored) {
-    refprops = {
-      fig:['figure ',null, null,null],
-      tab:['table ',null,null,null]
-    }
-  }
-  
   return refprops 
 }
 
@@ -453,6 +449,7 @@ function getSettings() {
   
   settings['fig'] = 'figur_Figure_figure _null_null_null_figure _null_null_null';
   settings['tab'] = 'table_Table_table _null_null_null_table _null_null_null';
+  settings['equ'] = 'equat_Equation_equation _null_null_null_equation _null_null_null';
   
   for (var i in uprops) {
     if (i.substr(0,5) === 'cross') {
@@ -501,6 +498,7 @@ function restoreDefault() {
   
   settings['fig'] = 'figur_Figure_figure _null_null_null_figure _null_null_null';
   settings['tab'] = 'table_Table_table _null_null_null_table _null_null_null';
+  settings['equ'] = 'equat_Equation_equation _null_null_null_equation _null_null_null';
   
   for (var i in uprops) {
     if (i.substr(0,5) === 'cross') {
