@@ -27,16 +27,23 @@ Cross Reference also applies the user's choice of text and style to labels and r
 
 Cross Reference needs to be told that a piece of text is a label or a reference. This is done using Docs' hyperlink function. Instead of adding a web address, you will use special code to indicate a label or a reference along with the name of the figure or table. Cross Reference uses two codes, one for labels and one for references. The user chooses the names. It's best to use meaningful names, rather than numbers. For example, a graph showing the heights of a group of people could be called 'heights'.
 
-The code for a figure label is `#figur`; for a table, it's `#table`. Notice that the code is not figure with an 'e', because it must be 5 letters. This code is followed by an underscore and then the name. For our figure called 'heights', the complete label identifier would be `#figur_heights`.
+The code for a figure label is `#figur`; for a table, it's `#table`. (Notice that the code is not figure with an 'e' because label codes in Cross Reference are 5 letters long.) This code is followed by an underscore and then the name. For our figure called 'heights', the complete label identifier would be `#figur_heights`.
 
 To create a label for our graph of people's heights, we take the following steps:
 
-For example, to create a label for a figure do the following:
-1. Insert some text below your graph. Whatever text you use will be replaced, so you can just use the word 'heights'.
-2. Highlight this text, making sure not to highligh any spaces either side.
+1. Insert some text below the heights graph. Whatever text you use will be replaced, so you can just use the word 'heights'.
+2. Highlight this text, making sure not to highlight any spaces either side.
 3. Add a hyperlink with Ctrl+K on Windows or ⌘+K on Mac (or go to the *Insert* menu and choose *Link*).
 4. In the pop-up box, enter `#figur_heights` as the link url.
 
 We have now created a label for our graph, which should appear as a link (blue and underlined).
 
 We can now refer to our graph in the text. To do this, follow exactly the same steps, but use the reference code. This code is the first three letters of the label code. So for figures, the code is `#fig` and for tables it's `#tab`. A reference to the graph called 'heights' would be a link with the url `#fig_heights`.
+
+### Updating the document
+
+Cross Reference works by scanning the document and replacing labels and references with the right text and styling. It does not automatically update the document. To update the document, go to *Add-ons*→*Cross Reference*→*Update document*. Cross Reference will update labels with the right text and with a number corresponding to their position in the text. It will then scan for references in the text and update them with the right text and the appropriate number.
+
+**Labels and references are only paired if the correct code is used and the names match, so be careful of typos. Cross Reference will try to detect mistakes, such as references without corresponding labels, but it is not perfect.**
+
+Following our example of a graph of heights (above), the word 'heights' that we highlighted and turned into a label should now read 'figure 1', assuming it was the first figure in the document. The references should read the same. If we were to insert a new figure at the beginning of the document and then update the document in the Cross Reference menu, our heights graph would now be labelled 'figure 2' and its references would match this.
