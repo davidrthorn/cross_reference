@@ -65,7 +65,7 @@
     }
     
     .labels {
-    background: #C2D2E1;
+    background: #abbab7;
     }
     
     .references {
@@ -191,43 +191,36 @@
     }
     
     .button-row1, .button-row2 {
-      height: 50px;
+      height: 55px;
       position: relative;
     }
     
     .button-row1 {
-      background: indianred;
+      background: #e49767;
     }
-    .button-row2 {
-      min-height: 80px;
-      height: auto !important;
-      height: 80px;
-      background: #c2e1d1;
-    }
-    
     
     #save {
       position: absolute;
       left:25px;
-      bottom:15px;
+      top:15px;
     }
     
     #cancel {
       position: absolute;
       right:25px;
-      bottom:15px;
+      top:15px;
     }
     
     #save_defaults {
       position: absolute;
       left:25px;
-      top:10px;
+      top:12px;
     }
     
     #restore_defaults {
       position: absolute;
       right:25px;
-      top:10px;
+      top:12px;
     }
 
     </style>
@@ -590,13 +583,6 @@
       updateTemp();
       updateSidebar(document.getElementById('name').value);
     }
- 
-    /*
-    document.getElementById("lab_code").onkeyup = function() {
-      var code = document.getElementById("lab_code").value;
-      document.getElementById("ref_code").innerHTML = '#' + code.substr(0,3);
-    }
-    */
     
     document.getElementById("lab_text").onkeyup = function() {
       var lab = document.getElementById("lab_text").value;
