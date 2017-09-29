@@ -9,7 +9,7 @@ Cross Reference is available free of charge in the Google Add-ons store, which c
 ## Usage
 ### What does Cross Reference do?
 
-At its core, Cross Reference does two things: 1) automatically numbers and styles labels for equations, figures and tables; 2) updates in-text references accordingly. This means that if you add elements, delete them, or change their order, you don't have to go through the text manually changing all references to those elements.
+At its core, Cross Reference does two things: 1) automatically numbers and styles labels for equations, figures and tables; 2) updates in-text references accordingly. This means that if you add elements, delete them, or change their order, you don't have to go through the text manually relabelling them and changing all references accordingly.
 
 ### What are labels and references?
 
