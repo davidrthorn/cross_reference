@@ -1,6 +1,6 @@
 # Cross Reference for Google Docs
 
-Cross Reference is a free Google Docs add-on that allows users to label equations, figures and tables and then refer to them within the text body. The add-on takes care of numbering these elements, updating labels and references automatically. It also allows users to choose the text and style of their labels and references.
+Cross Reference is a free Google Docs add-on that allows you to label equations, figures and tables and then refer to them within the text body. The add-on takes care of numbering these elements, updating labels and references automatically. It also allows you to choose the text and style of their labels and references.
 
 ## Installation
 
@@ -19,7 +19,7 @@ An example of a label would be *Figure 1* written below a graph in a document. L
 
 Cross Reference scans the document for labels and numbers them sequentially based on their position in the document. So if there are three figures in a document, Cross Reference numbers them 1, 2, and 3 as it goes down through the document. If you moved the second figure in your document to the beginning, Cross Reference would detect this and relabel it *figure 1* instead of *figure 2*.
 
-Cross Reference also applies the user's choice of text and style to labels. For example, you might choose to format figure labels as Figure 1, *Fig. 1* or FIGURE-1.
+Cross Reference also applies your choice of text and style to labels. For example, you might choose to format figure labels as Figure 1, *Fig. 1* or FIGURE-1.
 
 #### References
 
@@ -31,7 +31,7 @@ Cross Reference needs to be told that a piece of text is a label or a reference.
 
 Names are left up to you, but it's best to use meaningful names, rather than numbers. For example, a graph showing the height distribution of a population could be called 'height'.
 
-Names are joined to Cross Reference codes. Cross Reference uses two codes, one for labels and one for references. The code for an equation label is `#equat`; for a figure it's `#figur`; for a table, it's `#table`. (Notice that the code is not figure with an 'e' because label codes in Cross Reference are 5 letters long.) This code is followed by an underscore and then the name. For our figure called 'height', the complete label identifier would be `#figur_height`.
+Names are joined to Cross Reference codes. Cross Reference uses two codes, one for labels and one for references. The code for an equation label is `#equat`; for a figure it's `#figur`; for a table it's `#table`. (Notice that the code for a figure is not `#figure` with an 'e' because label codes in Cross Reference are 5 letters long.) This code is followed by an underscore and then the name. For our figure called 'height', the complete label identifier would be `#figur_height`.
 
 So to create a label for our graph of height distribution, we take the following steps:
 
@@ -42,7 +42,7 @@ So to create a label for our graph of height distribution, we take the following
 
 We have now created a label for our graph, which should appear as a link (blue and underlined).
 
-We can now refer to our graph in the text. To do this, follow exactly the same steps, but use the reference code. This code is the first three letters of the label code. So for equations, the code is `#equ`; for figures, it's `#fig`; for tables it's `#tab`. A reference to the graph called 'height' would be a link with the URL `#fig_height`.
+We can now refer to our graph in the text. To do this, follow exactly the same steps, but use the reference code. This code is the first three letters of the label code. So for equations, the code is `#equ`; for figures it's `#fig`; for tables it's `#tab`. A reference to the graph called 'height' would be a link with the URL `#fig_height`.
 
 You should never create two labels with the same name, but you can create as many references as you want for the same element.
 
@@ -52,4 +52,4 @@ Cross Reference works by scanning the document and replacing labels and referenc
 
 **Labels and references are only paired if the correct code is used and the names match, so be careful of typos. Cross Reference will try to detect mistakes, such as references without corresponding labels, but it is not perfect.**
 
-Following our example of a graph of height distribution (above), the word 'height' that we highlighted and turned into a label should now read 'figure 1', assuming it was the first figure in the document. The references should read the same. If we were to insert a new figure at the beginning of the document and then update the document in the Cross Reference menu, our height distribution graph would now be labelled 'figure 2' and its references would match this.
+Following our example of a graph of height distribution (see above), the word 'height' that we highlighted and turned into a label should now read 'figure 1', assuming it was the first figure in the document. The references should read the same. If we were to insert a new figure at the beginning of the document and then update the document in the Cross Reference menu, our height distribution graph would now be labelled 'figure 2' and its references would match this.
