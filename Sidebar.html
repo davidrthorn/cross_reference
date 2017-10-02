@@ -21,17 +21,18 @@
     .main-wrapper {
     position:relative;
     width:100%;
-    /*height: 1024px;*/
     margin:0 auto;
     }
     
     select {
+      background: url(https://ssl.gstatic.com/ui/v1/disclosure/grey-disclosure-arrow-up-down.png), white;
+    }
+    select, #custom_name {
     
     width: 100%;
     
     -moz-appearance: none;
     -webkit-appearance: none;
-    background: url(https://ssl.gstatic.com/ui/v1/disclosure/grey-disclosure-arrow-up-down.png), white;
     background-position: 95% 50%;
     background-repeat: no-repeat;
     border: 1px solid #918F92;
@@ -54,7 +55,9 @@
     text-overflow: '';
     white-space: nowrap;
 }
-    
+    #custom_name {
+      display: none
+    }
     .details {
       width: 100%;
     }
@@ -113,6 +116,14 @@
       width:45px;
       height:26px;
       padding-top: 5px;
+    }
+    
+    #cs_lab_code {
+      display: none;
+    }
+    
+    #cs_lab_code input {
+      width: 110px;
     }
     
     #lab_text, #ref_text {
@@ -228,8 +239,9 @@
   <body>
   <div class="main-wrapper">
     <article class="selection">
-      <select id="name" onchange="selectName();">
+      <select id="name" onchange="selectName()">
       </select>
+      <input id="custom_name" placeholder="Custom name" maxlength="20"/>
     </article> 
     <article class="details">
       <div class="labels">
@@ -242,8 +254,10 @@
           </div>
           <div class="xcontent">
             <div class="hash-input">
-              <!--<input type="text" id="lab_code" value="" maxlength="5"/>-->
               <div id="lab_code">
+              </div>
+              <div id="cs_lab_code">
+              #&nbsp;<input type="text" value="" id="lab_code_entry" maxlength="5"/>
               </div>
             </div>
           </div>
@@ -383,14 +397,18 @@
     </script>
     <script>
     
+    // Inititialise global objects
+    
     var styles = {};
     var temp_settings = {};
+    
+    // On sidebar open, retrieve settings and update sidebar
     
     $(function() {
             google.script.run
                 .withSuccessHandler(initialiseSidebar)
                 .getSettings();
-        });
+        });  
 
     function initialiseSidebar(settings) {
       var names = [];
@@ -401,7 +419,8 @@
         temp_settings[name] = set_array;
       }
       
-      var sorted_names = names.sort()
+      var sorted_names = names.sort();
+      sorted_names.push("➤ Custom");
       
       for (var i in sorted_names) {
         var final_name = sorted_names[i]
@@ -412,7 +431,7 @@
       $("#name").data('val', sorted_names[0])
       updateSidebar(sorted_names[0])
     }
- 
+    
     function updateSidebar(name) {
 
       var csets = temp_settings[name];
@@ -505,16 +524,32 @@
       }
     }
     
+    //***** Actions within sidebar *****
+    
+    // Change the name (e.g. 'figure') of the element menu when user selects element from list
     
     $('#name').on('focusin', function(){
       $(this).data('val', $(this).val());
     });
+    
+    // Use name of element menu to update sidebar
+    
+    function selectName() {
+      updateTemp();
+      if (document.getElementById('name').value == "➤ Custom") {
+        customScreen();
+      } else {
+        updateSidebar(document.getElementById('name').value);
+      }
+    }
+    
+    // Transfer sidebar settings to temporary object to be applied, saved as default etc.
 
     function updateTemp() {
     
       var prev_name = $('#name').data('val');
       var name = $('#name').val(); 
-      var lab_code = document.getElementById("lab_code").innerHTML.substr(1,6);;
+      var lab_code = document.getElementById("lab_code").innerHTML.substr(1,6);
       var lab_text = $("#lab_text").val();
       var ref_text = $("#ref_text").val();
 
@@ -565,6 +600,8 @@
       $("#name").data('val', $('#name').val());
     }
     
+    // Defaults
+    
     function storeDefault() {
     updateTemp();
     google.script.run.withSuccessHandler().storeDefault(temp_settings)
@@ -578,11 +615,61 @@
     
      initialiseSidebar(defaults);
     }
+
+    // Save and apply current sidebar settings
     
-    function selectName() {
+    function saveProperties() {
+      document.getElementById("save").disabled = true;
       updateTemp();
-      updateSidebar(document.getElementById('name').value);
+      google.script.run.updateProps(temp_settings);
+      setTimeout(function() {
+        document.getElementById("save").disabled = false;
+       }, 1000);
     }
+    
+    
+    //***** The custom screen *****
+    
+    function customScreen() {   
+      document.getElementById("name").style.display = "none";
+      document.getElementById("custom_name").style.display = "block";
+      
+      document.getElementById("lab_code").style.display = "none"
+      document.getElementById("cs_lab_code").style.display = "block"
+      
+      document.getElementById("lab_text").value = "";
+      document.getElementById("ref_code").value = "";
+      document.getElementById("ref_code").innerHTML = "";
+      document.getElementById("ref_text").value = "";
+ 
+      // Update preview text
+     
+      document.getElementById("lab_result").innerHTML = "&lt;element&gt;";
+      document.getElementById("lab_result2").innerHTML = "&lt;element&gt;";
+      document.getElementById("ref_result").innerHTML = "&lt;element&gt;";
+      document.getElementById("ref_result2").innerHTML = "&lt;element&gt;";
+    }
+    
+    
+    //***** Dynamically update preview box when user changes settings *****
+    
+    // Update ref code on custom screen only
+    
+    document.getElementById("lab_code_entry").onkeyup = function() {
+      document.getElementById("lab_code_entry").value = document.getElementById("lab_code_entry").value.toLowerCase();
+      var lab = document.getElementById("lab_code_entry").value;
+      document.getElementById("lab_code").innerHTML = "#" + lab;
+      document.getElementById("ref_code").innerHTML = "#" + lab.substr(0,3);
+    }
+    
+    // Update name (hidden) on custom screen
+    document.getElementById("custom_name").onkeyup = function() {
+      var name = document.getElementById("custom_name").value;
+      console.log(name);
+      $('#name').data('val', name);
+    }
+    
+    // Update label text
     
     document.getElementById("lab_text").onkeyup = function() {
       var lab = document.getElementById("lab_text").value;
@@ -594,7 +681,9 @@
       }
       document.getElementById("lab_result").innerHTML = lab + '1';
       document.getElementById("lab_result2").innerHTML = lab2 + '1';
-    } 
+    }
+    
+    //Update reference text   
     
     document.getElementById("ref_text").onkeyup = function() {
       var ref = document.getElementById("ref_text").value;
@@ -608,6 +697,8 @@
       document.getElementById("ref_result").innerHTML = ref + '1';
       document.getElementById("ref_result2").innerHTML = ref2 + '1';
     }
+    
+    // Update style
     
     $(".style-button").on("click", function() {
       $(this).toggleClass("st-selected");
@@ -651,15 +742,10 @@
         }
       }
     });
-    
-    function saveProperties() {
-      document.getElementById("save").disabled = true;
-      updateTemp();
-      google.script.run.updateProps(temp_settings);
-      setTimeout(function() {
-        document.getElementById("save").disabled = false;
-       }, 1000);
-    }
     </script>
   </body>
 </html>
+
+
+
+
