@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <base target="_top">
-    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <base target='_top'>
+    <link rel='stylesheet' href='https://ssl.gstatic.com/docs/script/css/add-ons1.css'>
 
     <style>
     * { 
@@ -51,8 +51,6 @@
     padding: 7px 19px 7px 10px;
     text-align: left;
     text-indent: .01px;
-    text-overflow: ellipsis;
-    text-overflow: '';
     white-space: nowrap;
 }
     #custom_name {
@@ -123,13 +121,18 @@
     }
     
     #cs_lab_code input {
-      width: 110px;
+      width: 60px;
     }
     
     #lab_text, #ref_text {
       width: 120px;
       height:26px;
       padding-left: 5px;
+    }
+    
+    #taken {
+      font-weight: bold;
+      color: #D70000;
     }
     
     .shadedtext1, .shadedtext2 {
@@ -201,13 +204,17 @@
       background: #d57676;
     }
     
-    .button-row1, .button-row2 {
+    .button-row1, .button-row2, .button-row-custom {
       height: 55px;
       position: relative;
     }
     
     .button-row1 {
       background: #e49767;
+    }
+    
+    .button-row-custom {
+      display: none;
     }
     
     #save {
@@ -233,140 +240,165 @@
       right:25px;
       top:12px;
     }
+    
+    #add, #remove {
+      position: absolute;
+      cursor: pointer;
+    }
+    
+    #add {
+    top: 26px;
+    -ms-transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
+    color: #333;
+    right: 31px;
+    font-size: 11px;
+    }
+    
+    #remove {
+      top: 27px;
+      right: 48px;
+      color: indianred;
+      display: none;
+    }
 
     </style>
   </head>
   <body>
-  <div class="main-wrapper">
-    <article class="selection">
-      <select id="name" onchange="selectName()">
+  <div class='main-wrapper'>
+    <article class='selection'>
+      <div id='remove'>❌</div>
+      <div id='add'>❌</div>
+      <select id='name' onchange='selectName(this.value)'>
       </select>
-      <input id="custom_name" placeholder="Custom name" maxlength="20"/>
+      <input id='custom_name' placeholder='Custom name' maxlength='20'/>
     </article> 
-    <article class="details">
-      <div class="labels">
-        <div class="xrow">
+    <article class='details'>
+      <div class='labels'>
+        <div class='xrow'>
         <h2>Labels</h2>
         </div>
-        <div class="xrow">
-          <div class="xname">
+        <div class='xrow'>
+          <div class='xname'>
             Code
           </div>
-          <div class="xcontent">
-            <div class="hash-input">
-              <div id="lab_code">
+          <div class='xcontent'>
+            <div class='hash-input'>
+              <div id='lab_code'>
               </div>
-              <div id="cs_lab_code">
-              #&nbsp;<input type="text" value="" id="lab_code_entry" maxlength="5"/>
+              <div id='cs_lab_code'>
+              #&nbsp;<input type='text' value='' id='lab_code_entry' maxlength='5'/>
+              <span id='taken'></span>
               </div>
             </div>
           </div>
         </div>
-        <div class="xrow">
-          <div class="xname">
+        <div class='xrow'>
+          <div class='xname'>
             Text
           </div>
-          <div class="xcontent">
-            <input type="text" id="lab_text"/>
+          <div class='xcontent'>
+            <input type='text' id='lab_text'/>
           </div>
         </div>
-        <div class="xrow">
-          <div class="style">
+        <div class='xrow'>
+          <div class='style'>
             Style
           </div>
-          <div class="xcontent">
-            <div id="lab_bold" class="style-button" title="false">
+          <div class='xcontent'>
+            <div id='lab_bold' class='style-button' title='false'>
               Bold
             </div>
-            <div id="lab_ital" class="style-button" title="false">
+            <div id='lab_italic' class='style-button' title='false'>
               Italic
             </div>
-            <div id="lab_unde" class="style-button" title="false">
+            <div id='lab_underline' class='style-button' title='false'>
               ULine
             </div>
           </div>
         </div>
-        <div class="result-row">
-          <div class="results-internal">
-            <div class = "line1">
-              <div class="shadedtext1">
+        <div class='result-row'>
+          <div class='results-internal'>
+            <div class = 'line1'>
+              <div class='shadedtext1'>
                 Rendered
               </div>
-              <div class="xcontent" id="lab_result">
+              <div class='xcontent' id='lab_result'>
                 figure 1
               </div>
-              <div class="shadedtext2">
+              <div class='shadedtext2'>
                 . Early human migration route out of Africa
               </div>
             </div>
-            <div class= "line2">
-              <div class="xcontent" id="lab_result2">
+            <div class= 'line2'>
+              <div class='xcontent' id='lab_result2'>
                 Figure 1
               </div>
-              <div class="shadedtext2">
+              <div class='shadedtext2'>
                 . Early human migration route out of Africa
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="references">
-        <div class="xrow">
+      <div class='references'>
+        <div class='xrow'>
         <h2>References</h2>
         </div>
-        <div class="xrow">
-          <div class="xname">
+        <div class='xrow'>
+          <div class='xname'>
             Code
           </div>
-          <div class="xcontent" id="ref_code">
+          <div class='xcontent' id='ref_code'>
             <em>#</em>
           </div>
         </div>
-        <div class="xrow">
-          <div class="xname">
+        <div class='xrow'>
+          <div class='xname'>
             Text
           </div>
-          <div class="xcontent">
-            <input type="text" id="ref_text"/>
+          <div class='xcontent'>
+            <input type='text' id='ref_text'/>
           </div>
         </div>
-        <div class="xrow">
-          <div class="style">
+        <div class='xrow'>
+          <div class='style'>
             Style
           </div>
-          <div class="xcontent">
-            <div id="ref_bold" class="style-button" title="false">
+          <div class='xcontent'>
+            <div id='ref_bold' class='style-button' title='false'>
               Bold
             </div>
-            <div id="ref_ital" class="style-button" title="false">
+            <div id='ref_italic' class='style-button' title='false'>
               Italic
             </div>
-            <div id="ref_unde" class="style-button" title="false">
+            <div id='ref_underline' class='style-button' title='false'>
               ULine
             </div>
           </div>
         </div>
-        <div class="result-row">
-          <div class="results-internal">
-            <div class = "line1">
-              <div class="shadedtext1">
+        <div class='result-row'>
+          <div class='results-internal'>
+            <div class = 'line1'>
+              <div class='shadedtext1'>
                 the line in
               </div>
-              <div class="xcontent" id="ref_result">
+              <div class='xcontent' id='ref_result'>
                 figure 1
               </div>
-              <div class="shadedtext2">
+              <div class='shadedtext2'>
                 &nbsp;represents the path of human
               </div>
             </div>
-            <div class= "line2">
-              <div class="shadedtext1">
+            <div class= 'line2'>
+              <div class='shadedtext1'>
                 to Ethiopia.
               </div>
-              <div class="xcontent" id="ref_result2">
+              <div class='xcontent' id='ref_result2'>
                 Figure 1
               </div>
-              <div class="shadedtext2">
+              <div class='shadedtext2'>
                 &nbsp;is accurate to within 100 miles
               </div>
             </div>
@@ -374,41 +406,60 @@
         </div>
       </div>
     </article>
-    <article class="actions">
-      <div class="button-row1">
-        <button id="save_defaults" onclick="storeDefault()">
+    <article class='actions'>
+      <div class='button-row1'>
+        <button id='save_defaults' onclick='storeDefault()'>
           Save defaults
         </button>
-        <button id="restore_defaults" onclick="google.script.run.withSuccessHandler(restoreDefault).restoreDefault()">
+        <button id='restore_defaults' onclick='google.script.run.withSuccessHandler(restoreDefault).restoreDefault()'>
           Restore defaults
         </button>
       </div>
-      <div class="button-row2">
-        <button id="save" onclick="saveProperties()" class="blue">
+      <div class='button-row2'>
+        <button id='save' onclick='saveProperties()' class='blue'>
           Save and apply
         </button>
-        <button id="cancel" onclick="google.script.host.close()">
+        <button id='cancel' onclick='google.script.host.close()'>
           Cancel
+        </button>
+      </div>
+      <div class='button-row-custom'>
+        <button id='save_custom' onclick='saveCustom()' class='blue'>
+          Save and apply
+        </button>
+        <button id='cancel_custom' onclick='cancelCustom()'>
+           Cancel
         </button>
       </div>
     </article>
   </div>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+  
+  
+  
+  
+  
+  
+    <script src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'>
     </script>
     <script>
     
     // Inititialise global objects
-    
+
     var styles = {};
     var temp_settings = {};
+    var ref_codes = [];
     
+//***** Initialise sidebar *****
+
     // On sidebar open, retrieve settings and update sidebar
     
     $(function() {
-            google.script.run
-                .withSuccessHandler(initialiseSidebar)
-                .getSettings();
-        });  
+            refreshSidebar();
+        });
+        
+    function refreshSidebar() {
+      google.script.run.withSuccessHandler(initialiseSidebar).getSettings()
+    }
 
     function initialiseSidebar(settings) {
       var names = [];
@@ -417,39 +468,47 @@
         var name = set_array[1];
         names.push(name);
         temp_settings[name] = set_array;
+        ref_codes.push(temp_settings[name][0].substr(0,3));
       }
-      
+   
       var sorted_names = names.sort();
-      sorted_names.push("➤ Custom");
       
       for (var i in sorted_names) {
-        var final_name = sorted_names[i]
-        var option = document.createElement("option");
-        option.text = final_name;
-        document.getElementById("name").add(option);
+        var final_name = sorted_names[i] 
+        $('#name').append($('<option>', {text: final_name}))
       }
-      $("#name").data('val', sorted_names[0])
-      updateSidebar(sorted_names[0])
+
+      $('#name').data('val', sorted_names[0]);
+
+      updateSidebar(sorted_names[0]);
+      
+      if (sorted_names[0] != 'Equation' | 'Figure' | 'Table') {
+        $('#remove').css('display', 'block');
+      } else {
+        $('#remove').css('display', 'none');
+      }
     }
-    
+
     function updateSidebar(name) {
 
       var csets = temp_settings[name];
       var clab_code = csets[0];
       var clab_text = csets[2];
-      var clab_bold = csets[3];
-      var clab_ital = csets[4];
-      var clab_unde = csets[5];
       var cref_text = csets[6];
-      var cref_bold = csets[7];
-      var cref_ital = csets[8];
-      var cref_unde = csets[9];
       
-      document.getElementById("lab_code").innerHTML = "#" + clab_code;
-      document.getElementById("lab_text").value = clab_text;
-      document.getElementById("ref_code").value = clab_code.substr(0,3);
-      document.getElementById("ref_code").innerHTML = '#' + clab_code.substr(0,3);
-      document.getElementById("ref_text").value = cref_text;
+      var style = {'lab_bold': csets[3],
+                   'lab_italic': csets[4],
+                   'lab_underline': csets[5],
+                   'ref_bold': csets[7],
+                   'ref_italic': csets[8],
+                   'ref_underline': csets[9]
+                   }
+      
+      $('#lab_code').html('#' + clab_code);
+      $('#lab_text').val(clab_text);
+      $('#ref_code').val(clab_code.substr(0,3));
+      $('#ref_code').html('#' + clab_code.substr(0,3));
+      $('#ref_text').val(cref_text);
       
       if (clab_text.charAt(0) === clab_text.charAt(0).toUpperCase()) {
         var lab2 = clab_text
@@ -462,69 +521,36 @@
       } else {
         var ref2 = cref_text.charAt(0).toUpperCase() + cref_text.substr(1,cref_text.length);
       }
-      document.getElementById("lab_result").innerHTML = clab_text + ' 1';
-      document.getElementById("lab_result2").innerHTML = lab2 + ' 1';
-      document.getElementById("ref_result").innerHTML = cref_text + ' 1';
-      document.getElementById("ref_result2").innerHTML = ref2 + ' 1';
+      $('#lab_result').html(clab_text + ' 1');
+      $('#lab_result2').html(lab2 + ' 1');
+      $('#ref_result').html(cref_text + ' 1');
+      $('#ref_result2').html(ref2 + ' 1');
       
       
-      if (clab_bold === "true") {
-        document.getElementById("lab_result").style.fontWeight = "bold";
-        document.getElementById("lab_result2").style.fontWeight = "bold";
-        $("#lab_bold").addClass("st-selected");
-      } else {
-        document.getElementById("lab_result").style.fontWeight = null;
-        document.getElementById("lab_result2").style.fontWeight = null;
-        $("#lab_bold").removeClass("st-selected");
+      for (var i in style) {
+        var code = i.substr(0,3);
+        var att = i.substr(4,i.length);
+        var button_id = '#' + code + '_' + att;
+        
+        var css_props = {'bold': 'font-weight',
+                         'italic': 'font-style',
+                         'underline': 'text-decoration'
+                         }
+        
+        if (style[i] === 'true') {
+          $('#' + code + '_result').css(css_props[att], att);
+          $('#' + code + '_result2').css(css_props[att], att);
+          $(button_id).addClass('st-selected')
+        } else {
+          $('#' + code + '_result').css(css_props[att], null);
+          $('#' + code + '_result2').css(css_props[att], null);
+          $(button_id).removeClass('st-selected')
+        }
       }
-      if (clab_ital === "true") {
-        document.getElementById("lab_result").style.fontStyle = "italic";
-        document.getElementById("lab_result2").style.fontStyle = "italic";
-        $("#lab_ital").addClass("st-selected");
-      } else {
-        document.getElementById("lab_result").style.fontStyle = null;
-        document.getElementById("lab_result2").style.fontStyle = null;
-        $("#lab_ital").removeClass("st-selected");
-      }
-      if (clab_unde === "true") {
-        document.getElementById("lab_result").style.textDecoration = "underline";
-        document.getElementById("lab_result2").style.textDecoration = "underline";
-        $("#lab_unde").addClass("st-selected");
-      } else {
-        document.getElementById("lab_result").style.textDecoration = null;
-        document.getElementById("lab_result2").style.textDecoration = null;
-        $("#lab_unde").removeClass("st-selected");
-      }
-      if (cref_bold === "true") {
-        document.getElementById("ref_result").style.fontWeight = "bold";
-        document.getElementById("ref_result2").style.fontWeight = "bold";
-        $("#ref_bold").addClass("st-selected");
-      } else {
-        document.getElementById("ref_result").style.fontWeight = null;
-        document.getElementById("ref_result2").style.fontWeight = null;
-        $("#ref_bold").removeClass("st-selected");
-      }
-      if (cref_ital === "true") {
-        document.getElementById("ref_result").style.fontStyle = "italic";
-        document.getElementById("ref_result2").style.fontStyle = "italic";
-        $("#ref_ital").addClass("st-selected");
-      } else {
-        document.getElementById("ref_result").style.fontStyle = null;
-        document.getElementById("ref_result2").style.fontStyle = null;
-        $("#ref_ital").removeClass("st-selected");
-      }
-      if (cref_unde === "true") {
-        document.getElementById("ref_result").style.textDecoration = "underline";
-        document.getElementById("ref_result2").style.textDecoration = "underline";
-        $("#ref_unde").addClass("st-selected");
-      } else {
-        document.getElementById("ref_result").style.textDecoration = null;
-        document.getElementById("ref_result2").style.textDecoration = null;
-        $("#ref_unde").removeClass("st-selected");
-      }
+      
     }
     
-    //***** Actions within sidebar *****
+//***** Actions within sidebar *****
     
     // Change the name (e.g. 'figure') of the element menu when user selects element from list
     
@@ -534,13 +560,23 @@
     
     // Use name of element menu to update sidebar
     
-    function selectName() {
+    $('#remove').on('click', function () {
+      //erase entry
+    });
+    
+    
+    function selectName(name) {
       updateTemp();
-      if (document.getElementById('name').value == "➤ Custom") {
-        customScreen();
+      
+      var safe_names = ['Equation', 'Figure', 'Table'];
+      
+      if (safe_names.indexOf(name) < 0) {
+        $('#remove').css('display', 'block');
       } else {
-        updateSidebar(document.getElementById('name').value);
+        $('#remove').css('display', 'none');
       }
+      
+        updateSidebar(name);
     }
     
     // Transfer sidebar settings to temporary object to be applied, saved as default etc.
@@ -549,39 +585,39 @@
     
       var prev_name = $('#name').data('val');
       var name = $('#name').val(); 
-      var lab_code = document.getElementById("lab_code").innerHTML.substr(1,6);
-      var lab_text = $("#lab_text").val();
-      var ref_text = $("#ref_text").val();
-
-      if (document.getElementById("lab_result").style.fontWeight === "bold") {
-        var lab_bold = "true"
+      var lab_code = $('#lab_code').html().substr(1,6);
+      var lab_text = $('#lab_text').val();
+      var ref_text = $('#ref_text').val();
+      
+      if ($('#lab_result').css('font-weight') === 'bold') {
+        var lab_bold = 'true'
       } else {
-        var lab_bold = "null"
+        var lab_bold = 'null'
       }
-      if (document.getElementById("lab_result").style.fontStyle === "italic") {
-        var lab_ital = "true"
+      if ($('#lab_result').css('font-style') === 'italic') {
+        var lab_italic = 'true'
       } else {
-        var lab_ital = "null"
+        var lab_italic = 'null'
       }
-      if (document.getElementById("lab_result").style.textDecoration === "underline") {
-        var lab_unde = "true"
+      if ($('#lab_result').css('text-decoration') === 'underline') {
+        var lab_underline = 'true'
       } else {
-        var lab_unde = "null"
+        var lab_underline = 'null'
       }
-      if (document.getElementById("ref_result").style.fontWeight === "bold") {
-        var ref_bold = "true"
+      if ($('#ref_result').css('font-weight') === 'bold') {
+        var ref_bold = 'true'
       } else {
-        var ref_bold = "null"
+        var ref_bold = 'null'
       }
-      if (document.getElementById("ref_result").style.fontStyle === "italic") {
-        var ref_ital = "true"
+      if ($('#ref_result').css('font-style') === 'italic') {
+        var ref_italic = 'true'
       } else {
-        var ref_ital = "null"
+        var ref_italic = 'null'
       }
-      if (document.getElementById("ref_result").style.textDecoration === "underline") {
-        var ref_unde = "true"
+      if ($('#ref_result').css('text-decoration') === 'underline') {
+        var ref_underline = 'true'
       } else {
-        var ref_unde = "null"
+        var ref_underline = 'null'
       }
       
       temp_settings[prev_name] = [
@@ -589,17 +625,17 @@
         prev_name,
         lab_text,
         lab_bold,
-        lab_ital,
-        lab_unde,
+        lab_italic,
+        lab_underline,
         ref_text,
         ref_bold,
-        ref_ital,
-        ref_unde
+        ref_italic,
+        ref_underline
       ]
       
-      $("#name").data('val', $('#name').val());
+      $('#name').data('val', $('#name').val());
     }
-    
+
     // Defaults
     
     function storeDefault() {
@@ -619,74 +655,180 @@
     // Save and apply current sidebar settings
     
     function saveProperties() {
-      document.getElementById("save").disabled = true;
+      
+      $('#save').prop('disabled', true);
       updateTemp();
       google.script.run.updateProps(temp_settings);
       setTimeout(function() {
-        document.getElementById("save").disabled = false;
+        $('#save').prop('disabled', 'false')
        }, 1000);
     }
     
+//***** The custom screen *****
+
+    $('#add').on('click', customScreen);
     
-    //***** The custom screen *****
-    
-    function customScreen() {   
-      document.getElementById("name").style.display = "none";
-      document.getElementById("custom_name").style.display = "block";
+    function customScreen() {
+
+      $('#add').css('display', 'none');
+      $('#remove').css('display', 'none');
       
-      document.getElementById("lab_code").style.display = "none"
-      document.getElementById("cs_lab_code").style.display = "block"
+      // Change fields and buttons
       
-      document.getElementById("lab_text").value = "";
-      document.getElementById("ref_code").value = "";
-      document.getElementById("ref_code").innerHTML = "";
-      document.getElementById("ref_text").value = "";
+      $('#name').css('display', 'none');
+      $('#custom_name').css('display', 'block');
+
+      $('#lab_code').css('display', 'none');
+      $('#cs_lab_code').css('display', 'block');
+      
+      $('.button-row1').css('display', 'none');
+      $('.button-row2').css('display', 'none');
+      $('.button-row-custom').css('display', 'block');
+
+      // Clear values
+      
+      $('#lab_code').val('');
+      $('#lab_code_entry').val('');
+      $('#lab_text').val('');
+      $('#ref_code').val('');
+      $('#ref_code').html('#');
+      $('#ref_text').val('');
  
       // Update preview text
-     
-      document.getElementById("lab_result").innerHTML = "&lt;element&gt;";
-      document.getElementById("lab_result2").innerHTML = "&lt;element&gt;";
-      document.getElementById("ref_result").innerHTML = "&lt;element&gt;";
-      document.getElementById("ref_result2").innerHTML = "&lt;element&gt;";
+
+      var results = [
+                     $('#lab_result'),
+                     $('#lab_result2'),
+                     $('#ref_result'),
+                     $('#ref_result2')
+                     ];
+                     
+      for (var i in results) {
+        var t = results[i];
+        t.css('font-weight', 'normal');
+        t.css('font-style', 'normal');
+        t.css('text-decoration', 'none');
+        t.html('&lt;element&gt;')
+      }
+      
+      $('.st-selected').removeClass('st-selected')
+      
+    }
+
+    // Save custom settings
+    
+    function saveCustom() {
+        
+      saveProperties();
+      
+      var name = $('#custom_name').val();
+      var custom_settings = temp_settings[name];
+      
+      google.script.run.storeCustom(custom_settings);
+      
+      $('#name option:last').after($('<option>', {text: name}))
+      $('#name').val(name)
+      revertCustomScreen()
+    }
+
+    // Cancel custom settings
+    
+    function cancelCustom() {
+    
+      $('#lab_code').val('');
+      
+      $('#name').val($('#name option:first'));
+      
+      revertCustomScreen();
+      updateSidebar($('#name').val());
+      $('#remove').css('display', 'none');
     }
     
+    // Revert to non-custom screen
     
-    //***** Dynamically update preview box when user changes settings *****
+    function revertCustomScreen() {
+      $('#name').css('display', 'block');
+      $('#custom_name').css('display', 'none');
+      
+      $('#lab_code').css('display', 'block');
+      $('#cs_lab_code').css('display', 'none');
+      
+      $('.button-row1').css('display', 'block');
+      $('.button-row2').css('display', 'block');
+      $('.button-row-custom').css('display', 'none');
+      
+      $('#add').css('display', 'block');
+      $('#remove').css('display', 'block')
+    }
+    
+    // Delete pairing
+    
+    $('#remove').on('click', function(){
+      var ref = $('#ref_code').html();
+      $('#remove').css('display', 'none');
+      var current_name = $('#name').val();
+      google.script.run.withSuccessHandler(cancelCustom).removePair(ref.substr(1,4));
+      $('#name option:contains("' + current_name + '")').remove();
+    });
+       
+    
+//***** Dynamically update preview box when user changes settings *****
     
     // Update ref code on custom screen only
     
-    document.getElementById("lab_code_entry").onkeyup = function() {
-      document.getElementById("lab_code_entry").value = document.getElementById("lab_code_entry").value.toLowerCase();
-      var lab = document.getElementById("lab_code_entry").value;
-      document.getElementById("lab_code").innerHTML = "#" + lab;
-      document.getElementById("ref_code").innerHTML = "#" + lab.substr(0,3);
-    }
+      $('#lab_code_entry').keyup(function(){
+      var lab = $(this).val();
+      $(this).val(lab.toLowerCase());
+      
+      if (ref_codes.indexOf(lab.substr(0,3)) >= 0) {
+        $('#taken').html('⚠ in use');
+        $(this).attr('maxlength', '3');
+        $('#save_custom').prop('disabled', true);
+      } else {
+        $('taken').html('');
+        $(this).attr('maxlength', '5');
+        $('#save_custom').prop('disabled', false);
+      }
+      
+      $('#lab_code').html('#' + lab);
+      $('#ref_code').html('#' + lab.substr(0,3));
+    })
     
     // Update name (hidden) on custom screen
-    document.getElementById("custom_name").onkeyup = function() {
-      var name = document.getElementById("custom_name").value;
-      console.log(name);
+    $('#custom_name').keyup(function() {
+      var name = $('#custom_name').val();
       $('#name').data('val', name);
-    }
+    });
+    
+    // Only allow user to save when label code is 5 letters
+    
+    $('#lab_code_entry').focusout(function() {
+      if ($('#lab_code').html().length < 6){
+       $('#taken').html('⚠ 5 letter min');
+       $('#save_custom').prop('disabled', true)
+      }
+    });
+
     
     // Update label text
-    
-    document.getElementById("lab_text").onkeyup = function() {
-      var lab = document.getElementById("lab_text").value;
+
+    $('#lab_text').keyup(function() {
+      var lab = $('#lab_text').val();
       
       if (lab.charAt(0) === lab.charAt(0).toUpperCase()) {
         var lab2 = lab
       } else {
         var lab2 = lab.charAt(0).toUpperCase() + lab.substr(1,lab.length);
       }
-      document.getElementById("lab_result").innerHTML = lab + '1';
-      document.getElementById("lab_result2").innerHTML = lab2 + '1';
-    }
+      $('#lab_result').html(lab + '1');
+      $('#lab_result2').html(lab2 + '1');
+    });
+    
     
     //Update reference text   
     
-    document.getElementById("ref_text").onkeyup = function() {
-      var ref = document.getElementById("ref_text").value;
+    $('#ref_text').keyup(function() {
+      var ref = document.getElementById('ref_text').value;
       
       if (ref.charAt(0) === ref.charAt(0).toUpperCase()) {
         var ref2 = ref
@@ -694,58 +836,45 @@
         var ref2 = ref.charAt(0).toUpperCase() + ref.substr(1,ref.length);
       }
       
-      document.getElementById("ref_result").innerHTML = ref + '1';
-      document.getElementById("ref_result2").innerHTML = ref2 + '1';
-    }
+      $('#ref_result').html(ref + '1');
+      $('#ref_result2').html(ref2 + '1');
+    });
+    
     
     // Update style
-    
-    $(".style-button").on("click", function() {
-      $(this).toggleClass("st-selected");
-      var target = this.id.substr(0,3) + "_result";
-      var target2 = this.id.substr(0,3) + "_result2";
-      var attribute = this.id.substr(4,6);
 
-      if (attribute === "bold") {
-        if (document.getElementById(target).style.fontWeight === "bold") {
-          document.getElementById(target).style.fontWeight = null;
-          document.getElementById(target2).style.fontWeight = null;
-          styles[this.id] = null;
+    
+    $('.style-button').on('click', function() {
+      $(this).toggleClass('st-selected');
+      
+      var result = $('#' + this.id.substr(0,3) +'_result');
+      var result2 = $('#' + this.id.substr(0,3) +'_result2');
+      
+      var id = this.id
+      var att = id.substr(4,this.length);
+      
+      function button(ident, element, css, atton, attoff) {
+        if (element.hasClass('st-selected')) {
+          result.css(css, atton);
+          result2.css(css, atton);
+          styles[ident] = null;
         } else {
-          document.getElementById(target).style.fontWeight = "bold";
-          document.getElementById(target2).style.fontWeight = "bold";
-          styles[this.id] = true;
+          result.css(css, attoff);
+          result2.css(css, attoff);
+          styles[ident] = true;
         }
       }
       
-      if (attribute === "ital") {
-        if (document.getElementById(target).style.fontStyle === "italic") {
-          document.getElementById(target).style.fontStyle = null;
-          document.getElementById(target2).style.fontStyle = null;
-          styles[this.id] = null;
-        } else {
-          document.getElementById(target).style.fontStyle = "italic";
-          document.getElementById(target2).style.fontStyle = "italic";
-          styles[this.id] = true;
-        }
+      if (att === 'bold') {
+        button(id, $(this),'font-weight', 'bold', 'normal')
       }
-      
-      if (attribute === "unde") {
-        if (document.getElementById(target).style.textDecoration === "underline") {
-          document.getElementById(target).style.textDecoration = null;
-          document.getElementById(target2).style.textDecoration = null;
-          styles[this.id] = null;
-        } else {
-          document.getElementById(target).style.textDecoration = "underline";
-          document.getElementById(target2).style.textDecoration = "underline";
-          styles[this.id] = true;
-        }
+      if (att === 'italic') {
+        button(id, $(this),'font-style', 'italic', 'normal')
+      }
+      if (att === 'underline') {
+        button(id, $(this),'text-decoration', 'underline', 'none')
       }
     });
     </script>
   </body>
 </html>
-
-
-
-
