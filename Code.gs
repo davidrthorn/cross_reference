@@ -102,6 +102,7 @@ function labelCount(code,counter) {
 function determineReplaceText(text,start,code,number,props) {
   
   var text_format = props[code][0]
+  
   var first_letter = text_format.charAt(0)
   
   var captest = smartCapitals(text,start);
@@ -117,12 +118,16 @@ function determineReplaceText(text,start,code,number,props) {
 
 // Style the text of the reference/label
 
-function determineAttributes(text,start,code,props,errorcheck) {
+function determineAttributes(text,start,code,props,error) {
   var current = text.getAttributes(start);
   var replacements = {};
   
   for (var i in current) {
     replacements[i] = current[i];
+  }
+
+  if (!props[code]) {
+    return text.getLinkUrl(start).substr(0,6);
   }
 
   replacements['BOLD'] = props[code][1];
@@ -135,8 +140,7 @@ function determineAttributes(text,start,code,props,errorcheck) {
 
 // Replace the existing cross link with the new one
 
-function replaceCrossLink(text,start,end,code,number,attributes,props,errorcheck) {
-  
+function replaceCrossLink(text,start,end,code,number,attributes,props,error) {
   
   var reptext = determineReplaceText(text,start,code,number,props);
 
@@ -144,7 +148,7 @@ function replaceCrossLink(text,start,end,code,number,attributes,props,errorcheck
   text.insertText(start, reptext);
   
   text.setAttributes(start, start + reptext.length - 1, attributes);
-  if (errorcheck === code) {
+  if (error === code) {
     text.setForegroundColor(start, start + reptext.length - 1, '#FF0000')
   } else {
   text.setForegroundColor(start, start + reptext.length - 1, null)
@@ -213,7 +217,7 @@ function smartCapitals(origtext,start) {
 // Sweep paragraphs and update
 
 function sweepParagraphs(paragraphs,type,pairings,counter,props) {
-  var errorcheck = ''
+  var error = ''
   for (var i in paragraphs) {
     
     var paragraph = paragraphs[i]
@@ -246,28 +250,28 @@ function sweepParagraphs(paragraphs,type,pairings,counter,props) {
               var name = url.substr(5,url.length);
               var number = pairings[code + 'N' + name];
               if (number === undefined) {
-                var errorcheck = code;
+                var error = code;
               }
             }
             
             // Replacement
 
             var attributes = determineAttributes(text,start,code,props);
-            replaceCrossLink(text,start,end,code,number,attributes,props,errorcheck)
+            if (typeof attributes === 'string') {
+              return attributes
+            }
+            replaceCrossLink(text,start,end,code,number,attributes,props,error)
           }
         }
       } 
     }
   }
-  if(errorcheck) {
-    return errorcheck
+  if(error) {
+    return error
   } else {
   return pairings
   }
 }
-
-
-
 
 // ********* Update Document *********
 
@@ -294,23 +298,31 @@ function updateDocument() {
   
   var final_pairings = sweepParagraphs(paragraphs,1,pairings,counter,labprops);
   
-  if (final_pairings === 'format') {return}
+  if (final_pairings === 'format') {
+    return
+  } else if (typeof final_pairings === 'string') {
+      DocumentApp.getUi().alert('The label code ' + final_pairings + ' was not recognised.' +
+                                '\n\nIt could be a typo...' +
+                                '\n\n...but if you want to use it as a new label,' +
+                                '\nyou can add it to Cross Reference using the sidebar.');
+      return
+  }
   
   // Second sweep of text body to update references
-  var errorcheck = sweepParagraphs(paragraphs,2,final_pairings,counter,refprops);
+  var error = sweepParagraphs(paragraphs,2,final_pairings,counter,refprops);
   
-  if (errorcheck === 'format') {return}
+  if (error === 'format') {return}
   
   // Sweep footnotes to update references
   for (var i in footnotes) {
     var fnparagraphs = footnotes[i].getFootnoteContents().getParagraphs();
-    var errorcheck = sweepParagraphs(fnparagraphs,2,final_pairings,counter,refprops);
+    var error = sweepParagraphs(fnparagraphs,2,final_pairings,counter,refprops);
   }
   
-  if (errorcheck === 'format') {return}
+  if (error === 'format') {return}
   
   // Produce applicable error messages
-  if (typeof errorcheck === 'string') {
+  if (typeof error === 'string') {
     DocumentApp.getUi().alert("Some in-text references have nothing to refer to." +
                            "\n\nYou probably either deleted a label and didn't remove" +
                            " the relevant cross\nreferences, or there is a typo in the reference.\n" +
@@ -471,20 +483,33 @@ function getSettings() {
 
 function storeDefault(temp_settings) {
   
-  var userProps = PropertiesService.getUserProperties();
+  var user_props = PropertiesService.getUserProperties();
   
   for (var i in temp_settings) {
-    var setting = temp_settings[i];
-    var code = setting[0].substr(0,3);
+    var settings = temp_settings[i];
+    storePairing(user_props, settings)
+  }
+}
+
+function storeCustom(custom_settings) {
+  
+    var user_props = PropertiesService.getUserProperties();
+    storePairing(user_props, custom_settings);
+}
+
+function storePairing(user_props, settings) {
+  
+    var code = settings[0].substr(0,3);
     
     var pkey = 'cross_' + code;
     var pvalue = '';
-    for (var j = 0; j < (setting.length - 1); j++) {
-      pvalue += setting[j] + '_'
+  
+    for (var j = 0; j < (settings.length - 1); j++) {
+      pvalue += settings[j] + '_'
     }
-    pvalue += setting[setting.length - 1];
-    userProps.setProperty(pkey, pvalue);
-  }
+  
+    pvalue += settings[settings.length - 1];
+    user_props.setProperty(pkey, pvalue);
 }
 
 
@@ -507,3 +532,23 @@ function restoreDefault() {
   }
   return settings
 }
+
+
+// Removes pairings from user settings
+
+function removePair(ref) {
+  PropertiesService.getUserProperties().deleteProperty("cross_" + ref);
+  PropertiesService.getDocumentProperties().deleteProperty("cross_" + ref);
+}
+
+//***** For testing only *****
+
+function clearProps() {
+  PropertiesService.getUserProperties().deleteAllProperties()
+  PropertiesService.getDocumentProperties().deleteAllProperties()
+}
+
+function showProps() {
+  Logger.log(PropertiesService.getUserProperties().getProperties());
+  Logger.log(PropertiesService.getDocumentProperties().getProperties());
+  }
