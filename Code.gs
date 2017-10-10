@@ -12,7 +12,7 @@ function onOpen(e) {
 
 function showSidebar() {
   var ui = HtmlService.createHtmlOutputFromFile('Sidebar')
-      .setTitle('Configure cross referencing');
+      .setTitle('Cross Reference');
   DocumentApp.getUi().showSidebar(ui);
 }
 
