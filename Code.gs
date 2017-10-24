@@ -7,16 +7,60 @@ function onOpen(e) {
     .createAddonMenu()
     .addItem('Update document', 'updateDocument')
     .addItem('Configure', 'showSidebar')
+    .addItem('Test', 'testPages')
     .addToUi();
 }
+
+
+
+
+//--------------
+
+function testPages() {
+  
+  resizeLabel()
+  
+  var html = HtmlService.createHtmlOutputFromFile('test')
+      .setWidth(400)
+      .setHeight(300);
+  DocumentApp.getUi() // Or DocumentApp or FormApp.
+      .showModalDialog(html, 'My custom dialog');
+}
+
+function resizeLabel() {
+  var doc = DocumentApp.getActiveDocument();
+  var text = doc.getBody().getParagraphs()[0].getChild(0).asText();
+  
+  var locations = findCrossLinks(1,text)
+  
+  var start = locations[0];
+  var end = locations[1];
+  var url = text.getLinkUrl(start);
+  
+  if (url) {
+    text.deleteText(start, end);
+    text.insertText(start, url.substr(7, url.length));
+    text.setFontSize(start, end, 6);
+  }
+}
+
+function countPages() {
+   var blob = DocumentApp.getActiveDocument().getBlob().getBytes();
+   return blob
+}
+
+
+
+//---------------
+
+
+
 
 function showSidebar() {
   var ui = HtmlService.createHtmlOutputFromFile('Sidebar')
       .setTitle('Cross Reference');
   DocumentApp.getUi().showSidebar(ui);
 }
-
-
 
 // Scan text element and return indices for references and labels
 
@@ -553,3 +597,5 @@ function showProps() {
   Logger.log(PropertiesService.getUserProperties().getProperties());
   Logger.log(PropertiesService.getDocumentProperties().getProperties());
   }
+
+
