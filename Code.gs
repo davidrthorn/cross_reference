@@ -18,9 +18,9 @@ function onOpen(e) {
 
 function testPages() {
   
-  resizeLabel()
+  //resizeLabel()
   
-  var html = HtmlService.createHtmlOutputFromFile('test')
+  var html = HtmlService.createHtmlOutputFromFile('lof')
       .setWidth(400)
       .setHeight(300);
   DocumentApp.getUi() // Or DocumentApp or FormApp.
@@ -49,6 +49,15 @@ function countPages() {
    return blob
 }
 
+function addToLof(page_labs) {
+  var doc = DocumentApp.getActiveDocument();
+  var body = doc.getBody();
+  
+  for (var i in page_labs) {
+    var text = i + ': ' + page_labs[i][0]
+    body.insertParagraph(0, text)
+  }  
+}
 
 
 //---------------
@@ -597,5 +606,3 @@ function showProps() {
   Logger.log(PropertiesService.getUserProperties().getProperties());
   Logger.log(PropertiesService.getDocumentProperties().getProperties());
   }
-
-
