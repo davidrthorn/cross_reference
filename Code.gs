@@ -18,7 +18,8 @@ function onOpen(e) {
 
 function testPages() {
   
-  //resizeLabel()
+  var lab_count = encodeLabel();
+  dummyLof(lab_count);
   
   var html = HtmlService.createHtmlOutputFromFile('lof')
       .setWidth(400)
@@ -27,36 +28,68 @@ function testPages() {
       .showModalDialog(html, 'My custom dialog');
 }
 
-function resizeLabel() {
-  var doc = DocumentApp.getActiveDocument();
-  var text = doc.getBody().getParagraphs()[0].getChild(0).asText();
-  
-  var locations = findCrossLinks(1,text)
-  
-  var start = locations[0];
-  var end = locations[1];
-  var url = text.getLinkUrl(start);
-  
-  if (url) {
-    text.deleteText(start, end);
-    text.insertText(start, url.substr(7, url.length));
-    text.setFontSize(start, end, 6);
-  }
-}
-
-function countPages() {
+function getPDF() {
    var blob = DocumentApp.getActiveDocument().getBlob().getBytes();
    return blob
 }
 
-function addToLof(page_labs) {
+function encodeLabel() {
+  var doc = DocumentApp.getActiveDocument();
+  var paras = doc.getBody().getParagraphs();
+  
+  var lab_count = {'fig': 0}
+  
+  for (var i in paras) {
+    var para = paras[i]
+    for (var j = 0;j < para.getNumChildren();j++) {
+      if (para.getChild(j).getType() == "TEXT") {
+        var text = para.getChild(j).asText();
+        var locations = findCrossLinks(1,text);
+        
+        var start = locations[0];
+        var end = locations[1];
+        var url = text.getLinkUrl(start);
+        
+        if (url.substr(0,4) == '#fig') {
+          text.deleteText(start, start + 1)
+          text.insertText(start, '♩')
+          var num = lab_count['fig'] + 1
+          lab_count['fig'] = num
+        }
+      }
+    }
+  }
+  return lab_count
+}
+
+function dummyLof(lab_count) {
   var doc = DocumentApp.getActiveDocument();
   var body = doc.getBody();
   
-  for (var i in page_labs) {
-    var text = i + ': ' + page_labs[i][0]
-    body.insertParagraph(0, text)
-  }  
+  var num_fig = lab_count['fig']
+  
+  for (var i=0; i<num_fig; i++) {
+    body.insertParagraph(i, 'Figure ' + (i + 1) + '.......... ')
+  }
+}
+
+function lofNumbers(page_numbers) {
+  var doc = DocumentApp.getActiveDocument();
+  var body = doc.getBody();
+  var paras = body.getParagraphs();
+  var current_loc = 0;
+  
+  for (var i=0; i<Object.keys(page_numbers).length; i++) {
+    var p_number = i + 1;
+    var p_content = page_numbers[Object.keys(page_numbers)[i]];
+    var fig_count = p_content.match(/♩/g).length
+    
+    for (var j=current_loc; j<current_loc + fig_count; j++) {
+      var lof_line = paras[j].getChild(0).asText();
+      lof_line.insertText(lof_line.getText().length, p_number);
+    }
+    current_loc = current_loc + fig_count;
+  }
 }
 
 
