@@ -46,8 +46,10 @@ function encodeLabel() {
         var text = para.getChild(j).asText();
         var locations = findCrossLinks(1,text);
         
-        var start = locations[0];
-        var end = locations[1];
+        if (!locations[0][0]){continue}
+        
+        var start = locations[0][0];
+        var end = locations[1][0]; 
         var url = text.getLinkUrl(start);
         
         if (url.substr(0,4) == '#fig') {
@@ -79,19 +81,50 @@ function lofNumbers(page_numbers) {
   var paras = body.getParagraphs();
   var current_loc = 0;
   
-  for (var i=0; i<Object.keys(page_numbers).length; i++) {
+  var p_num_keys = Object.keys(page_numbers).sort()
+  
+  for (var i=0; i<p_num_keys.length; i++) {
     var p_number = i + 1;
-    var p_content = page_numbers[Object.keys(page_numbers)[i]];
-    var fig_count = p_content.match(/♩/g).length
+    var p_content = page_numbers[p_num_keys[i]];
+
+    if (typeof p_content == 'number') {continue}
     
-    for (var j=current_loc; j<current_loc + fig_count; j++) {
-      var lof_line = paras[j].getChild(0).asText();
-      lof_line.insertText(lof_line.getText().length, p_number);
-    }
+    var fig_count = p_content.match(/♩/g).length
+      for (var j=current_loc; j<current_loc + fig_count; j++) {
+        var lof_line = paras[j].getChild(0).asText();
+        lof_line.insertText(lof_line.getText().length, p_number);
+      }
     current_loc = current_loc + fig_count;
   }
 }
 
+function restoreLabels() {
+  var doc = DocumentApp.getActiveDocument();
+  var paras = doc.getBody().getParagraphs();
+  
+  var lab_count = {'fig': 0}
+  
+  for (var i in paras) {
+    var para = paras[i]
+    for (var j = 0;j < para.getNumChildren();j++) {
+      if (para.getChild(j).getType() == "TEXT") {
+        var text = para.getChild(j).asText();
+        var locations = findCrossLinks(1,text);
+        
+        if (!locations[0][0]){continue}
+        
+        var start = locations[0][0];
+        var end = locations[1][0]; 
+        var url = text.getLinkUrl(start);
+        
+        if (url.substr(0,4) == '#fig') {
+          text.deleteText(start - 1, start - 1)
+        }
+      }
+    }
+  }
+  updateDocument()
+}
 
 //---------------
 
@@ -291,7 +324,7 @@ function smartCapitals(origtext,start) {
 }
 
 
-// Above function feed into the main paragraph sweep and replace...
+// Above functions feed into the main paragraph sweep and replace...
 
 // Sweep paragraphs and update
 
