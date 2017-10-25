@@ -1,49 +1,57 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <base target="_top">
-  </head>
-  <body>
-  </body>
-  <script src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'>
-  </script>
-  <script src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.81/pdf.js'>
-  </script>
+<head>
+<base target="_top">
+</head>
+<body>
+</body>
+<script src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'>
+</script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.81/pdf.js'>
+</script>
   
-  <script>
+<script>
 
-  PDFJS.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.81/pdf.worker.js'
-  $(function() {
-    google.script.run.withSuccessHandler(logIt).getPDF();
-  });
+PDFJS.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.81/pdf.worker.js'
+
+$(function() {
+  google.script.run.withSuccessHandler(logIt).getPDF();
+});
+
+var page_labs = {};
+
+function logIt(blob) {
   
-  var page_labs = {};
+  var timer = 8000
   
-  function logIt(blob) {
-    PDFJS.getDocument({data: blob}).then(function (PDFdoc) {
-      for (var i=1; i<=PDFdoc.numPages; i++) {
-        PDFdoc.getPage(i).then(function (PDFpage) {
+  setTimeout(function() {
+    google.script.run.withSuccessHandler(restoreLabels).lofNumbers(page_labs)
+  }, timer)
+  
+  PDFJS.getDocument({data: blob}).then(function (PDFdoc) {
+    var num_pages = PDFdoc.numPages
+    for (var i=1; i<=num_pages; i++) {
+    var array = [];
+      PDFdoc.getPage(i).then(function (PDFpage) {
         var page_number = PDFpage.pageIndex + 1;
-        var labs = ''
+        var labs = page_number
         PDFpage.getTextContent().then(function (text) {
           for (var j in text.items) {
             var item = text.items[j]
             if (item.str.substr(0,1) == '♩') {
               labs += '♩'
-              }
             }
-            page_labs['Page ' + page_number.toString()] = labs
-          })
+          }
+          page_labs['Page ' + page_number] = labs          
         })
-      }
-    })
-    setTimeout(pageLabs, 1000)
-  }
-  
-  function pageLabs() {
-    google.script.run.withSuccessHandler().lofNumbers(page_labs)
-  }
-  
-  </script>
+      })
+    }
+  })
+}
+
+function restoreLabels() {
+  google.script.run.restoreLabels()
+}
+</script>
 
 </html>
