@@ -14,7 +14,7 @@
 
   PDFJS.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.81/pdf.worker.js'
   $(function() {
-    google.script.run.withSuccessHandler(logIt).countPages();
+    google.script.run.withSuccessHandler(logIt).getPDF();
   });
   
   var page_labs = {};
@@ -24,24 +24,24 @@
       for (var i=1; i<=PDFdoc.numPages; i++) {
         PDFdoc.getPage(i).then(function (PDFpage) {
         var page_number = PDFpage.pageIndex + 1;
-        var labs = []
-          PDFpage.getTextContent().then(function (text) {
-            for (var j in text.items) {
-              var item = text.items[j]
-              if (item.height < 8 && item.width > 0) {
-               labs.push(item.str);
+        var labs = ''
+        PDFpage.getTextContent().then(function (text) {
+          for (var j in text.items) {
+            var item = text.items[j]
+            if (item.str.substr(0,1) == '♩') {
+              labs += '♩'
               }
             }
+            page_labs['Page ' + page_number.toString()] = labs
           })
-          page_labs['Page ' + page_number.toString()] = labs
         })
       }
     })
-    setTimeout(pageLabs, 5000)
+    setTimeout(pageLabs, 1000)
   }
   
   function pageLabs() {
-    google.script.run.withSuccessHandler().addToLof(page_labs)
+    google.script.run.withSuccessHandler().lofNumbers(page_labs)
   }
   
   </script>
