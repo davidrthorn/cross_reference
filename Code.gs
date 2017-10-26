@@ -7,16 +7,20 @@ function onOpen(e) {
     .createAddonMenu()
     .addItem('Update document', 'updateDocument')
     .addItem('Configure', 'showSidebar')
+    .addItem('Test', 'testPages')
     .addToUi();
 }
 
 function showSidebar() {
-  var ui = HtmlService.createHtmlOutputFromFile('Sidebar')
-      .setTitle('Cross Reference');
+  var ui = HtmlService.createTemplateFromFile('sidebar').evaluate();
+  var sb = ui.setTitle('Cross Reference');
   DocumentApp.getUi().showSidebar(ui);
 }
 
-
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename)
+      .getContent();
+}
 
 // Scan text element and return indices for references and labels
 
@@ -205,7 +209,7 @@ function smartCapitals(origtext,start) {
 }
 
 
-// Above function feed into the main paragraph sweep and replace...
+// Above functions feed into the main paragraph sweep and replace...
 
 // Sweep paragraphs and update
 
