@@ -11,8 +11,16 @@ function onOpen(e) {
     .addToUi();
 }
 
+function showSidebar() {
+  var ui = HtmlService.createTemplateFromFile('sidebar').evaluate();
+  var sb = ui.setTitle('Cross Reference');
+  DocumentApp.getUi().showSidebar(ui);
+}
 
-
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename)
+      .getContent();
+}
 
 //--------------
 
@@ -53,8 +61,8 @@ function encodeLabel() {
         var url = text.getLinkUrl(start);
         
         if (url.substr(0,4) == '#fig') {
-          text.deleteText(start, start + 1)
-          text.insertText(start, '♩')
+          text.deleteText(start, start + 3)
+          text.insertText(start, '☖☂')
           var num = lab_count['fig'] + 1
           lab_count['fig'] = num
         }
@@ -76,25 +84,20 @@ function dummyLof(lab_count) {
 }
 
 function lofNumbers(page_numbers) {
-  var doc = DocumentApp.getActiveDocument();
-  var body = doc.getBody();
-  var paras = body.getParagraphs();
-  var current_loc = 0;
-  
-  var p_num_keys = Object.keys(page_numbers).sort()
-  
-  for (var i=0; i<p_num_keys.length; i++) {
+  var paras = DocumentApp.getActiveDocument().getBody().getParagraphs();
+  var current_loc = -1;
+  Logger.log(page_numbers.length);
+ 
+  for (var i=0; i<page_numbers.length; i++) {
     var p_number = i + 1;
-    var p_content = page_numbers[p_num_keys[i]];
+    var fig_count = page_numbers[i];
+    if (fig_count == 0){continue};
 
-    if (typeof p_content == 'number') {continue}
-    
-    var fig_count = p_content.match(/♩/g).length
-      for (var j=current_loc; j<current_loc + fig_count; j++) {
-        var lof_line = paras[j].getChild(0).asText();
-        lof_line.insertText(lof_line.getText().length, p_number);
-      }
-    current_loc = current_loc + fig_count;
+    for (var j=current_loc + 1; j<=current_loc + fig_count; j++) {
+      var lof_line = paras[j].getChild(0).asText();
+      lof_line.insertText(lof_line.getText().length, p_number);
+    }
+    var current_loc = current_loc + fig_count;
   }
 }
 
@@ -118,7 +121,7 @@ function restoreLabels() {
         var url = text.getLinkUrl(start);
         
         if (url.substr(0,4) == '#fig') {
-          text.deleteText(start - 1, start - 1)
+          text.deleteText(start - 2, start)
         }
       }
     }
@@ -128,14 +131,6 @@ function restoreLabels() {
 
 //---------------
 
-
-
-
-function showSidebar() {
-  var ui = HtmlService.createHtmlOutputFromFile('Sidebar')
-      .setTitle('Cross Reference');
-  DocumentApp.getUi().showSidebar(ui);
-}
 
 // Scan text element and return indices for references and labels
 
