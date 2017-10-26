@@ -1,10 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<base target="_top">
-</head>
-<body>
-</body>
 <script src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'>
 </script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.81/pdf.js'>
@@ -18,11 +11,11 @@ $(function() {
   google.script.run.withSuccessHandler(logIt).getPDF();
 });
 
-var page_labs = {};
+var page_labs = [];
 
 function logIt(blob) {
   
-  var timer = 8000
+  var timer = 6000
   
   setTimeout(function() {
     google.script.run.withSuccessHandler(restoreLabels).lofNumbers(page_labs)
@@ -36,13 +29,9 @@ function logIt(blob) {
         var page_number = PDFpage.pageIndex + 1;
         var labs = page_number
         PDFpage.getTextContent().then(function (text) {
-          for (var j in text.items) {
-            var item = text.items[j]
-            if (item.str.substr(0,1) == '♩') {
-              labs += '♩'
-            }
-          }
-          page_labs['Page ' + page_number] = labs          
+        var flat = JSON.stringify(text['items']);
+        var lab_count = flat.split('☖☂').length - 1;
+        page_labs.push(lab_count)
         })
       })
     }
@@ -50,8 +39,10 @@ function logIt(blob) {
 }
 
 function restoreLabels() {
-  google.script.run.restoreLabels()
+  google.script.run.restoreLabels();
 }
 </script>
 
 </html>
+
+
