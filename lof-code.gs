@@ -1,3 +1,5 @@
+// Open dialogue and create lof
+
 function createLof() {
   
   var lab_count = encodeLabel();
@@ -10,10 +12,14 @@ function createLof() {
       .showModalDialog(html, 'My custom dialog');
 }
 
+// Retrieve document as blob bytes
+
 function getPDF() {
    var blob = DocumentApp.getActiveDocument().getBlob().getBytes();
    return blob
 }
+
+// Replace first two letter of figure labels with UTF-8 symbol placeholder
 
 function encodeLabel() {
   var doc = DocumentApp.getActiveDocument();
@@ -33,8 +39,6 @@ function encodeLabel() {
         var starts = locations[0];
         var ends = locations[1];
         
-        Logger.log(starts.length)
-        
         for (var k=starts.length-1; k>=0; k--) {
           var start = starts[k];
           var end = ends[k];
@@ -52,21 +56,28 @@ function encodeLabel() {
   return lab_count
 }
 
+// Create correct length lof without page numbers (so that page numbers reflect inclusion of lof)
+
 function dummyLof(lab_count) {
   var doc = DocumentApp.getActiveDocument();
   var body = doc.getBody();
   
   var num_fig = lab_count['fig']
-  
-  for (var i=0; i<num_fig; i++) {
-    body.insertParagraph(i, 'Figure ' + (i + 1) + '.......... ')
+  body.insertParagraph(0, 'List of Figures');
+  body.getParagraphs()[0].setHeading(DocumentApp.ParagraphHeading.HEADING1);
+  for (var i=1; i<=num_fig; i++) {
+    body.insertParagraph(i, 'Figure ' + i + '.......... ')
+    if (i == num_fig) {
+      body.insertPageBreak(num_fig + 1);
+    }
   }
 }
 
+// Add actual page numbers to lof
+
 function lofNumbers(page_numbers) {
   var paras = DocumentApp.getActiveDocument().getBody().getParagraphs();
-  var current_loc = -1;
-  Logger.log(page_numbers.length);
+  var current_loc = 0;
  
   for (var i=0; i<page_numbers.length; i++) {
     var p_number = i + 1;
@@ -80,6 +91,8 @@ function lofNumbers(page_numbers) {
     var current_loc = current_loc + fig_count;
   }
 }
+
+// Restore labels to their correct formatting
 
 function restoreLabels() {
   var doc = DocumentApp.getActiveDocument();
