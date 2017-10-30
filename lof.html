@@ -8,41 +8,47 @@
 PDFJS.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.81/pdf.worker.js'
 
 $(function() {
-  google.script.run.withSuccessHandler(logIt).getPDF();
+  google.script.run.withSuccessHandler(countFigures).getPDF();
 });
 
 var page_labs = [];
 
 function logIt(blob) {
-  
-  var timer = 6000
-  
-  setTimeout(function() {
-    google.script.run.withSuccessHandler(restoreLabels).lofNumbers(page_labs)
-  }, timer)
-  
-  PDFJS.getDocument({data: blob}).then(function (PDFdoc) {
-    var num_pages = PDFdoc.numPages
-    for (var i=1; i<=num_pages; i++) {
-    var array = [];
-      PDFdoc.getPage(i).then(function (PDFpage) {
-        var page_number = PDFpage.pageIndex + 1;
-        var labs = page_number
-        PDFpage.getTextContent().then(function (text) {
-        var flat = JSON.stringify(text['items']);
-        var lab_count = flat.split('☖☂').length - 1;
-        page_labs.push(lab_count)
-        })
-      })
+  var pdf = PDFJS.getDocument({data: blob});
+  return pdf.then(function(pdf) {
+    var maxPages = pdf.pdfInfo.numPages;
+    var countPromises = []; // collecting all page promises
+    for (var j = 1; j <= maxPages; j++) {
+      var page = pdf.getPage(j);
+      countPromises.push(page.then(function(page) { // add page promise
+        var textContent = page.getTextContent();
+        return textContent.then(function(page){ // return content promise;
+          return textContent// value for page words
+        });
+      }));
     }
-  })
+  
+    // Wait for all pages and sum counts
+  
+    return Promise.all(countPromises).then(function (counts) {
+      var final_count = [];
+      for (var i=0; i<counts.length; i++) {
+        var as_string = JSON.stringify(counts[i]);
+        final_count.push(as_string.split('☙').length - 1)
+      }
+      return final_count;
+    });
+  });
 }
+
+function countFigures(blob) {
+  logIt(blob).then(function (count) {
+    google.script.run.withSuccessHandler(restoreLabels).lofNumbers(count);   
+  });
+}
+
 
 function restoreLabels() {
   google.script.run.restoreLabels();
 }
 </script>
-
-</html>
-
-
