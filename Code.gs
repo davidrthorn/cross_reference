@@ -56,15 +56,21 @@ function encodeLabel() {
         
         if (!locations[0][0]){continue}
         
-        var start = locations[0][0];
-        var end = locations[1][0]; 
-        var url = text.getLinkUrl(start);
+        var starts = locations[0];
+        var ends = locations[1];
         
-        if (url.substr(0,4) == '#fig') {
-          text.deleteText(start, start + 3)
-          text.insertText(start, '☖☂')
-          var num = lab_count['fig'] + 1
-          lab_count['fig'] = num
+        Logger.log(starts.length)
+        
+        for (var k=starts.length-1; k>=0; k--) {
+          var start = starts[k];
+          var end = ends[k];
+          Logger.log(start);
+          var url = text.getLinkUrl(start);  
+          if (url.substr(0,4) == '#fig') {
+            text.deleteText(start, start + 1)
+            text.insertText(start, '☙')
+            lab_count['fig'] = lab_count['fig'] + 1
+          }
         }
       }
     }
@@ -116,12 +122,16 @@ function restoreLabels() {
         
         if (!locations[0][0]){continue}
         
-        var start = locations[0][0];
-        var end = locations[1][0]; 
-        var url = text.getLinkUrl(start);
+        var starts = locations[0];
+        var ends = locations[1]; 
         
-        if (url.substr(0,4) == '#fig') {
-          text.deleteText(start - 2, start)
+        for (var k=starts.length-1; k>=0; k--) {
+          var start = starts[k];
+          var end = ends[k];
+          var url = text.getLinkUrl(start);
+          if (url.substr(0,4) == '#fig') {
+            text.deleteText(start - 1, start)
+          }
         }
       }
     }
@@ -367,7 +377,7 @@ function sweepParagraphs(paragraphs,type,pairings,counter,props) {
                   var position = doc.newPosition(paragraph.getChild(j), start);
                   doc.setCursor(position);
                   
-                  return url
+                  //return url
                 }
               
               pairings[code + 'N' + name] = number;
