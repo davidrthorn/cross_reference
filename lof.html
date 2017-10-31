@@ -49,6 +49,10 @@ function countFigures(blob) {
 
 
 function restoreLabels() {
-  google.script.run.restoreLabels();
+  google.script.run.withSuccessHandler(closeDialog).restoreLabels();
+}
+
+function closeDialog() {
+  google.script.host.close();
 }
 </script>
