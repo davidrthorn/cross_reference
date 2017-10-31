@@ -2,19 +2,39 @@
 
 function createLof() {
 
+  var cursor = getCursorIndex();
+
   var error = updateDocument();
   if (error == 'error') {
     return;
   }
-  deleteLof(); 
+
+  var lof_position = deleteLof(); 
   var lab_count = encodeLabel();
-  var position = 0;
+  
+  if (lof_position) {
+    var position = lof_position
+  } else {
+    var position = cursor
+  }
+  
   dummyLof(lab_count, position);
   
   var html = HtmlService.createTemplateFromFile('lof').evaluate()
   html.setWidth(300).setHeight(100);
   DocumentApp.getUi() // Or DocumentApp or FormApp.
       .showModalDialog(html, 'Generating list of figures...');
+}
+
+// get  the body index of the cursor
+
+function getCursorIndex() {
+  var doc = DocumentApp.getActiveDocument();
+  var cursor = doc.getCursor();
+  var element = cursor.getElement();
+  var index = element.getParent().getChildIndex(element);
+  
+  return index
 }
 
 // find current lof 
@@ -33,9 +53,9 @@ function findLof() {
 function deleteLof() {
   var table = findLof();
   if (table) {
-    var next = table.getNextSibling();
+    var index = table.getParent().getChildIndex(table);
     table.removeFromParent();
-    next.removeFromParent();
+    return index
   }
 }
 
@@ -189,4 +209,3 @@ function restoreLabels() {
   var top = doc.newPosition(paras[1].getChild(0), 0);
   doc.setCursor(top);
 }
-
