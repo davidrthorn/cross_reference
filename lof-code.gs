@@ -3,6 +3,12 @@
 function createLof() {
 
   var cursor = getCursorIndex();
+  var lab = PropertiesService.getDocumentProperties().getProperty('cross_fig');
+  if (lab) {
+    var lab_text = lab.split('_')[2]
+  } else {
+    var lab_text = 'Figure '
+  }
 
   var error = updateDocument();
   if (error == 'error') {
@@ -18,10 +24,10 @@ function createLof() {
     var position = cursor
   }
   
-  dummyLof(lab_count, position);
+  dummyLof(lab_count, lab_text, position);
   
   var html = HtmlService.createTemplateFromFile('lof').evaluate()
-  html.setWidth(300).setHeight(100);
+  html.setWidth(250).setHeight(90);
   DocumentApp.getUi() // Or DocumentApp or FormApp.
       .showModalDialog(html, 'Generating list of figures...');
 }
@@ -36,6 +42,7 @@ function getCursorIndex() {
   
   return index
 }
+
 
 // find current lof 
 
@@ -104,16 +111,10 @@ function encodeLabel() {
 
 // Create correct length lof without page numbers (so that page numbers reflect inclusion of lof)
 
-function dummyLof(lab_count,position) {
+function dummyLof(lab_count,lab_text,position) {
   var doc = DocumentApp.getActiveDocument();
   var body = doc.getBody();
-  
-  var d_props = PropertiesService.getDocumentProperties();
-  var u_props = PropertiesService.getUserProperties();
-  
-  var lab_props = retrieveStoredLabs(d_props,u_props);
-  var lab_text = lab_props['figur'][0];
-    
+ 
   var num_fig = lab_count['fig'];
   var cells = [];
   
