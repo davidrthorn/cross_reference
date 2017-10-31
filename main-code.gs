@@ -9,7 +9,7 @@ function onOpen(e) {
     .createAddonMenu()
     .addItem('Update document', 'updateDocument')
     .addItem('Configure', 'showSidebar')
-    .addItem('Create list of figures', 'createLof')
+    .addItem('Create list of figures (beta)', 'createLof')
     .addToUi();
 }
 
@@ -262,7 +262,7 @@ function sweepParagraphs(paragraphs,type,pairings,counter,props) {
                   var position = doc.newPosition(paragraph.getChild(j), start);
                   doc.setCursor(position);
                   
-                  //return url
+                  return url
                 }
               
               pairings[code + 'N' + name] = number;
@@ -321,22 +321,22 @@ function updateDocument() {
   // Error handling from first sweep
   
   if (final_pairings === 'format') {
-    return
+    return 'error'
   } else if (typeof final_pairings === 'string' && final_pairings.charAt(0) === '#') {
     DocumentApp.getUi().alert('There are two labels with the code ' + final_pairings + '.' +
                               "\n\nLabel codes must be 5 letters and label names (e.g. '" + final_pairings.substr(7,final_pairings.length) + "') must be unique.");
-    return
+    return 'error'
   } else if (typeof final_pairings === 'string') {
     DocumentApp.getUi().alert('The label code #' + final_pairings + ' was not recognised.' +
                               '\nIt might be a typo or it might be a custom label you' +
                               '\nhave not yet added in the configuration sidebar.');
-    return
+    return 'error'
   } 
   
   // Second sweep of text body to update references
   var error = sweepParagraphs(paragraphs,2,final_pairings,counter,refprops);
   
-  if (error === 'format') {return}
+  if (error === 'format') {return 'error'}
   
   // Sweep footnotes to update references
   for (var i in footnotes) {
@@ -344,13 +344,13 @@ function updateDocument() {
     var error = sweepParagraphs(fnparagraphs,2,final_pairings,counter,refprops);
   }
   
-  if (error === 'format') {return}
+  if (error === 'format') {return 'error'}
   
   // Produce applicable error messages
   if (error === 'missrefs') {
     DocumentApp.getUi().alert('The reference highlighted in red has nothing to refer to.' +
                            '\nIt might contain a typo or the corresponding label might be missing.')
-    return
+    return 'error'
   }
 }
 
@@ -437,4 +437,4 @@ function clearProps() {
 function showProps() {
   Logger.log(PropertiesService.getUserProperties().getProperties());
   Logger.log(PropertiesService.getDocumentProperties().getProperties());
-  }
+}
