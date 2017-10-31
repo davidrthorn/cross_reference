@@ -1,18 +1,45 @@
 // Open dialogue and create lof
 
 function createLof() {
-  
+
+  var error = updateDocument();
+  if (error == 'error') {
+    return;
+  }
+  deleteLof(); 
   var lab_count = encodeLabel();
-  dummyLof(lab_count);
+  var position = 0;
+  dummyLof(lab_count, position);
   
-  var html = HtmlService.createHtmlOutputFromFile('lof')
-      .setWidth(300)
-      .setHeight(100);
+  var html = HtmlService.createTemplateFromFile('lof').evaluate()
+  html.setWidth(300).setHeight(100);
   DocumentApp.getUi() // Or DocumentApp or FormApp.
       .showModalDialog(html, 'Generating list of figures...');
 }
 
-// Retrieve document as blob bytes
+// find current lof 
+
+function findLof() {
+  var ranges = DocumentApp.getActiveDocument().getNamedRanges('lof_table');
+  var lof = ranges[0];
+  if (lof) {
+    var table = lof.getRange().getRangeElements()[0].getElement().asTable();
+    return table;
+  }
+}
+
+// Delete current lof
+
+function deleteLof() {
+  var table = findLof();
+  if (table) {
+    var next = table.getNextSibling();
+    table.removeFromParent();
+    next.removeFromParent();
+  }
+}
+
+// Retrieve document as PDF blob in byte form
 
 function getPDF() {
    var blob = DocumentApp.getActiveDocument().getBlob().getBytes();
@@ -57,27 +84,40 @@ function encodeLabel() {
 
 // Create correct length lof without page numbers (so that page numbers reflect inclusion of lof)
 
-function dummyLof(lab_count) {
+function dummyLof(lab_count,position) {
   var doc = DocumentApp.getActiveDocument();
   var body = doc.getBody();
   
-  var num_fig = lab_count['fig'];
-  var cells = [
-    ['List of Figures','']
-  ];
+  var d_props = PropertiesService.getDocumentProperties();
+  var u_props = PropertiesService.getUserProperties();
   
-  for (var i=1; i<=num_fig; i++) {
-    var name = 'Figure ' + i;
-    var placeholder = '---';
+  var lab_props = retrieveStoredLabs(d_props,u_props);
+  var lab_text = lab_props['figur'][0];
+    
+  var num_fig = lab_count['fig'];
+  var cells = [];
+  
+  for (var i=0; i<num_fig; i++) {
+    var name = lab_text + (i + 1);
+    var placeholder = '...';
     var row = [name, placeholder];
     cells.push(row);
   }
-
-  var lof_table = body.insertTable(0, cells);
+  
+  var lof_table = body.insertTable(position, cells);
   styleTable(lof_table);
+  
+  var lof_ranges = doc.getNamedRanges('lof_table');
+  for (var i in lof_ranges) {
+    lof_ranges[i].remove();
+  }
+  var range = doc.newRange();
+  range.addElement(lof_table);
+  doc.addNamedRange('lof_table', range.build())
 }
 
 // Style lof table
+
 function styleTable(table) {
   
   table.setBorderWidth(0);
@@ -87,31 +127,17 @@ function styleTable(table) {
     var rcell = table.getRow(i).getCell(1);
     
     lcell.setPaddingLeft(0);
-    lcell.setPaddingTop(0);
-    
     rcell.setPaddingRight(0);
-    rcell.setPaddingTop(0);
     rcell.getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
-    if (i==0) {
-      lcell.getChild(0).asParagraph().setBold(true);
-    }
   }
 }
 
 // Add actual page numbers to lof
 
 function lofNumbers(page_numbers) {
-  var tables = DocumentApp.getActiveDocument().getBody().getTables();
   
-  for (var i=0; i<tables.length; i++) {
-    var top_cell = tables[i].getCell(0, 0);
-    if (top_cell.getText()) {
-      var table = tables[i];
-      break
-    }
-  }
-  
-  var current_loc = 1;
+  var table = findLof();
+  var current_loc = 0;
   
   for (var i=0; i<page_numbers.length; i++) {
     var p_number = i + 1;
@@ -159,5 +185,8 @@ function restoreLabels() {
     }
   }
   updateDocument();
+  
+  var top = doc.newPosition(paras[1].getChild(0), 0);
+  doc.setCursor(top);
 }
 
