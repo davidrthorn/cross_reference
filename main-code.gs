@@ -1,3 +1,4 @@
+
 //***** Set up add-on menu *****
 
 function onInstall(e) {
@@ -321,11 +322,13 @@ function updateDocument() {
   // Error handling from first sweep
   
   if (final_pairings === 'format') {
+
     return 'error'
   } else if (typeof final_pairings === 'string' && final_pairings.charAt(0) === '#') {
     DocumentApp.getUi().alert('There are two labels with the code ' + final_pairings + '.' +
                               "\n\nLabel codes must be 5 letters and label names (e.g. '" + final_pairings.substr(7,final_pairings.length) + "') must be unique.");
     return 'error'
+
   } else if (typeof final_pairings === 'string') {
     DocumentApp.getUi().alert('The label code #' + final_pairings + ' was not recognised.' +
                               '\nIt might be a typo or it might be a custom label you' +
@@ -424,17 +427,4 @@ function retrieveStoredRefs(docProps,userProps) {
     }
   }
   return refprops 
-}
-
-
-//***** For testing only *****
-
-function clearProps() {
-  PropertiesService.getUserProperties().deleteAllProperties()
-  PropertiesService.getDocumentProperties().deleteAllProperties()
-}
-
-function showProps() {
-  Logger.log(PropertiesService.getUserProperties().getProperties());
-  Logger.log(PropertiesService.getDocumentProperties().getProperties());
 }
