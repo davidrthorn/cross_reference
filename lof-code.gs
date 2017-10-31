@@ -142,9 +142,16 @@ function styleTable(table) {
   
   table.setBorderWidth(0);
   
+  var att = {};
+  att[DocumentApp.Attribute.BOLD] = null;
+  att[DocumentApp.Attribute.ITALIC] = null;
+  att[DocumentApp.Attribute.UNDERLINE] = null;
+  att[DocumentApp.Attribute.FONT_SIZE] = null;
+  
   for (var i=0; i<table.getNumRows(); i++) {
     var lcell = table.getRow(i).getCell(0);
     var rcell = table.getRow(i).getCell(1);
+    table.setAttributes(att);
     
     lcell.setPaddingLeft(0);
     rcell.setPaddingRight(0);
