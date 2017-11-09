@@ -90,9 +90,9 @@ Custom pairs are automatically saved in the user settings and will be available 
 
 ## List of figures (experimental!)
 
-Cross Reference can create a list of figures akin to Docs' own table of contents. This feature is found under *Add-ons*→*Cross Reference*→*List* of figures It inserts the list at the cursor or updates the existing list. The list of figures uses the label text of a normal label and numbers figures in the same way.
+Cross Reference can create a list of figures akin to Docs' own table of contents. This feature is found under *Add-ons*→*Cross Reference*→*List of figures*. It inserts the list at the cursor or updates the existing list. The list of figures uses the label text of a normal label and numbers figures in the same way.
 
->**Technical**: The list of figures feature is pretty slow. This is because Docs does not provide a way to access page numbers. The only way to obtain the page numbers for figures is to export the whole document as a PDF, then to process it using the JavaScript library PDF.js. Since PDFs are complex documents, this takes a long time. Your documents are **not** exported to an external server; they are by the JavaScript contained in the dialogue that pops up when the feature is used.
+>**Technical**: The list of figures feature is pretty slow. This is because Docs does not provide a way to access page numbers. The only way to obtain the page numbers for figures is to export the whole document as a PDF, then to process it using the JavaScript library PDF.js. Since PDFs are complex documents, this takes a long time. Your documents are **not** exported to an external server; they are processed by the JavaScript contained in the dialogue that pops up when the feature is used.
 
 Since this feature is relatively slow, it is recommended to generate lists of figures only when necessary (e.g. before printing) and not to update them every time a figure is added.
 
