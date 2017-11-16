@@ -62,17 +62,6 @@ function findCrossLinks(type,text) {
 
     var locations = crossCat(type,ref,ref_minus,starts,ends,index);
   }
-  if (locations[0].length > locations[1].length) {
-    var position = doc.newPosition(text.getParent().asParagraph(), 0);
-    doc.setCursor(position);
-    DocumentApp.getUi().alert('There was a problem scanning the paragraph starting \'' + 
-                             text.getText().substr(0,30) + '...\'' +
-                             '\n\nThe most likely explanation is that a reference or label changes formatting half way through,' +
-                             '\nfor example becoming italicised mid-word. Please try using Docs\' clear formatting command' +
-                             '\non the labels and references in this paragraph and running again. If this doesn\'t work, try' +
-                             '\nremoving and reapplying the reference or label.')
-    return
-  }
   return locations
 }
 
@@ -85,7 +74,7 @@ function crossCat(type,ref,ref_minus,starts,ends,index) {
     var position = 4
   }
 
-  if (ref_minus != '#' && ref.charAt(0) === '#' && ref.charAt(position) === '_') {
+  if (ref_minus.charAt(0) != '#' && ref.charAt(0) === '#' && ref.charAt(position) === '_') {
       starts.push(index);
     } else if (ref.charAt(0) != '#' && ref_minus.charAt(0) === '#' && ref_minus.charAt(position) === '_') {
       ends.push(index - 1);
