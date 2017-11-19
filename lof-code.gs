@@ -1,210 +1,183 @@
-// Open dialogue and create lof
 
-function createLof() {
+function createLoF() {
 
-  var cursor = getCursorIndex();
-  var lab = PropertiesService.getDocumentProperties().getProperty('cross_fig');
-  if (lab) {
-    var lab_text = lab.split('_')[2]
+  var cursor = getCursorIndex(),
+      label_settings = PropertiesService.getDocumentProperties().getProperty('cross_fig');
+  
+  if (label_settings) {
+    var label_text_raw = label_settings.split('_')[2],
+        label_text = label_text_raw.substr(0,1).toUpperCase() + label_text_raw.substr(1,label_text_raw.length);
   } else {
-    var lab_text = 'Figure '
+    var label_text = 'Figure '
   }
 
   var error = updateDocument();
-  if (error == 'error') {
-    return;
-  }
-
-  var lof_position = deleteLof(); 
-  var lab_count = encodeLabel();
+  if (error === 'error') {return};
   
-  if (lof_position) {
-    var position = lof_position
-  } else {
-    var position = cursor
-  }
+  var label_count = encodeLabel(),
+      lof_position = deleteLoF();
   
-  dummyLof(lab_count, lab_text, position);
+  if (lof_position)
+    var position = lof_position;
+  else
+    var position = cursor;
   
-  var html = HtmlService.createTemplateFromFile('lof').evaluate()
+  insertDummyLof(label_count, label_text, position);
+  
+  var html = HtmlService.createTemplateFromFile('lof').evaluate();
   html.setWidth(250).setHeight(90);
-  DocumentApp.getUi() // Or DocumentApp or FormApp.
-      .showModalDialog(html, 'Generating list of figures...');
+  DocumentApp.getUi().showModalDialog(html, 'Generating list of figures...');
 }
 
-// get  the body index of the cursor
 
 function getCursorIndex() {
-  var doc = DocumentApp.getActiveDocument();
-  var cursor = doc.getCursor();
-  var element = cursor.getElement();
-  var index = element.getParent().getChildIndex(element);
-  
-  return index
+  var element = DocumentApp.getActiveDocument().getCursor().getElement()
+  return element.getParent().getChildIndex(element);
 }
 
-
-// find current lof 
-
-function findLof() {
-  var ranges = DocumentApp.getActiveDocument().getNamedRanges('lof_table');
-  var lof = ranges[0];
-  if (lof) {
-    var table = lof.getRange().getRangeElements()[0].getElement().asTable();
-    return table;
-  }
-}
-
-// Delete current lof
-
-function deleteLof() {
-  var table = findLof();
-  if (table) {
-    var index = table.getParent().getChildIndex(table);
-    table.removeFromParent();
-    return index
-  }
-}
-
-// Retrieve document as PDF blob in byte form
-
-function getPDF() {
-   var blob = DocumentApp.getActiveDocument().getBlob().getBytes();
-   return blob
-}
-
-// Replace first two letter of figure labels with UTF-8 symbol placeholder
 
 function encodeLabel() {
-  var doc = DocumentApp.getActiveDocument();
-  var paras = doc.getBody().getParagraphs();
+  var doc = DocumentApp.getActiveDocument(),
+      paragraphs = doc.getBody().getParagraphs(),
+      label_count = {'fig': 0}
   
-  var lab_count = {'fig': 0}
-  
-  for (var i in paras) {
-    var para = paras[i]
-    for (var j = 0;j < para.getNumChildren();j++) {
-      if (para.getChild(j).getType() == "TEXT") {
-        var text = para.getChild(j).asText();
-        var locations = findCrossLinks(1,text);
+  for (var i in paragraphs) {
+    var paragraph = paragraphs[i]
+    for (var j = 0; j < paragraph.getNumChildren(); j++) {
+      if (paragraph.getChild(j).getType() == 'TEXT') {
+        var text = paragraph.getChild(j).asText(),
+            locations = findCrossLinks(1, text);
+        if (!locations[1][0]) {continue};
         
-        if (!locations[0][0]){continue}
-        
-        var starts = locations[0];
-        var ends = locations[1];
-        
-        for (var k=starts.length-1; k>=0; k--) {
-          var start = starts[k];
-          var end = ends[k];
-          var url = text.getLinkUrl(start);  
-          if (url.substr(0,4) == '#fig') {
-            text.deleteText(start, start + 1)
-            text.insertText(start, '☙')
-            lab_count['fig'] = lab_count['fig'] + 1
-          }
+        var start = locations[0][0];
+
+        if (text.getLinkUrl(start).substr(0,4) === '#fig') {
+          text.deleteText(start, start + 1)
+          .insertText(start, '☙')
+          label_count['fig'] = label_count['fig'] + 1
         }
       }
     }
   }
-  return lab_count
+  return label_count
 }
 
-// Create correct length lof without page numbers (so that page numbers reflect inclusion of lof)
 
-function dummyLof(lab_count,lab_text,position) {
-  var doc = DocumentApp.getActiveDocument();
-  var body = doc.getBody();
- 
-  var num_fig = lab_count['fig'];
-  var cells = [];
+function deleteLoF() {
+  var lof_table = findLoF();
+  if (lof_table) {
+    var index = lof_table.getParent().getChildIndex(lof_table);
+    lof_table.removeFromParent();
+    return index
+  }
+}
+
+
+function findLoF() {
+  var ranges = DocumentApp.getActiveDocument().getNamedRanges('lof_table'),
+      lof = ranges[0];
   
-  for (var i=0; i<num_fig; i++) {
-    var name = lab_text + (i + 1);
-    var placeholder = '...';
-    var row = [name, placeholder];
+  if (lof) return lof.getRange().getRangeElements()[0].getElement().asTable();
+}
+
+
+function insertDummyLof(label_count,label_text,position) {
+  var doc = DocumentApp.getActiveDocument(),
+      body = doc.getBody(),
+      cells = [];
+  
+  for (var i = 0; i < label_count['fig']; i++) {
+    var name = label_text + (i + 1);
+    var placeholder = '...',
+        row = [name, placeholder];
     cells.push(row);
   }
   
   var lof_table = body.insertTable(position, cells);
-  styleTable(lof_table);
+  
+  styleLoF(lof_table);
   
   var lof_ranges = doc.getNamedRanges('lof_table');
+  
   for (var i in lof_ranges) {
     lof_ranges[i].remove();
   }
+  
   var range = doc.newRange();
   range.addElement(lof_table);
   doc.addNamedRange('lof_table', range.build())
 }
 
-// Style lof table
 
-function styleTable(table) {
+function styleLoF(lof_table) {
   
-  table.setBorderWidth(0);
+  lof_table.setBorderWidth(0);
   
-  var att = {};
-  att[DocumentApp.Attribute.BOLD] = null;
-  att[DocumentApp.Attribute.ITALIC] = null;
-  att[DocumentApp.Attribute.UNDERLINE] = null;
-  att[DocumentApp.Attribute.FONT_SIZE] = null;
+  var attributes = {};
+  attributes[DocumentApp.Attribute.BOLD] = null;
+  attributes[DocumentApp.Attribute.ITALIC] = null;
+  attributes[DocumentApp.Attribute.UNDERLINE] = null;
+  attributes[DocumentApp.Attribute.FONT_SIZE] = null;
   
-  for (var i=0; i<table.getNumRows(); i++) {
-    var lcell = table.getRow(i).getCell(0);
-    var rcell = table.getRow(i).getCell(1);
-    table.setAttributes(att);
+  for (var i = 0; i < lof_table.getNumRows(); i++) {
+    var left_cell = lof_table.getRow(i).getCell(0),
+        right_cell = lof_table.getRow(i).getCell(1);
+    lof_table.setAttributes(attributes);
     
-    lcell.setPaddingLeft(0);
-    rcell.setPaddingRight(0);
-    rcell.getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+    left_cell.setPaddingLeft(0);
+    right_cell.setPaddingRight(0)
+              .getChild(0).asParagraph()
+              .setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
   }
 }
 
-// Add actual page numbers to lof
 
-function lofNumbers(page_numbers) {
-  
-  var table = findLof();
-  var current_loc = 0;
-  
-  for (var i=0; i<page_numbers.length; i++) {
-    var p_number = i + 1;
-    var fig_count = page_numbers[i];
-    if (fig_count == 0){continue};
+function getDocAsPDF() {
+   var blob = DocumentApp.getActiveDocument().getBlob().getBytes();
+   return blob
+}
 
-    for (var j=current_loc; j<current_loc + fig_count; j++) {
-      var num_cell = table.getCell(j, 1)
-      num_cell.clear();
-      num_cell.getChild(0).asParagraph().appendText(p_number);
+
+function insertLoFNumbers(page_numbers) {
+  
+  var lof_table = findLoF(),
+      current_row = 0;
+  
+  for (var i = 0; i < page_numbers.length; i++) {
+    var page_number = (i + 1),
+        label_count = page_numbers[i];
+    if (label_count === 0){continue};
+
+    for (var j = current_row; j < current_row + label_count; j++) {
+      lof_table.getCell(j, 1)
+               .clear()
+               .getChild(0).asParagraph()
+               .appendText(page_number);
     }
-    var current_loc = current_loc + fig_count;
+    var current_row = current_row + label_count;
   }
 }
 
-// Restore labels to their correct formatting
 
 function restoreLabels() {
-  var doc = DocumentApp.getActiveDocument();
-  var paras = doc.getBody().getParagraphs();
+  var doc = DocumentApp.getActiveDocument(),
+      paragraphs = doc.getBody().getParagraphs(),
+      label_count = {'fig': 0}
   
-  var lab_count = {'fig': 0}
-  
-  for (var i in paras) {
-    var para = paras[i]
-    for (var j = 0;j < para.getNumChildren();j++) {
-      if (para.getChild(j).getType() == "TEXT") {
-        var text = para.getChild(j).asText();
-        var locations = findCrossLinks(1,text);
+  for (var i in paragraphs) {
+    var paragraph = paragraphs[i]
+    for (var j = 0;j < paragraph.getNumChildren();j++) {
+      if (paragraph.getChild(j).getType() == "TEXT") {
+        var text = paragraph.getChild(j).asText(),
+            locations = findCrossLinks(1, text);
         
         if (!locations[0][0]){continue}
         
         var starts = locations[0];
-        var ends = locations[1]; 
         
-        for (var k=starts.length-1; k>=0; k--) {
-          var start = starts[k];
-          var end = ends[k];
-          var url = text.getLinkUrl(start);
+        for (var k = starts.length - 1; k >= 0; k--) {
+          var start = starts[k],
+              url = text.getLinkUrl(start);
           if (url.substr(0,4) == '#fig') {
             text.deleteText(start - 1, start)
           }
@@ -214,6 +187,5 @@ function restoreLabels() {
   }
   updateDocument();
   
-  var top = doc.newPosition(paras[1].getChild(0), 0);
-  doc.setCursor(top);
+  doc.setCursor(doc.newPosition(paragraphs[1].getChild(0), 0)) // set cursor to top of document
 }
