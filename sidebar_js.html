@@ -1,18 +1,11 @@
-<script src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'>
-</script>
-
 <script>
 // Inititialise global objects
 
 styles = {};
 temp_settings = {}; // user settings not yet applied or saved
-ref_codes = [];
-
-
+reference_codes = [];
 
 //***** Initialise sidebar *****
-
-
 
 // On sidebar open, retrieve settings and update sidebar
 
@@ -26,12 +19,13 @@ function refreshSidebar() {
 
 function initialiseSidebar(settings) {
   var names = [];
+  
   for (var i in settings) {
     var set_array = settings[i].split('_');
     var name = set_array[1];
     names.push(name);
     temp_settings[name] = set_array;
-    ref_codes.push(temp_settings[name][0].substr(0, 3));
+    reference_codes.push(temp_settings[name][0].substr(0, 3));
   }
 
   var sorted_names = names.sort();
@@ -47,11 +41,10 @@ function initialiseSidebar(settings) {
 
   updateSidebar(sorted_names[0]);
 
-  if (sorted_names[0] != 'Equation' | 'Figure' | 'Table') {
+  if (sorted_names[0] != 'Equation' | 'Figure' | 'Table')
     $('#remove').css('display', 'block');
-  } else {
+  else
     $('#remove').css('display', 'none');
-  }
 }
 
 function updateSidebar(name) {
@@ -72,21 +65,19 @@ function updateSidebar(name) {
   
   $('#lab_code').html('#' + clab_code);
   $('#lab_text').val(clab_text);
-  $('#ref_code').val(clab_code.substr(0, 3));
-  $('#ref_code').html('#' + clab_code.substr(0, 3));
+  $('#ref_code').val(clab_code.substr(0, 3)).html('#' + clab_code.substr(0, 3));
   $('#ref_text').val(cref_text);
 
-  if (clab_text.charAt(0) === clab_text.charAt(0).toUpperCase()) {
-    var lab2 = clab_text
-  } else {
+  if (clab_text.charAt(0) === clab_text.charAt(0).toUpperCase())
+    var lab2 = clab_text;
+  else
     var lab2 = clab_text.charAt(0).toUpperCase() + clab_text.substr(1, clab_text.length);
-  }
 
-  if (cref_text.charAt(0) === cref_text.charAt(0).toUpperCase()) {
-    var ref2 = cref_text
-  } else {
+  if (cref_text.charAt(0) === cref_text.charAt(0).toUpperCase())
+    var ref2 = cref_text;
+  else
     var ref2 = cref_text.charAt(0).toUpperCase() + cref_text.substr(1, cref_text.length);
-  }
+    
   $('#lab_result').html(clab_text + ' 1');
   $('#lab_result2').html(lab2 + ' 1');
   $('#ref_result').html(cref_text + ' 1');
@@ -94,9 +85,9 @@ function updateSidebar(name) {
 
 
   for (var i in style) {
-    var code = i.substr(0, 3);
-    var att = i.substr(4, i.length);
-    var button_id = '#' + code + '_' + att;
+    var code = i.substr(0, 3),
+    att = i.substr(4, i.length),
+    button_id = '#' + code + '_' + att;
 
     var css_props = {
       'bold': 'font-weight',
@@ -114,7 +105,6 @@ function updateSidebar(name) {
       $(button_id).removeClass('st-selected')
     }
   }
-
 }
 
 
@@ -136,11 +126,10 @@ function selectName(name) {
 
   var safe_names = ['Equation', 'Figure', 'Table'];
 
-  if (safe_names.indexOf(name) < 0) {
+  if (safe_names.indexOf(name) < 0)
     $('#remove').css('display', 'block');
-  } else {
+  else
     $('#remove').css('display', 'none');
-  }
   
   updateSidebar(name)
 }
@@ -150,54 +139,35 @@ function selectName(name) {
 function updateTemp() {
 
   var prev_name = $('#name').data('val');
-  var name = $('#name').val();
-  var lab_code = $('#lab_code').html().substr(1, 6);
-  var lab_text = $('#lab_text').val();
-  var ref_text = $('#ref_text').val();
-
-  if ($('#lab_bold').hasClass('st-selected')) {
-    var lab_bold = 'true'
-  } else {
-    var lab_bold = 'null'
-  }
-  if ($('#lab_italic').hasClass('st-selected')) {
-    var lab_italic = 'true'
-  } else {
-    var lab_italic = 'null'
-  }
-  if ($('#lab_underline').hasClass('st-selected')) {
-    var lab_underline = 'true'
-  } else {
-    var lab_underline = 'null'
-  }
-  if ($('#ref_bold').hasClass('st-selected')) {
-    var ref_bold = 'true'
-  } else {
-    var ref_bold = 'null'
-  }
-  if ($('#ref_italic').hasClass('st-selected')) {
-    var ref_italic = 'true'
-  } else {
-    var ref_italic = 'null'
-  }
-  if ($('#ref_underline').hasClass('st-selected')) {
-    var ref_underline = 'true'
-  } else {
-    var ref_underline = 'null'
-  }
-
-  temp_settings[prev_name] = [
-    lab_code,
-    prev_name,
-    lab_text,
-    lab_bold,
-    lab_italic,
-    lab_underline,
-    ref_text,
-    ref_bold,
-    ref_italic,
-    ref_underline
+  
+  var ts = [
+      $('#lab_code').html().substr(1, 6),
+      prev_name,
+      $('#lab_text').val()
   ]
+  
+  var ids = [
+      '#lab_bold',
+      '#lab_italic',
+      '#lab_underline',
+      'ref_text',
+      '#ref_bold',
+      '#ref_italic',
+      '#ref_underline'
+  ]
+  
+  for (var i = 0; i < ids.length; i++) {
+    if (ids[i] === 'ref_text') {
+      ts.push($('#ref_text').val());
+      continue;
+    }
+    if ($(ids[i]).hasClass('st-selected'))
+      ts.push('true');
+    else
+      ts.push('null');
+  }
+  
+  temp_settings[prev_name] = ts
 
   $('#name').data('val', $('#name').val());
 }
@@ -211,90 +181,55 @@ function storeDefault() {
 
 function restoreDefault(defaults) {
   $('#name').find('option').remove().end();
-
   initialiseSidebar(defaults);
 }
 
 // Save and apply current sidebar settings
 
 function saveProperties() {
-
   $('#save').prop('disabled', true);
   updateTemp();
   google.script.run.updateProps(temp_settings);
-  setTimeout(function() {
-    $('#save').prop('disabled', false)
-  }, 1000);
+  setTimeout(function() {$('#save').prop('disabled', false)}, 1000);
 }
 
 // Delete pairing
 
 $('#remove').on('click', function() {
-  var ref = $('#ref_code').html().substr(1, 4);
-  var current_name = $('#name').val();
+  var ref = $('#ref_code').html().substr(1, 4),
+      current_name = $('#name').val();
   $('#remove').css('display', 'none');
 
   google.script.run.withSuccessHandler(cancelCustom).removePair(ref);
+  
   $('#name option:contains("' + current_name + '")').remove();
-  if (ref_codes.indexOf(ref) != -1) {
-    ref_codes.splice(ref_codes.indexOf(ref), 1)
-  }
+  if (reference_codes.indexOf(ref) != -1)
+    reference_codes.splice(reference_codes.indexOf(ref), 1);
 });
 
 //***** The custom screen *****
 
 
 
-$('#add').on('click', customScreen);
-
-function customScreen() {
-
-  // remove options to add or remove current pairing
-
-  $('#add').css('display', 'none');
-  $('#remove').css('display', 'none');
-
-  // Change fields and buttons
-
-  $('#name').css('display', 'none');
-  $('#custom_name').css('display', 'block');
-
-  $('#lab_code').css('display', 'none');
-  $('#cs_lab_code').css('display', 'block');
-
-  $('.button-row1').css('display', 'none');
-  $('.button-row2').css('display', 'none');
-  $('.button-row-custom').css('display', 'block');
-
-  // Clear values
+$('#add').on('click', function() {
   
-  $('#custom_name').val('');
-  $('#lab_code').val('');
-  $('#lab_code_entry').val('');
-  $('#lab_text').val('');
-  $('#ref_code').val('');
+  var to_hide = '#add, #remove, #name, #lab_code, .button-row1, .button-row2',
+      to_show = '#custom_name, #cs_lab_code, .button-row-custom',
+      to_clear = '#custom_name, #lab_code, #lab_code_entry, #lab_text, #ref_code, #ref_text',
+      results = '#lab_result, #lab_result2, #ref_result, #ref_result2';
+   
+  $(to_hide).css('display', 'none');
+  $(to_show).css('display', 'block');
+  $(to_clear).val('');
   $('#ref_code').html('#');
-  $('#ref_text').val('');
-
-  // Update preview text
-
-  var results = [
-    $('#lab_result'),
-    $('#lab_result2'),
-    $('#ref_result'),
-    $('#ref_result2')
-  ];
-
-  for (var i in results) {
-    var t = results[i];
-    t.css('font-weight', 'normal');
-    t.css('font-style', 'normal');
-    t.css('text-decoration', 'none');
-    t.html('&lt;element&gt;')
-  }
+  $(results).css({'font-weight': 'normal',
+                  'font-style': 'normal',
+                  'text-decoration': 'none'
+                  })
+            .html('&lt;element&gt;')
 
   $('.st-selected').removeClass('st-selected')
-}
+})
 
 // Save custom settings
 
@@ -302,16 +237,14 @@ function saveCustom() {
 
   saveProperties();
 
-  var name = $('#custom_name').val();
-  var custom_settings = temp_settings[name];
+  var name = $('#custom_name').val(),
+      custom_settings = temp_settings[name];
 
   google.script.run.storeCustom(custom_settings);
 
-  $('#name option:last').after($('<option>', {
-    text: name
-  }))
-  $('#name').val(name)
-  revertCustomScreen()
+  $('#name option:last').after($('<option>', {text: name}))
+  $('#name').val(name);
+  revertCustomScreen();
   $('#remove').css('display', 'block');
 }
 
@@ -319,16 +252,13 @@ function saveCustom() {
 
 function cancelCustom() {
 
-  //$('#lab_code').val('');
-  var firstname = $('#name option:first').val()
-  
-  var safe_names = ['Equation', 'Figure', 'Table'];
+  var firstname = $('#name option:first').val(),
+      safe_names = ['Equation', 'Figure', 'Table'];
 
-  if (safe_names.indexOf(firstname) < 0) {
+  if (safe_names.indexOf(firstname) < 0)
     $('#remove').css('display', 'block');
-  } else {
+  else
     $('#remove').css('display', 'none');
-  }
   
   $('#name').val($('#name option:first'));
 
@@ -341,18 +271,13 @@ function cancelCustom() {
 // Revert to non-custom screen
 
 function revertCustomScreen() {
-  $('#name').css('display', 'block');
-  $('#custom_name').css('display', 'none');
 
-  $('#lab_code').css('display', 'block');
-  $('#cs_lab_code').css('display', 'none');
-
-  $('.button-row1').css('display', 'block');
-  $('.button-row2').css('display', 'block');
-  $('.button-row-custom').css('display', 'none');
-
+  var to_hide = '#custom_name, #cs_lab_code, .button-row-custom',
+      to_show = '#name, #lab_code, .button-row1, .button-row2';
+  
+  $(to_hide).css('display', 'none');
+  $(to_show).css('display', 'block');
   $('#add').css('display', 'block');
-
   $('#set_defaults').prop('disabled', false);
 }
 
@@ -362,13 +287,9 @@ function revertCustomScreen() {
 // Update label text
 
 $('#lab_text').keyup(function() {
-  var lab = $('#lab_text').val();
-
-  if (lab.charAt(0) === lab.charAt(0).toUpperCase()) {
-    var lab2 = lab
-  } else {
-    var lab2 = lab.charAt(0).toUpperCase() + lab.substr(1, lab.length);
-  }
+  var lab = $('#lab_text').val(),
+      lab2 = lab.charAt(0).toUpperCase() + lab.substr(1, lab.length);
+  
   $('#lab_result').html(lab + '1');
   $('#lab_result2').html(lab2 + '1');
 });
@@ -377,13 +298,8 @@ $('#lab_text').keyup(function() {
 //Update reference text   
 
 $('#ref_text').keyup(function() {
-  var ref = document.getElementById('ref_text').value;
-
-  if (ref.charAt(0) === ref.charAt(0).toUpperCase()) {
-    var ref2 = ref
-  } else {
-    var ref2 = ref.charAt(0).toUpperCase() + ref.substr(1, ref.length);
-  }
+  var ref = document.getElementById('ref_text').value,
+      ref2 = ref.charAt(0).toUpperCase() + ref.substr(1, ref.length);
 
   $('#ref_result').html(ref + '1');
   $('#ref_result2').html(ref2 + '1');
@@ -395,11 +311,10 @@ $('#ref_text').keyup(function() {
 
 $('.style-button').on('click', function() {
   $(this).toggleClass('st-selected');
-
-  var result = $('#' + this.id.substr(0, 3) + '_result');
-  var result2 = $('#' + this.id.substr(0, 3) + '_result2');
-
-  var id = this.id
+  var id = this.id,
+      result = $('#' + id.substr(0, 3) + '_result'),
+      result2 = $('#' + id.substr(0, 3) + '_result2');
+  
   var att = id.substr(4, this.length);
 
   function button(ident, element, css, atton, attoff) {
@@ -414,15 +329,9 @@ $('.style-button').on('click', function() {
     }
   }
 
-  if (att === 'bold') {
-    button(id, $(this), 'font-weight', 'bold', 'normal')
-  }
-  if (att === 'italic') {
-    button(id, $(this), 'font-style', 'italic', 'normal')
-  }
-  if (att === 'underline') {
-    button(id, $(this), 'text-decoration', 'underline', 'none')
-  }
+  if (att === 'bold') button(id, $(this), 'font-weight', 'bold', 'normal');
+  if (att === 'italic') button(id, $(this), 'font-style', 'italic', 'normal');
+  if (att === 'underline') button(id, $(this), 'text-decoration', 'underline', 'none');
 });
 
 // Update ref code in custom screen
@@ -431,18 +340,20 @@ $('#lab_code_entry').keyup(function() {
   var lab = $(this).val();
   $(this).val(lab.toLowerCase());
 
-  if (ref_codes.indexOf(lab.substr(0, 3)) >= 0) {
-    $('#taken').html('⚠ in use');
-    $('#taken').css('color', '#D70000');
+  if (reference_codes.indexOf(lab.substr(0, 3)) >= 0) {
+    $('#taken').html('⚠ in use')
+               .css('color', '#D70000');
     $(this).attr('maxlength', '3');
     $('#save_custom').prop('disabled', true)
+    
   } else if (lab.length == 5) {
     $('#taken').html('');
     $('#save_custom').prop('disabled', false)
+    
   } else {
     $(this).attr('maxlength', '5');
-    $('#taken').html('5 letters');
-    $('#taken').css('color', 'white');
+    $('#taken').html('5 letters')
+               .css('color', 'white');
     $('#save_custom').prop('disabled', true)
   }
 
@@ -452,9 +363,8 @@ $('#lab_code_entry').keyup(function() {
 
 // Update name (hidden) on custom screen
 $('#custom_name').keyup(function() {
-  var name = $('#custom_name').val();
+  var name = this.value;
   $('#name').data('val', name);
 });
 
 </script>
-
