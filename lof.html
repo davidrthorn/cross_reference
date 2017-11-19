@@ -10,7 +10,7 @@
 PDFJS.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.81/pdf.worker.js'
 
 $(function() {
-  google.script.run.withSuccessHandler(countFigures).getPDF();
+  google.script.run.withSuccessHandler(countFigures).getDocAsPDF();
 });
 
 var page_labs = [];
@@ -18,10 +18,10 @@ var page_labs = [];
 function logIt(blob) {
   var pdf = PDFJS.getDocument({data: blob});
   return pdf.then(function(pdf) {
-    var maxPages = pdf.pdfInfo.numPages;
-    var countPromises = [];
-    for (var j = 1; j <= maxPages; j++) {
-      var page = pdf.getPage(j);
+    var maxPages = pdf.pdfInfo.numPages,
+        countPromises = [];
+    for (var i = 1; i <= maxPages; i++) {
+      var page = pdf.getPage(i);
       countPromises.push(page.then(function(page) {
         var textContent = page.getTextContent();
         return textContent.then(function(page){
@@ -34,8 +34,8 @@ function logIt(blob) {
   
     return Promise.all(countPromises).then(function (counts) {
       var final_count = [];
-      for (var i=0; i<counts.length; i++) {
-        var as_string = JSON.stringify(counts[i]);
+      for (var j = 0; j < counts.length; j++) {
+        var as_string = JSON.stringify(counts[j]);
         final_count.push(as_string.split('☙').length - 1)
       }
       return final_count;
@@ -45,7 +45,7 @@ function logIt(blob) {
 
 function countFigures(blob) {
   logIt(blob).then(function (count) {
-    google.script.run.withSuccessHandler(restoreLabels).lofNumbers(count);   
+    google.script.run.withSuccessHandler(restoreLabels).insertLoFNumbers(count);   
   });
 }
 
