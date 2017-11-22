@@ -1,24 +1,22 @@
-// Updates user/document properties based on user input in side panel
 
 function updateProps(settings) {
   
-  var doc_props = PropertiesService.getDocumentProperties();
-  var dprops = doc_props.getProperties()
+  var document_properties = PropertiesService.getDocumentProperties();
   
-  for (var i in dprops)
-    if (i.substr(0,6) === "cross_")  doc_props.deleteProperty(i);
+  for (var i in document_properties.getProperties()) {
+    if (i.substr(0, 6) === "cross_")  document_properties.deleteProperty(i);
+  }
   
   for (var i in settings) {
-    var setting = settings[i];
-    var code = setting[0].substr(0,3);
+    var setting = settings[i],
+        code = setting[0].substr(0, 3),
+        property_key = 'cross_' + code;
+    var property_value = '';
     
-    var p_key = 'cross_' + code;
-    var p_value = '';
+    for (var j = 0; j < (setting.length - 1); j++) {property_value += setting[j] + '_'}
     
-    for (var j = 0; j < (setting.length - 1); j++)  p_value += setting[j] + '_';
-    
-    p_value += setting[setting.length - 1];
-    doc_props.setProperty(p_key, p_value);
+    property_value += setting[setting.length - 1];
+    document_properties.setProperty(property_key, property_value);
   }
   
   updateDocument();
@@ -29,76 +27,72 @@ function updateProps(settings) {
 
 function getSettings() {
   
-  var doc_props = PropertiesService.getDocumentProperties().getProperties();
-  var user_props = PropertiesService.getUserProperties().getProperties();
-  
-  var settings = {};
+  var document_properties = PropertiesService.getDocumentProperties().getProperties(),
+      user_properties = PropertiesService.getUserProperties().getProperties(),
+      settings = {}
   
   settings['fig'] = 'figur_Figure_figure _null_null_null_figure _null_null_null';
   settings['tab'] = 'table_Table_table _null_null_null_table _null_null_null';
   settings['equ'] = 'equat_Equation_equation _null_null_null_equation _null_null_null';
   
-  for (var i in user_props)
-    if (i.substr(0,5) === 'cross')  settings[i.substr(6,i.length)] = user_props[i];
+  for (var i in user_properties) {
+    if (i.substr(0, 5) === 'cross')  settings[i.substr(6, i.length)] = user_properties[i];
+  }
   
-  for (var i in doc_props)
-    if (i.substr(0,5) === 'cross')  settings[i.substr(6,i.length)] = doc_props[i];
+  for (var i in document_properties) {
+    if (i.substr(0, 5) === 'cross')  settings[i.substr(6, i.length)] = document_properties[i];
+  }
 
   return settings
 }
-
-// Stores settings as default
 
 
 function storeDefault(temp_settings) {
-  var user_props = PropertiesService.getUserProperties();
+  var user_properties = PropertiesService.getUserProperties();
   
   for (var i in temp_settings) {
     var settings = temp_settings[i];
-    storePairing(user_props, settings)
+    storePairing(user_properties, settings);
   }
 }
 
+
 function storeCustom(custom_settings) {
-    var user_props = PropertiesService.getUserProperties();
-    storePairing(user_props, custom_settings);
+    var user_properties = PropertiesService.getUserProperties();
+    storePairing(user_properties, custom_settings);
 }
+
 
 function storePairing(user_props, settings) {
   
-    var code = settings[0].substr(0,3);
-    
-    var pkey = 'cross_' + code;
-    var pvalue = '';
+  var code = settings[0].substr(0, 3),
+      property_key = 'cross_' + code;
+  var property_value = '';
   
-    for (var j = 0; j < (settings.length - 1); j++)  pvalue += settings[j] + '_';
+  for (var j = 0; j < (settings.length - 1); j++) {property_value += settings[j] + '_'}
   
-    pvalue += settings[settings.length - 1];
-    user_props.setProperty(pkey, pvalue);
+  property_value += settings[settings.length - 1];
+  user_props.setProperty(property_key, property_value);
 }
 
 
-// Feeds default settings to sidebar to be applied
-
 function restoreDefault() {
-  var uprops = PropertiesService.getUserProperties().getProperties();
-  
-  var settings = {};
+  var user_properties = PropertiesService.getUserProperties().getProperties(),
+      settings = {};
   
   settings['fig'] = 'figur_Figure_figure _null_null_null_figure _null_null_null';
   settings['tab'] = 'table_Table_table _null_null_null_table _null_null_null';
   settings['equ'] = 'equat_Equation_equation _null_null_null_equation _null_null_null';
   
-  for (var i in uprops)
-    if (i.substr(0,5) === 'cross')  settings[i.substr(6,i.length)] = uprops[i];
+  for (var i in user_properties) {
+    if (i.substr(0,5) === 'cross')  settings[i.substr(6, i.length)] = user_properties[i];
+  }
     
   return settings
 }
 
 
-// Removes pairings from user settings
-
-function removePair(ref) {
-  PropertiesService.getUserProperties().deleteProperty("cross_" + ref);
-  PropertiesService.getDocumentProperties().deleteProperty("cross_" + ref);
+function removePair(code) {
+  PropertiesService.getUserProperties().deleteProperty("cross_" + code);
+  PropertiesService.getDocumentProperties().deleteProperty("cross_" + code);
 }
