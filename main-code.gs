@@ -12,11 +12,13 @@ function onOpen(e) {
     .addToUi()
 }
 
+
 function showSidebar() {
   var sidebar = HtmlService.createTemplateFromFile('sidebar').evaluate();
   sidebar.setTitle('Cross Reference');
   DocumentApp.getUi().showSidebar(sidebar);
 }
+
 
 function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent();
