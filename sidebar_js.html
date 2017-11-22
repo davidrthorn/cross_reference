@@ -1,460 +1,320 @@
-<script src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'>
-</script>
-
 <script>
-// Inititialise global objects
 
-styles = {};
-temp_settings = {}; // user settings not yet applied or saved
-ref_codes = [];
+temp_settings = {};
+reference_codes = [];
 
-
-
-//***** Initialise sidebar *****
-
-
-
-// On sidebar open, retrieve settings and update sidebar
 
 $(function() {
-  refreshSidebar();
-});
+  google.script.run.withSuccessHandler(initialiseSidebar).getSettings();
+})
 
-function refreshSidebar() {
-  google.script.run.withSuccessHandler(initialiseSidebar).getSettings()
-}
 
 function initialiseSidebar(settings) {
   var names = [];
+  
   for (var i in settings) {
-    var set_array = settings[i].split('_');
-    var name = set_array[1];
+    var set_array = settings[i].split('_'),
+        name = set_array[1];
     names.push(name);
     temp_settings[name] = set_array;
-    ref_codes.push(temp_settings[name][0].substr(0, 3));
+    reference_codes.push(temp_settings[name][0].substr(0, 3));
   }
 
   var sorted_names = names.sort();
 
   for (var i in sorted_names) {
     var final_name = sorted_names[i]
-    $('#name').append($('<option>', {
+    $('#category-select').append($('<option>', {
       text: final_name
     }))
   }
 
-  $('#name').data('val', sorted_names[0]);
+  $('#category-select').data('val', sorted_names[0]);
 
   updateSidebar(sorted_names[0]);
 
-  if (sorted_names[0] != 'Equation' | 'Figure' | 'Table') {
-    $('#remove').css('display', 'block');
-  } else {
-    $('#remove').css('display', 'none');
-  }
+  if (sorted_names[0] !== 'Equation' | 'Figure' | 'Table')
+    $('#delete-category').css('display', 'block');
+  else
+    $('#delete-category').css('display', 'none');
 }
 
-function updateSidebar(name) {
 
-  var csets = temp_settings[name];
-  var clab_code = csets[0];
-  var clab_text = csets[2];
-  var cref_text = csets[6];
+function updateSidebar(category) {
 
-  var style = {
-    'lab_bold': csets[3],
-    'lab_italic': csets[4],
-    'lab_underline': csets[5],
-    'ref_bold': csets[7],
-    'ref_italic': csets[8],
-    'ref_underline': csets[9]
-  }
+  var settings = temp_settings[category],
+      label_code = settings[0],
+      label_text = settings[2],
+      reference_text = settings[6],
+      style = {
+        'lab_bold': settings[3],
+        'lab_italic': settings[4],
+        'lab_underline': settings[5],
+        'ref_bold': settings[7],
+        'ref_italic': settings[8],
+        'ref_underline': settings[9]
+      }
   
-  $('#lab_code').html('#' + clab_code);
-  $('#lab_text').val(clab_text);
-  $('#ref_code').val(clab_code.substr(0, 3));
-  $('#ref_code').html('#' + clab_code.substr(0, 3));
-  $('#ref_text').val(cref_text);
-
-  if (clab_text.charAt(0) === clab_text.charAt(0).toUpperCase()) {
-    var lab2 = clab_text
-  } else {
-    var lab2 = clab_text.charAt(0).toUpperCase() + clab_text.substr(1, clab_text.length);
+  $('#lab_code').html('#' + label_code);
+  $('#lab_text').val(label_text);
+  $('#ref_code').val(label_code.substr(0, 3)).html('#' + label_code.substr(0, 3));
+  $('#ref_text').val(reference_text);
+    
+  $('.lab').find('.preview__text').html(label_text + '1');
+  $('.ref').find('.preview__text').html(reference_text + '1');
+  
+  var css_properties = {
+    'bold': 'font-weight',
+    'italic': 'font-style',
+    'underline': 'text-decoration'
   }
-
-  if (cref_text.charAt(0) === cref_text.charAt(0).toUpperCase()) {
-    var ref2 = cref_text
-  } else {
-    var ref2 = cref_text.charAt(0).toUpperCase() + cref_text.substr(1, cref_text.length);
-  }
-  $('#lab_result').html(clab_text + ' 1');
-  $('#lab_result2').html(lab2 + ' 1');
-  $('#ref_result').html(cref_text + ' 1');
-  $('#ref_result2').html(ref2 + ' 1');
-
 
   for (var i in style) {
-    var code = i.substr(0, 3);
-    var att = i.substr(4, i.length);
-    var button_id = '#' + code + '_' + att;
-
-    var css_props = {
-      'bold': 'font-weight',
-      'italic': 'font-style',
-      'underline': 'text-decoration'
-    }
+    var code = i.substr(0, 3),
+        css_value_name = i.substr(4, i.length),
+        button_id = '#' + code + '_' + css_value_name;
+     
+    var css_value = (style[i] === 'true') ? css_value_name : 'initial';
+    $('.' + code).find('.preview__text').css(css_properties[css_value_name], css_value);
 
     if (style[i] === 'true') {
-      $('#' + code + '_result').css(css_props[att], att);
-      $('#' + code + '_result2').css(css_props[att], att);
-      $(button_id).addClass('st-selected')
-    } else {
-      $('#' + code + '_result').css(css_props[att], 'initial');
-      $('#' + code + '_result2').css(css_props[att], 'initial');
-      $(button_id).removeClass('st-selected')
+      $(button_id).addClass('style-button--selected');
+    }
+    else {
+      $(button_id).removeClass('style-button--selected');
     }
   }
-
 }
 
 
-
-//***** Actions within standard sidebar screen *****
-
-
-
-// Store current name of pairing
-
-$('#name').on('focusin', function() {
-  $(this).data('val', $(this).val());
-});
-
-// Use name of element menu to update sidebar
-
-function selectName(name) {
+function selectCategory(category) {
   updateTemp();
 
-  var safe_names = ['Equation', 'Figure', 'Table'];
-
-  if (safe_names.indexOf(name) < 0) {
-    $('#remove').css('display', 'block');
-  } else {
-    $('#remove').css('display', 'none');
+  if (category === 'Equation' || category === 'Figure' || category === 'Table') {
+    $('#delete-category').css('display', 'none');
+  }
+  else {
+    $('#delete-category').css('display', 'block');
   }
   
-  updateSidebar(name)
+  updateSidebar(category)
 }
 
-// Transfer sidebar settings to temporary object to be applied, saved as default etc.
 
 function updateTemp() {
 
-  var prev_name = $('#name').data('val');
-  var name = $('#name').val();
-  var lab_code = $('#lab_code').html().substr(1, 6);
-  var lab_text = $('#lab_text').val();
-  var ref_text = $('#ref_text').val();
-
-  if ($('#lab_bold').hasClass('st-selected')) {
-    var lab_bold = 'true'
-  } else {
-    var lab_bold = 'null'
-  }
-  if ($('#lab_italic').hasClass('st-selected')) {
-    var lab_italic = 'true'
-  } else {
-    var lab_italic = 'null'
-  }
-  if ($('#lab_underline').hasClass('st-selected')) {
-    var lab_underline = 'true'
-  } else {
-    var lab_underline = 'null'
-  }
-  if ($('#ref_bold').hasClass('st-selected')) {
-    var ref_bold = 'true'
-  } else {
-    var ref_bold = 'null'
-  }
-  if ($('#ref_italic').hasClass('st-selected')) {
-    var ref_italic = 'true'
-  } else {
-    var ref_italic = 'null'
-  }
-  if ($('#ref_underline').hasClass('st-selected')) {
-    var ref_underline = 'true'
-  } else {
-    var ref_underline = 'null'
-  }
-
-  temp_settings[prev_name] = [
-    lab_code,
+  var prev_name = $('#category-select').data('val');
+  
+  var ts = [
+    $('#lab_code').html().substr(1, 6),
     prev_name,
-    lab_text,
-    lab_bold,
-    lab_italic,
-    lab_underline,
-    ref_text,
-    ref_bold,
-    ref_italic,
-    ref_underline
+    $('#lab_text').val()
   ]
+  
+  var ids = [
+    '#lab_bold',
+    '#lab_italic',
+    '#lab_underline',
+    'ref_text',
+    '#ref_bold',
+    '#ref_italic',
+    '#ref_underline'
+  ]
+  
+  for (var i = 0; i < ids.length; i++) {
+    if (ids[i] === 'ref_text') {
+      ts.push($('#ref_text').val());
+      continue;
+    }
+    if ($(ids[i]).hasClass('style-button--selected'))
+      ts.push('true');
+    else
+      ts.push('null');
+  }
+  
+  temp_settings[prev_name] = ts
 
-  $('#name').data('val', $('#name').val());
+  $('#category-select').data('val', $('#category-select').val());
 }
 
-// Defaults
-
-function storeDefault() {
-  updateTemp();
-  google.script.run.withSuccessHandler().storeDefault(temp_settings)
-}
-
-function restoreDefault(defaults) {
-  $('#name').find('option').remove().end();
-
-  initialiseSidebar(defaults);
-}
-
-// Save and apply current sidebar settings
 
 function saveProperties() {
-
   $('#save').prop('disabled', true);
   updateTemp();
   google.script.run.updateProps(temp_settings);
-  setTimeout(function() {
-    $('#save').prop('disabled', false)
-  }, 1000);
+  setTimeout(function() {$('#save').prop('disabled', false)}, 1000);
 }
 
-// Delete pairing
-
-$('#remove').on('click', function() {
-  var ref = $('#ref_code').html().substr(1, 4);
-  var current_name = $('#name').val();
-  $('#remove').css('display', 'none');
-
-  google.script.run.withSuccessHandler(cancelCustom).removePair(ref);
-  $('#name option:contains("' + current_name + '")').remove();
-  if (ref_codes.indexOf(ref) != -1) {
-    ref_codes.splice(ref_codes.indexOf(ref), 1)
-  }
-});
-
-//***** The custom screen *****
-
-
-
-$('#add').on('click', customScreen);
-
-function customScreen() {
-
-  // remove options to add or remove current pairing
-
-  $('#add').css('display', 'none');
-  $('#remove').css('display', 'none');
-
-  // Change fields and buttons
-
-  $('#name').css('display', 'none');
-  $('#custom_name').css('display', 'block');
-
-  $('#lab_code').css('display', 'none');
-  $('#cs_lab_code').css('display', 'block');
-
-  $('.button-row1').css('display', 'none');
-  $('.button-row2').css('display', 'none');
-  $('.button-row-custom').css('display', 'block');
-
-  // Clear values
-  
-  $('#custom_name').val('');
-  $('#lab_code').val('');
-  $('#lab_code_entry').val('');
-  $('#lab_text').val('');
-  $('#ref_code').val('');
-  $('#ref_code').html('#');
-  $('#ref_text').val('');
-
-  // Update preview text
-
-  var results = [
-    $('#lab_result'),
-    $('#lab_result2'),
-    $('#ref_result'),
-    $('#ref_result2')
-  ];
-
-  for (var i in results) {
-    var t = results[i];
-    t.css('font-weight', 'normal');
-    t.css('font-style', 'normal');
-    t.css('text-decoration', 'none');
-    t.html('&lt;element&gt;')
-  }
-
-  $('.st-selected').removeClass('st-selected')
-}
-
-// Save custom settings
-
-function saveCustom() {
-
-  saveProperties();
-
-  var name = $('#custom_name').val();
-  var custom_settings = temp_settings[name];
-
-  google.script.run.storeCustom(custom_settings);
-
-  $('#name option:last').after($('<option>', {
-    text: name
-  }))
-  $('#name').val(name)
-  revertCustomScreen()
-  $('#remove').css('display', 'block');
-}
-
-// Cancel custom settings
-
-function cancelCustom() {
-
-  //$('#lab_code').val('');
-  var firstname = $('#name option:first').val()
-  
-  var safe_names = ['Equation', 'Figure', 'Table'];
-
-  if (safe_names.indexOf(firstname) < 0) {
-    $('#remove').css('display', 'block');
-  } else {
-    $('#remove').css('display', 'none');
-  }
-  
-  $('#name').val($('#name option:first'));
-
-  updateSidebar(firstname);
-
-  revertCustomScreen();
-  
-}
-
-// Revert to non-custom screen
 
 function revertCustomScreen() {
-  $('#name').css('display', 'block');
-  $('#custom_name').css('display', 'none');
 
-  $('#lab_code').css('display', 'block');
-  $('#cs_lab_code').css('display', 'none');
-
-  $('.button-row1').css('display', 'block');
-  $('.button-row2').css('display', 'block');
-  $('.button-row-custom').css('display', 'none');
-
-  $('#add').css('display', 'block');
-
+  var to_hide = '#custom-category-name, #cs_lab_code, .actions__row:last-child',
+      to_show = '#category-select, #lab_code, .actions__row:not(:last-child)';
+  
+  $(to_hide).css('display', 'none');
+  $(to_show).css('display', 'block');
+  $('#add-category').css('display', 'block');
   $('#set_defaults').prop('disabled', false);
 }
 
-//***** Dynamically update preview box when user changes settings *****
+
+function revertToFirstCategory() {
+  var safe_categories = ['Equation', 'Figure', 'Table'],
+      first_category = $('#category-select option:first').val(),
+      is_displayed = (safe_categories.indexOf(first_category) < 0) ? 'block' : 'none';
+  
+  $('#delete-category').css('display', is_displayed);
+  $('#category-select').val($('#category-select option:first'));
+
+  updateSidebar(first_category);
+}
 
 
-// Update label text
+// *** User interactions with sidebar ***
+
+$('#category-select').on('focusin', function() {
+  $(this).data('val', $(this).val());
+})
+
+
+$('#category-select').on('change', function() {
+  selectCategory(this.value)
+})
+
+$('#add-category').on('click', function() { 
+  
+  var to_hide = '.category__button, #category-select, #lab_code, .actions__row:not(:last-child)',
+      to_show = '#custom-category-name, #cs_lab_code, .actions__row:last-child',
+      to_clear = '#custom-category-name, #lab_code, #lab_code_entry, #lab_text, #ref_code, #ref_text';
+   
+  $(to_hide).css('display', 'none');
+  $(to_show).css('display', 'block');
+  $(to_clear).val('');
+  $('#ref_code').html('#');
+  $('.preview__text').css({'font-weight': 'normal',
+                           'font-style': 'normal',
+                           'text-decoration': 'none'
+                      })
+                     .html('&lt;element&gt;')
+
+  $('.style-button--selected').removeClass('style-button--selected')
+})
+
+
+$('#delete-category').on('click', function() {
+  var ref = $('#ref_code').html().substr(1, 4),
+      current_name = $('#category-select').val();
+
+  $(this).css('display', 'none')
+  google.script.run.withSuccessHandler(revertToFirstCategory).removePair(ref);
+  $('#category-select option:contains("' + current_name + '")').remove();
+  
+  if (reference_codes.indexOf(ref) !== -1) {
+    reference_codes.splice(reference_codes.indexOf(ref), 1);
+  }
+})
+
+
+$('#custom-category-name').keyup(function() {
+  $('#category-select').data('val', this.value);
+})
+
 
 $('#lab_text').keyup(function() {
-  var lab = $('#lab_text').val();
-
-  if (lab.charAt(0) === lab.charAt(0).toUpperCase()) {
-    var lab2 = lab
-  } else {
-    var lab2 = lab.charAt(0).toUpperCase() + lab.substr(1, lab.length);
-  }
-  $('#lab_result').html(lab + '1');
-  $('#lab_result2').html(lab2 + '1');
-});
-
-
-//Update reference text   
+  $('.lab').find('.preview__text').html($(this).val() + '1');
+})
 
 $('#ref_text').keyup(function() {
-  var ref = document.getElementById('ref_text').value;
+  $('.ref').find('.preview__text').html($(this).val() + '1');
+})
 
-  if (ref.charAt(0) === ref.charAt(0).toUpperCase()) {
-    var ref2 = ref
+
+$('#lab_code_entry').keyup(function() {
+  var label_code = $(this).val();
+  
+  $(this).val(label_code.toLowerCase());
+
+  if (reference_codes.indexOf(label_code.substr(0, 3)) >= 0) {
+    $('#taken').html('⚠ in use')
+               .css('color', '#9c3030');
+    $(this).attr('maxlength', '3');
+    $('#save-custom').prop('disabled', true)
+    
+  } else if (label_code.length === 5) {
+    $('#taken').html('');
+    $('#save-custom').prop('disabled', false)
+    
   } else {
-    var ref2 = ref.charAt(0).toUpperCase() + ref.substr(1, ref.length);
+    $(this).attr('maxlength', '5');
+    $('#taken').html('5 letters min')
+               .css('color', 'gray');
+    $('#save-custom').prop('disabled', true)
   }
 
-  $('#ref_result').html(ref + '1');
-  $('#ref_result2').html(ref2 + '1');
-});
-
-
-// Update style
+  $('#lab_code').html('#' + label_code);
+  $('#ref_code').html('#' + label_code.substr(0, 3));
+})
 
 
 $('.style-button').on('click', function() {
-  $(this).toggleClass('st-selected');
-
-  var result = $('#' + this.id.substr(0, 3) + '_result');
-  var result2 = $('#' + this.id.substr(0, 3) + '_result2');
-
-  var id = this.id
-  var att = id.substr(4, this.length);
-
-  function button(ident, element, css, atton, attoff) {
-    if (element.hasClass('st-selected')) {
-      result.css(css, atton);
-      result2.css(css, atton);
-      styles[ident] = null;
-    } else {
-      result.css(css, attoff);
-      result2.css(css, attoff);
-      styles[ident] = true;
-    }
+  $(this).toggleClass('style-button--selected');
+  
+  var id = this.id,
+      css_value_name = id.substr(4, this.length),
+      category_class = '.' + id.substr(0, 3);
+    
+  var css_properties = {
+    'bold': 'font-weight',
+    'italic': 'font-style',
+    'underline': 'text-decoration'
   }
-
-  if (att === 'bold') {
-    button(id, $(this), 'font-weight', 'bold', 'normal')
-  }
-  if (att === 'italic') {
-    button(id, $(this), 'font-style', 'italic', 'normal')
-  }
-  if (att === 'underline') {
-    button(id, $(this), 'text-decoration', 'underline', 'none')
-  }
-});
-
-// Update ref code in custom screen
-
-$('#lab_code_entry').keyup(function() {
-  var lab = $(this).val();
-  $(this).val(lab.toLowerCase());
-
-  if (ref_codes.indexOf(lab.substr(0, 3)) >= 0) {
-    $('#taken').html('⚠ in use');
-    $('#taken').css('color', '#D70000');
-    $(this).attr('maxlength', '3');
-    $('#save_custom').prop('disabled', true)
-  } else if (lab.length == 5) {
-    $('#taken').html('');
-    $('#save_custom').prop('disabled', false)
-  } else {
-    $(this).attr('maxlength', '5');
-    $('#taken').html('5 letters');
-    $('#taken').css('color', 'white');
-    $('#save_custom').prop('disabled', true)
-  }
-
-  $('#lab_code').html('#' + lab);
-  $('#ref_code').html('#' + lab.substr(0, 3));
+  
+  var css_value = ($(this).hasClass('style-button--selected')) ? css_value_name : 'initial';
+  
+  $(category_class).find('.preview__text').css(css_properties[css_value_name], css_value);
 })
 
-// Update name (hidden) on custom screen
-$('#custom_name').keyup(function() {
-  var name = $('#custom_name').val();
-  $('#name').data('val', name);
-});
+
+$('#save-defaults').on('click', function() {
+  updateTemp();
+  google.script.run.withSuccessHandler().storeDefault(temp_settings)
+})
+
+
+$('#restore-defaults').on('click', function() {
+  $('#category-select').find('option').remove().end();
+  google.script.run.withSuccessHandler(initialiseSidebar).restoreDefault();
+})
+
+
+$('#save-apply').on('click', function() {
+  saveProperties();
+})
+
+
+$('#cancel').on('click', function() {
+  google.script.host.close()
+})
+
+
+$('#save-custom').on('click', function() {
+  saveProperties();
+
+  var custom_name = $('#custom-category-name').val(),
+      custom_settings = temp_settings[custom_name];
+
+  google.script.run.storeCustom(custom_settings);
+
+  $('#category-select option:last').after($('<option>', {text: custom_name}))
+  $('#category-select').val(custom_name);
+  revertCustomScreen();
+  $('#delete-category').css('display', 'block');
+})
+
+
+$('#cancel-custom').on('click', function() {
+  revertToFirstCategory();
+  revertCustomScreen();
+})
 
 </script>
-
