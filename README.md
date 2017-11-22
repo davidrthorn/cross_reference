@@ -46,7 +46,7 @@ So to create a label for our graph of height distribution, we take the following
 3. Add a hyperlink with Ctrl+K on Windows or ⌘+K on Mac (or go to the *Insert* menu and choose *Link*).
 4. In the pop-up box, enter `#figur_height` as the link URL.
 
-We have now created a label for our graph, which should appear as a link (blue and underlined).
+We have now created a label for our graph, which should appear as a link (blue and underlined). This will be formatted appropriately when you update the document (see below).
 
 We can now refer to our graph in the text. To do this, follow exactly the same steps, but use the reference code. This code is the first three letters of the label code. So for equations, the code is `#equ`; for figures it's `#fig`; for tables it's `#tab`. A reference to the graph called 'height' would be a link with the URL `#fig_height`.
 
