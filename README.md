@@ -56,7 +56,7 @@ You should never create two labels with the same name, but you can create as man
 
 Cross Reference works by scanning the document and replacing labels and references with the right text and styling. It does not automatically update the document. To update the document, go to *Add-ons*→*Cross Reference*→*Update document*. Cross Reference will update labels with the right text and with a number corresponding to their position in the text. It will then scan for references in the text and update them with the right text and the appropriate number.
 
->Labels and references are only paired if the correct code is used and the names match, so be careful of typos. Cross Reference will try to detect mistakes, such as references without corresponding labels, but it is not perfect.
+>WARNING: Labels and references are only paired if the correct code is used and the names match, so be careful of typos. Cross Reference will try to detect mistakes, such as references without corresponding labels, but it is not perfect. For example, it will not detect labels with codes that are the wrong length, such as `#figure_height` with an 'e'.
 
 Following our example of a graph of height distribution (see above), the word 'height' that we highlighted and turned into a label should now read 'Figure 1', assuming it was the first figure in the document. The references should read the same. If we were to insert a new figure at the beginning of the document and then update the document in the Cross Reference menu, our height distribution graph would now be labelled 'Figure 2' and its references would match this.
 
