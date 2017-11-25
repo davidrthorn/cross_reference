@@ -162,9 +162,9 @@ function sweepParagraphs(paragraphs, type, pairings, counter, properties) {
 
         // Zoom into individual label/reference and process     
         if (starts) {
-          for (var i = starts.length - 1; i >= 0; i--) {
-            var start = starts[i],
-                end = ends[i],
+          for (var k = starts.length - 1; k >= 0; k--) {
+            var start = starts[k],
+                end = ends[k],
                 url = text.getLinkUrl(start),
                 code = url.substr(1, 3);
             
@@ -178,17 +178,13 @@ function sweepParagraphs(paragraphs, type, pairings, counter, properties) {
               // Error handling
               
               if (Object.keys(properties).indexOf(label_code) === -1) {  // Unrecognised label code
-                  text.setForegroundColor(start, end, '#FF0000');
-                  var position = doc.newPosition(paragraph.getChild(j), start);
-                  doc.setCursor(position);
+                  addFlag(paragraph, text, start, end, j)
                 
                   return label_code;
                   
               }
               if (Object.keys(pairings).indexOf(code + 'N' + name) !== -1) { // Label already encountered (duplicate)
-                  text.setForegroundColor(start, end, '#FF0000');
-                  var position = doc.newPosition(paragraph.getChild(j), start);
-                  doc.setCursor(position);
+                  addFlag(paragraph, text, start, end, j)
                   
                   return url;
               }
@@ -210,9 +206,7 @@ function sweepParagraphs(paragraphs, type, pairings, counter, properties) {
               // Error handling
               
               if (number === undefined) {
-                text.setForegroundColor(start, end, '#FF0000');
-                var position = doc.newPosition(paragraph.getChild(j), start);
-                doc.setCursor(position);
+                addFlag(paragraph, text, start, end, j)
                 
                 return 'missrefs'
               }
@@ -267,6 +261,13 @@ function labelCount(code, counter) {
   counter[code] = number + 1;
 
   return number
+}
+
+
+function addFlag(paragraph, text, start, end, iteration) {
+  text.setForegroundColor(start, end, '#FF0000');
+  var position = doc.newPosition(paragraph.getChild(iteration), start);
+  doc.setCursor(position);
 }
 
 
