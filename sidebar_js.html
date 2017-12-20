@@ -33,11 +33,10 @@ function initialiseSidebar(settings) {
 
   updateSidebar(sorted_names[0]);
 
-  if (sorted_names[0] !== 'Equation' | 'Figure' | 'Table')
-    $('#delete-category').css('display', 'block');
-  else
-    $('#delete-category').css('display', 'none');
+  var displayed = (sorted_names[0] === 'Equation') ? 'none' : 'block';
+  $('#delete-category').css('display', displayed);
 }
+
 
 
 function updateSidebar(category) {
@@ -89,15 +88,10 @@ function updateSidebar(category) {
 
 function selectCategory(category) {
   updateTemp();
-
-  if (category === 'Equation' || category === 'Figure' || category === 'Table') {
-    $('#delete-category').css('display', 'none');
-  }
-  else {
-    $('#delete-category').css('display', 'block');
-  }
+  updateSidebar(category);
   
-  updateSidebar(category)
+  var displayed = (category === 'Equation' || category === 'Figure' || category === 'Table') ? 'none' : 'block';
+  $('#delete-category').css('display', displayed);
 }
 
 
@@ -138,11 +132,13 @@ function updateTemp() {
 }
 
 
-function saveProperties() {
-  $('#save').prop('disabled', true);
+function saveProperties(button) {
   updateTemp();
-  google.script.run.updateProps(temp_settings);
-  setTimeout(function() {$('#save').prop('disabled', false)}, 1000);
+  google.script.run.withSuccessHandler(restoreButton).updateProps(temp_settings);
+}
+
+function restoreButton(button) {
+  $(button).prop('disabled', false);
 }
 
 
@@ -276,8 +272,9 @@ $('.style-button').on('click', function() {
 
 
 $('#save-defaults').on('click', function() {
+  $(this).prop('disabled', true);
   updateTemp();
-  google.script.run.withSuccessHandler().storeDefault(temp_settings)
+  google.script.run.withSuccessHandler(restoreButton).storeDefault(temp_settings);
 })
 
 
@@ -288,6 +285,7 @@ $('#restore-defaults').on('click', function() {
 
 
 $('#save-apply').on('click', function() {
+  $(this).prop('disabled', true);
   saveProperties();
 })
 
@@ -298,7 +296,8 @@ $('#cancel').on('click', function() {
 
 
 $('#save-custom').on('click', function() {
-  saveProperties();
+  $('#save-apply').prop('disabled', true);
+  saveProperties('#save-apply');
 
   var custom_name = $('#custom-category-name').val(),
       custom_settings = temp_settings[custom_name];
