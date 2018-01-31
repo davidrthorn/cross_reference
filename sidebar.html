@@ -1,0 +1,181 @@
+<!--
+
+The html for the configuration sidebar.
+
+-->
+
+<base target='_top'>
+<link rel='stylesheet' href='https://ssl.gstatic.com/docs/script/css/add-ons1.css'>
+<?!= include('sidebar-style'); ?>
+
+<div class='main-wrapper'>
+
+  <article class='category'>
+    <div class='category__button' id='delete-category'>
+      +
+    </div>
+    <div class='category__button' id='add-category'>
+      +
+    </div>
+    <select id='category-select'>
+    </select>
+    <input id='custom-category-name' maxlength='20' placeholder='Custom name'>
+  </article>
+  
+  <article class='details'>
+    <div class='main-section' id='lab'>
+    
+      <div class='input-row'>
+        <h2>Labels</h2>
+      </div>
+      <div class='input-row'>
+        <div class='input-row__name'>
+          Code
+        </div>
+        <div class='input-row__value'>
+          <div class='hash-input'>
+            <div id='lab_code'></div>
+            <div id='cs_lab_code'>
+              #&nbsp;<input id='lab_code_entry' maxlength='5' type='text' value=''> <span id='taken'></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class='input-row'>
+        <div class='input-row__name'>
+          Text
+        </div>
+        <div class='input-row__value'>
+          <input id='lab_text' type='text'>
+        </div>
+      </div>
+      <div class='input-row'>
+        <div class='input-row__name'>
+          Style
+        </div>
+        <div class='input-row__value'>
+          <button class='style-button bold' id='lab_bold'>B</button>
+          <button class='style-button italic' id='lab_italic'>I</button>
+          <button class='style-button underline' id='lab_underline'>U</button>
+          <div class='color-button'><div class='color-icon'>A</div></div>
+          <div class='color-pane color-hide' id='lab-color-pane'>
+            <div>#</div>
+            <input class='color-code' maxlength='6' placeholder='Auto'/>
+            <div class='clone-color'>✏</div>
+            <div class='confirm-color'>✔</div>
+            <div class='cancel-color'>❌</div>
+          </div>
+          <div class='color-triangle color-hide'>▼</div>
+        </div>
+      </div>
+      <div class='preview'>
+        <div class='preview__internal'>
+          <div class='preview__line'>
+            <div class='preview__text--shaded'>
+              Rendered
+            </div>
+            <div class='preview__text'>
+              figure 1
+            </div>
+            <div class='preview__text--shaded'>
+              . Early human migration route out of Africa
+            </div>
+          </div>
+          <div class='preview__line'>
+            <div class='preview__text'>
+              Figure 1
+            </div>
+            <div class='preview__text--shaded'>
+              . Early human migration route out of Africa
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class='main-section' id='ref'>
+      <div class='input-row'>
+        <h2>References</h2>
+      </div>
+      <div class='input-row'>
+        <div class='input-row__name'>
+          Code
+        </div>
+        <div class='input-row__value' id='ref_code'>
+          <em>#</em>
+        </div>
+      </div>
+      <div class='input-row'>
+        <div class='input-row__name'>
+          Text
+        </div>
+        <div class='input-row__value'>
+          <input id='ref_text' type='text'>
+        </div>
+      </div>
+      <div class='input-row'>
+        <div class='input-row__name'>
+          Style
+        </div>
+        <div class='input-row__value'>
+          <button class='style-button bold' id='ref_bold'>B</button>
+          <button class='style-button italic' id='ref_italic'>I</button>
+          <button class='style-button underline' id='ref_underline'>U</button>
+          <div class='color-button'><div class='color-icon'>A</div></div>
+          <div class='color-pane color-hide' id='ref-color-pane'>
+            <div>#</div>
+            <input class='color-code' maxlength='6' placeholder='Auto'/>
+            <div class='clone-color'>✏</div>
+            <div class='confirm-color'>✔</div>
+            <div class='cancel-color'>❌</div>
+          </div>
+          <div class='color-triangle color-hide'>▼</div>
+        </div>
+      </div>
+      <div class='preview'>
+        <div class='preview__internal'>
+          <div class='preview__line'>
+            <div class='preview__text--shaded'>
+              the line in
+            </div>
+            <div class='preview__text'>
+              figure 1
+            </div>
+            <div class='preview__text--shaded'>
+              &nbsp;represents the path of human
+            </div>
+          </div>
+          <div class='preview__line'>
+            <div class='preview__text--shaded'>
+              to Ethiopia.
+            </div>
+            <div class='preview__text'>
+              Figure 1
+            </div>
+            <div class='preview__text--shaded'>
+              &nbsp;is accurate to within 100 miles
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+  <article class='actions'>
+    <div class='actions__row'>
+      <button class='actions__button' id='save-defaults'>Save defaults</button>
+      <button class='actions__button' id='restore-defaults'>Restore defaults</button>
+    </div>
+    
+    <div class='actions__row'>
+      <button class='actions__button blue' id='save-apply'>Save and apply</button>
+      <button class='actions__button' id='cancel'>Cancel</button>
+    </div>
+    
+    <div class='actions__row'>
+      <button class='actions__button blue' id='save-custom' disabled>Save and apply</button>
+      <button class='actions__button' id='cancel-custom'>Cancel</button>
+    </div>
+  </article>
+</div>
+<script src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'>
+</script>
+<?!= include('sidebar-js'); ?>

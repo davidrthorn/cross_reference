@@ -1,235 +1,325 @@
-<style>
+<style>@import url('https://fonts.googleapis.com/css?family=Ledger');
 * {
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 h2 {
-    color: #9c3030;
-    margin-top: 0;
+  color: #b13535;
+  margin-top: 0;
+}
+
+input {
+  height: 26px;
 }
 
 .main-wrapper {
-    margin: 0 auto;
-    position: relative;
-    width: 100%;
+  margin: 0 auto;
+  position: relative;
+  width: 100%;
 }
 
 #category-select, #custom-category-name {
-    -moz-appearance: none;
-    -webkit-appearance: none;
-    background: url('https://ssl.gstatic.com/ui/v1/disclosure/grey-disclosure-arrow-up-down.png'), white;
-    background-position: 95% 50%;
-    background-repeat: no-repeat;
-    border-radius: 0px;
-    border: 1px solid #918F92;
-    color: #333;
-    cursor: default;
-    font-family: arial, sans-serif;
-    font-size: 24px;
-    font-weight: bold;
-    height: 70px;
-    margin: 0;
-    min-width: 72px;
-    outline: 0;
-    padding: 7px 19px 7px 10px;
-    text-align: left;
-    text-indent: .01px;
-    white-space: nowrap;
-    width: 100%;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  background: url('https://ssl.gstatic.com/ui/v1/disclosure/grey-disclosure-arrow-up-down.png'), white;
+  background-position: 95% 50%;
+  background-repeat: no-repeat;
+  border-radius: 0px;
+  border: 1px solid #918F92;
+  color: #333;
+  cursor: pointer;
+  font-family: arial, sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+  height: 70px;
+  margin: 0;
+  min-width: 72px;
+  outline: 0;
+  padding: 7px 19px 7px 10px;
+  text-align: left;
+  text-indent: .01px;
+  white-space: nowrap;
+  width: 100%;
 }
 
 #custom-category-name {
-    background: white;
-    display: none;
+  background: white;
+  display: none;
 }
 
 .category__button {
-    border-radius: 50%;
-    cursor: pointer;
-    height: 22px;
-    position: absolute;
-    width: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  height: 22px;
+  position: absolute;
+  width: 22px;
 }
 
 .category__button:hover {
-    background: #E9E9E9;
+  background: #E9E9E9;
 }
 
 #add-category {
-    color: #555;
-    font-size: 24px;
-    padding: 3px 0 0 4px;
-    right: 29px;
-    top: 25px;
+  color: #555;
+  font-size: 24px;
+  padding: 3px 0 0 4px;
+  right: 29px;
+  top: 25px;
 }
 
 #delete-category {
-    color: #9c3030;
-    display: none;
-    font-size: 27px;
-    padding: 1px 0 0 3px;
-    right: 50px;
-    top: 25px;
-    transform: rotate(45deg)
-    -ms-transform: rotate(45deg);
-    -webkit-transform: rotate(45deg);
+  color: #9c3030;
+  display: none;
+  font-size: 27px;
+  padding: 1px 0 0 3px;
+  right: 50px;
+  top: 25px;
+  transform: rotate(45deg) -ms-transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
 }
 
 .details {
-    position: absolute;
-    top: 70px;
-    width: 100%;
+  position: absolute;
+  top: 70px;
+  width: 100%;
 }
 
-.lab, .ref {
-    border-bottom: 1px solid gray;
-    color: black;
-    padding: 28px 24px;
+.main-section {
+  border-bottom: 1px solid gray;
+  color: black;
+  padding: 28px 24px;
 }
 
 .input-row {
-    height: 40px
+  height: 40px
 }
 
 .input-row__name {
-    float: left;
-    font-weight: bold;
-    padding-top: 5px;
-    width: 26%
+  float: left;
+  font-weight: bold;
+  padding-top: 5px;
+  width: 26%
 }
 
 .input-row__value {
-    float: left
+  float: left
+}
+
+.style-button, .color-button {
+  width: 30px;
+  background: lightgray;
+  border-radius: 0;
+  box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.1);
+  border: none;
+  cursor: pointer;
+  float: left;
+  height: 30px;
+  margin: 4px 8px 4px 0;
+  min-width: 0;
+  font-family: "Ledger", serif;
+  font-size: 13px;
+  font-weight: normal;
+  text-align: center;
 }
 
 .style-button, .style-button:hover {
-    background: #919191;
-    border-radius: 0;
-    border: none;
-    box-shadow: 1px 1px 1px 1px rgba(0,0,0,0.1);
-    color: white;
-    cursor: default;
-    float: left;
-    font-family: arial, sans;
-    font-size: 13px;
-    font-weight: normal;
-    height: 30px;
-    margin: 4px 8px 4px 0;
-    min-width: 0;
-    text-align: center;
-    width: 50px;
+  box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.1);
+  color: black;
 }
 
 .style-button:hover {
-    background: #717171;
+  background: #ddd;
 }
 
 .style-button:focus {
-    outline: 1px solid black;
+  outline: 1px solid black;
 }
 
 .style-button--selected, .style-button--selected:hover {
-    background: indianred;
+  background: #C94C4C;
+  color: white;
+}
+
+.style-button.bold {
+  font-weight: 800;
+}
+
+.style-button.italic {
+  font-style: italic;
+}
+
+.style-button.underline {
+  text-decoration: underline;
+}
+
+.color-button {
+  font-size: 11px;
+  padding-top: 5px;
+  padding-left: 1px;
+}
+
+.color-button div {
+  width: 19px;
+  height: 19px;
+  border-bottom: 3px solid black;
+  display: inline-block;
+}
+
+.color-hide {
+  display: none;
+}
+
+.color-pane {
+  position: absolute;
+  right: 30px;
+  height: 40px;
+  background: #abc9d4;
+  border-radius: 3px;
+  box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.7);
+  padding: 6px;
+}
+
+.color-pane * {
+  float: left;
+  margin-left: 8px;
+  padding-top: 4px;
+}
+
+#lab .color-pane {
+  top: 98px;
+}
+
+#ref .color-pane {
+  top: 395px;
+}
+
+.color-triangle {
+  position: absolute;
+  right: 70px;
+  font-size: 24px;
+  text-shadow: 2px 2px rgba(0, 0, 0, 0.7);
+  color: #abc9d4;
+}
+
+#lab .color-triangle {
+  top: 134px;
+}
+
+#ref .color-triangle {
+  top: 431px;
+}
+
+.color-code {
+  width: 60px;
+  padding: 4px;
+}
+
+.clone-color, .confirm-color, .cancel-color {
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.clone-color {
+  transform: scale(-1, 1);
 }
 
 #lab_code, #ref_code {
-    height: 26px;
-    padding-top: 5px;
-    width: 45px;
+  padding-top: 5px;
+  width: 45px;
 }
 
 #cs_lab_code {
-    display: none
+  display: none
 }
 
 #cs_lab_code input {
-    width: 60px
+  width: 60px
 }
 
 #lab_text, #ref_text {
-    height: 26px;
-    padding-left: 5px;
-    width: 120px;
+  height: 26px;
+  padding-left: 5px;
+  width: 120px;
 }
 
 #taken {
-    color: #D70000;
-    font-weight: bold;
+  color: #D70000;
+  font-weight: bold;
 }
 
 .preview {
-    background: white;
-    border-radius: 5px;
-    border: 1px solid gray;
-    box-shadow: inset 1px 1px 1px 1px rgba(0,0,0,0.2);
-    height: 70px;
-    margin-top: 10px;
-    width: 100%;
+  background: white;
+  border-radius: 5px;
+  border: 1px solid gray;
+  box-shadow: inset 1px 1px 1px 1px rgba(0, 0, 0, 0.2);
+  height: 70px;
+  margin-top: 10px;
+  width: 100%;
 }
 
 .preview__internal {
-    height: 60px;
-    margin: auto;
-    overflow: hidden;
-    padding-top: 15px;
-    width: 85%;
+  height: 60px;
+  margin: auto;
+  overflow: hidden;
+  padding-top: 15px;
+  width: 85%;
 }
 
 .preview__line {
-    height: 20px;
-    overflow: hidden;
-    width: 500px;
+  height: 20px;
+  overflow: hidden;
+  width: 500px;
 }
 
 .preview__line:last-child .preview__text {
-    text-transform: capitalize;
+  text-transform: capitalize;
 }
 
 .preview__text--shaded {
-    color: rgba(0,0,0,0.3);
-    float: left;
-    margin-right: 5px;
-    overflow: hidden;
+  color: rgba(0, 0, 0, 0.3);
+  float: left;
+  margin-right: 5px;
+  overflow: hidden;
 }
 
 .preview__text {
-    float: left;
+  float: left;
 }
 
 .hash {
-    box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    float: left;
-    height: 26px;
-    padding: 4px;
-    padding-right: 0px;
-    width: 20px
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  float: left;
+  height: 26px;
+  padding: 4px;
+  padding-right: 0px;
+  width: 20px
 }
 
 .hash-input {
-    float: left;
+  float: left;
 }
 
 .actions {
-    padding: 24px;
-    position: absolute;
-    top: 660px;
-    width: 100%;
+  padding: 24px;
+  position: absolute;
+  top: 660px;
+  width: 100%;
 }
 
 .actions__row {
-    height: 50px;
+  height: 50px;
 }
 
 .actions__row:last-child {
-    display: none;
+  display: none;
 }
 
 .actions__button:last-child {
-    float: right;
+  float: right;
 }
 
 </style>
