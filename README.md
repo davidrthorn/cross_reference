@@ -1,4 +1,4 @@
-![Cross Reference](https://raw.githubusercontent.com/davidrthorn/cross_reference/master/images/Panel_small.png)
+<img src="/images/Panel_small.png" width="220px">
 
 # What is Cross Reference?
 
