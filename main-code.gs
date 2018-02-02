@@ -209,78 +209,71 @@ function sweepParagraphs(paragraphs, cross_type, pairings, counter, properties) 
   var paras_length = paragraphs.length;
   
   for ( var i = 0; i < paras_length; i++ ) {
-    para = paragraphs[ i ];
+    text = paragraphs[ i ].editAsText();
     
-    var para_children = para.getNumChildren();
-    for ( var j = 0; j < para_children; j++ ) {
-      if ( para.getChild( j ).getType() == "TEXT" ) {
-        text = para.getChild( j ).asText();
+    // Where are the cross links?
+    cross_link_indices = findCrossLinks( cross_type, text );
+    
+    starts = cross_link_indices[ 0 ];
+    ends = cross_link_indices[ 1 ];
+    
+    if ( !starts ) continue;
+    
+    // Zoom into individual label/reference and process
+    // Work backwards because we might change the text length
+    for ( var j = starts.length - 1; j >= 0; j-- ) {
+      start = starts[ j ];
+      end = ends[ j ];
+      url = text.getLinkUrl( start );
+      code = url.substr( 1, 3 );
+      
+      // Labels
+      
+      if ( cross_type === 1 ) {
+        label_code = url.substr( 1, 5 );
+        number = advanceLabCount( code, counter );
+        name = url.substr( 7 );
         
-        // Where are the cross links?
-        cross_link_indices = findCrossLinks( cross_type, text );
+        // Error handling
         
-        starts = cross_link_indices[ 0 ];
-        ends = cross_link_indices[ 1 ];
+        if ( starts.length > 1 ) {
+          addFlag( para, text, start, end, i );
+          return 'multiple'
+        };
         
-        if ( !starts ) continue;
-
-        // Zoom into individual label/reference and process
-        // Work backwards because we might change the text length
-        for ( var k = starts.length - 1; k >= 0; k-- ) {
-          start = starts[ k ];
-          end = ends[ k ];
-          url = text.getLinkUrl( start );
-          code = url.substr( 1, 3 );
-          
-          // Labels
-          
-          if ( cross_type === 1 ) {
-            label_code = url.substr( 1, 5 );
-            number = advanceLabCount( code, counter );
-            name = url.substr( 7 );
-            
-            // Error handling
-            
-            if ( starts.length > 1 ) {
-              addFlag( para, text, start, end, j );
-              return 'multiple'
-            };
-            
-            // Label code not recognised
-            if ( !( label_code in properties ) ) {
-              addFlag( para, text, start, end, j );
-              return label_code;
-            }
-            
-            // Duplicate label code found
-            if ( code + 'N' + name in properties ) {
-              addFlag( para, text, start, end, j );
-              return url;
-            }
-            
-            pairings[ code + 'N' + name ] = number;
-            
-            new_style = determineAttributes( text, start, label_code, properties );
-            replaceCrossLink( text, start, end, label_code, number, new_style, properties );
-          }
-          
-          // References
-          
-          if ( cross_type === 0 ) {
-            name = url.substr( 5 );
-            number = pairings[ code + 'N' + name ];
-            
-            // Error handling
-            
-            if ( number === undefined ) {
-              addFlag( para, text, start, end, j );
-              return 'missrefs'
-            }
-            
-            new_style = determineAttributes( text, start,code, properties );
-            replaceCrossLink( text, start, end, code, number, new_style, properties );
-          }
+        // Label code not recognised
+        if ( !( label_code in properties ) ) {
+          addFlag( para, text, start, end, i );
+          return label_code;
         }
+        
+        // Duplicate label code found
+        if ( code + 'N' + name in properties ) {
+          addFlag( para, text, start, end, i );
+          return url;
+        }
+        
+        pairings[ code + 'N' + name ] = number;
+        
+        new_style = determineAttributes( text, start, label_code, properties );
+        replaceCrossLink( text, start, end, label_code, number, new_style, properties, url );
+      }
+      
+      // References
+      
+      if ( cross_type === 0 ) {
+        name = url.substr( 5 );
+        number = pairings[ code + 'N' + name ];
+        
+        // Error handling
+        
+        if ( number === undefined ) {
+          addFlag( text, start, end, i );
+          return 'missrefs'
+        }
+        
+        new_style = determineAttributes( text, start,code, properties, url );
+        replaceCrossLink( text, start, end, code, number, new_style, properties, url );
       }
     }
   }
@@ -333,21 +326,16 @@ function advanceLabCount(lab_code, counter) {
 
 
 // Highlight the erroneous label or reference
-function addFlag(paragraph, text, start, end, iteration) {
+function addFlag(text, start, end, iteration) {
   text.setForegroundColor(start, end, '#FF0000');
-  var position = doc.newPosition(paragraph.getChild(iteration), start);
+  var position = doc.newPosition(text, start);
   doc.setCursor(position);
 }
 
 
 // Determine the style attributes to apply
 function determineAttributes(text, start, code, properties) {
-  var current = text.getAttributes(start);
   var replacements = {};
-  
-  for (var i in current) {
-    replacements[i] = current[i];
-  }
 
   replacements['BOLD'] = properties[code][1];
   replacements['ITALIC'] = properties[code][2];
@@ -379,13 +367,14 @@ function determineReplacementText(text, start, code, number, properties) {
 
 
 // Replace the given label or reference
-function replaceCrossLink(text, start, end, code, number, style_attributes, properties) {
+function replaceCrossLink(text, start, end, code, number, style_attributes, properties, url) {
   
   var replacement_text = determineReplacementText(text, start, code, number, properties);
   var color = properties[code][4];
 
   text.deleteText(start, end)
     .insertText(start, replacement_text)
+    .setLinkUrl(start, start + replacement_text.length - 1, url)
     .setAttributes(start, start + replacement_text.length - 1, style_attributes);
   
   if (!color || color == 'null' || color.length < 3) {
