@@ -206,72 +206,79 @@ function sweepParagraphs(paragraphs, cross_type, pairings, counter, properties) 
   var number;
   var new_style;
   
-  for ( var i = 0; i < paragraphs.length; i++ ) {
+  var paras_length = paragraphs.length;
+  
+  for ( var i = 0; i < paras_length; i++ ) {
     para = paragraphs[ i ];
-    for ( var j = 0; j < para.getNumChildren(); j++ ) {
+    
+    var para_children = para.getNumChildren();
+    for ( var j = 0; j < para_children; j++ ) {
       if ( para.getChild( j ).getType() == "TEXT" ) {
         text = para.getChild( j ).asText();
+        
+        // Where are the cross links?
         cross_link_indices = findCrossLinks( cross_type, text );
+        
         starts = cross_link_indices[ 0 ];
         ends = cross_link_indices[ 1 ];
+        
+        if ( !starts ) continue;
 
         // Zoom into individual label/reference and process
-        if ( starts ) {
-          // Work backwards because we might change the text length
-          for ( var k = starts.length - 1; k >= 0; k-- ) {
-            start = starts[ k ];
-            end = ends[ k ];
-            url = text.getLinkUrl( start );
-            code = url.substr( 1, 3 );
+        // Work backwards because we might change the text length
+        for ( var k = starts.length - 1; k >= 0; k-- ) {
+          start = starts[ k ];
+          end = ends[ k ];
+          url = text.getLinkUrl( start );
+          code = url.substr( 1, 3 );
+          
+          // Labels
+          
+          if ( cross_type === 1 ) {
+            label_code = url.substr( 1, 5 );
+            number = advanceLabCount( code, counter );
+            name = url.substr( 7 );
             
-            // Labels
+            // Error handling
             
-            if ( cross_type === 1 ) {
-              label_code = url.substr( 1, 5 );
-              number = advanceLabCount( code, counter );
-              name = url.substr( 7 );
-              
-              // Error handling
-              
-              if ( starts.length > 1 ) {
-                addFlag( para, text, start, end, j );
-                return 'multiple'
-              };
-              
-              // Label code not recognised
-              if ( !( label_code in properties ) ) {
-                  addFlag( para, text, start, end, j );
-                  return label_code;
-              }
-              
-              // Duplicate label code found
-              if ( code + 'N' + name in properties ) {
-                  addFlag( para, text, start, end, j );
-                  return url;
-              }
-              
-              pairings[ code + 'N' + name ] = number;
-              
-              new_style = determineAttributes( text, start, label_code, properties );
-              replaceCrossLink( text, start, end, label_code, number, new_style, properties );
+            if ( starts.length > 1 ) {
+              addFlag( para, text, start, end, j );
+              return 'multiple'
+            };
+            
+            // Label code not recognised
+            if ( !( label_code in properties ) ) {
+              addFlag( para, text, start, end, j );
+              return label_code;
             }
             
-            // References
-            
-            if ( cross_type === 0 ) {
-              name = url.substr( 5 );
-              number = pairings[ code + 'N' + name ];
-              
-              // Error handling
-              
-              if ( number === undefined ) {
-                addFlag( para, text, start, end, j );
-                return 'missrefs'
-              }
-              
-              new_style = determineAttributes( text, start,code, properties );
-              replaceCrossLink( text, start, end, code, number, new_style, properties );
+            // Duplicate label code found
+            if ( code + 'N' + name in properties ) {
+              addFlag( para, text, start, end, j );
+              return url;
             }
+            
+            pairings[ code + 'N' + name ] = number;
+            
+            new_style = determineAttributes( text, start, label_code, properties );
+            replaceCrossLink( text, start, end, label_code, number, new_style, properties );
+          }
+          
+          // References
+          
+          if ( cross_type === 0 ) {
+            name = url.substr( 5 );
+            number = pairings[ code + 'N' + name ];
+            
+            // Error handling
+            
+            if ( number === undefined ) {
+              addFlag( para, text, start, end, j );
+              return 'missrefs'
+            }
+            
+            new_style = determineAttributes( text, start,code, properties );
+            replaceCrossLink( text, start, end, code, number, new_style, properties );
           }
         }
       }
@@ -291,10 +298,10 @@ function findCrossLinks( cross_type, text ) {
   
   att_ind.push( text_length );
 
-  for ( var i in att_ind ) {
-    var att_i = att_ind[ i ],
-        url = ( att_i === text_length ) ? 'null' : String( text.getLinkUrl( att_i ) ),
-        url_one_back = ( att_i > 0 ) ? String( text.getLinkUrl( att_i - 1 ) ) : 'null';
+  for ( var i = att_ind.length; i--; ) {
+    var att_i = att_ind[ i ];
+    var url = ( att_i === text_length ) ? 'null' : String( text.getLinkUrl( att_i ) );
+    var url_one_back = ( att_i > 0 ) ? String( text.getLinkUrl( att_i - 1 ) ) : 'null';
     
     var locations = refOrLab( cross_type, url, url_one_back, starts, ends, att_i );
   }
@@ -353,16 +360,20 @@ function determineAttributes(text, start, code, properties) {
 // Determine the text for the replacement
 function determineReplacementText(text, start, code, number, properties) {
   
-  var text_format = properties[code][0],
-      first_letter = text_format.charAt(0);
+  var text_format = properties[code][0];
+  var first_letter = text_format.charAt(0);
   
-  if (first_letter === first_letter.toUpperCase()) {return text_format + number}
-    
+  // Bail if the text is to be capitalised no matter what
+  if (first_letter === first_letter.toUpperCase()) {
+    return text_format + number;
+  }
+  
+  // Capitalise by context
   if (isCapitalised(text,start)) {
     var capitalised = first_letter.toUpperCase() + text_format.substr(1, text_format.length) + number;
-    
     return capitalised;
   }
+  
   return text_format + number;
 }
 
@@ -370,12 +381,12 @@ function determineReplacementText(text, start, code, number, properties) {
 // Replace the given label or reference
 function replaceCrossLink(text, start, end, code, number, style_attributes, properties) {
   
-  var replacement_text = determineReplacementText(text, start, code, number, properties),
-      color = properties[code][4];
+  var replacement_text = determineReplacementText(text, start, code, number, properties);
+  var color = properties[code][4];
 
   text.deleteText(start, end)
-      .insertText(start, replacement_text)
-      .setAttributes(start, start + replacement_text.length - 1, style_attributes);
+    .insertText(start, replacement_text)
+    .setAttributes(start, start + replacement_text.length - 1, style_attributes);
   
   if (!color || color == 'null' || color.length < 3) {
     text.setForegroundColor(start, start + replacement_text.length - 1, null);
@@ -389,11 +400,12 @@ function replaceCrossLink(text, start, end, code, number, style_attributes, prop
 function isCapitalised(original_text, start) {
   
   var text = original_text.getText();
-  var back_one = text.charAt(start - 1),
-      back_two = text.charAt(start - 2),
-      back_three = text.charAt(start - 3),
-      back_four = text.charAt(start - 4),
-      back_five = text.charAt(start - 5);
+  
+  var back_one = text.charAt(start - 1);
+  var back_two = text.charAt(start - 2);
+  var back_three = text.charAt(start - 3);
+  var back_four = text.charAt(start - 4);
+  var back_five = text.charAt(start - 5);
   
   var sentence_enders = ['!','?'];
   
