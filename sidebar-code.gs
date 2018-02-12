@@ -25,7 +25,7 @@ function updateProps(settings) {
     document_properties.setProperty(property_key, property_value);
   }
   
-  updateDocument();
+  updateDoc();
   return '#save-apply';
 }
 
@@ -40,6 +40,7 @@ function getSettings() {
   settings['fig'] = 'figur_Figure_figure _null_null_null_figure _null_null_null_null_null';
   settings['tab'] = 'table_Table_table _null_null_null_table _null_null_null_null_null';
   settings['equ'] = 'equat_Equation_equation _null_null_null_equation _null_null_null_null_null';
+  settings['fno'] = 'fnote_Footnote__null_null_null_fn. _null_null_null_null_null';
   
   for (var i in user_properties) {
     if (i.substr(0, 5) === 'cross')  settings[i.substr(6, i.length)] = user_properties[i];
@@ -116,7 +117,7 @@ function removePair(code) {
 function cloneColor(lab_or_ref) {
   var selection = DocumentApp.getActiveDocument().getSelection();
   if (!selection) {
-    DocumentApp.getUi().alert("No selection");
+    DocumentApp.getUi().alert("Clone colour", "Please select some text with the colour you want to clone.", DocumentApp.getUi().ButtonSet.OK);
     return
   }
   
