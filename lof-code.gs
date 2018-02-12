@@ -1,26 +1,16 @@
 
 function createLoF() {
 
-  var cursor = getCursorIndex(),
-      label_settings = PropertiesService.getDocumentProperties().getProperty('cross_fig');
-  
-  if (label_settings) {
-    var label_text = label_settings.split('_')[2],
-        label_text_capitalised = label_text.substr(0,1).toUpperCase() + label_text.substr(1,label_text.length);
-  }
-  else {
-    var label_text_capitalised = 'Figure ';
-  }
+  var cursor = getCursorIndex();
+  var lab_settings = PropertiesService.getDocumentProperties().getProperty('cross_fig');
+  var lab_text = lab_settings ?  toCap( lab_settings.split( '_' )[ 2 ] ) : 'Figure ';
 
-  var error = updateDocument();
-  if (error === 'error') {return};
+  if ( updateDoc() ) return;
   
-  var label_count = encodeLabel(),
-      lof_position = deleteLoF();
+  var lab_count = encodeLabel();
+  var position = deleteLoF() || cursor;
   
-  var position = lof_position || cursor;
-  
-  insertDummyLof(label_count, label_text_capitalised, position);
+  insertDummyLof( lab_count, lab_text, position );
   
   var html = HtmlService.createTemplateFromFile('lof').evaluate();
   html.setWidth(250).setHeight(90);
@@ -30,7 +20,7 @@ function createLoF() {
 
 function getCursorIndex() {
   var cursor = DocumentApp.getActiveDocument().getCursor();
-  if (!cursor) {return 0}
+  if ( !cursor ) return 0;
   
   var element = cursor.getElement();
   
@@ -39,36 +29,32 @@ function getCursorIndex() {
 
 
 function encodeLabel() {
-  var doc = DocumentApp.getActiveDocument(),
-      paragraphs = doc.getBody().getParagraphs(),
-      label_count = {'fig': 0}
+  var doc = DocumentApp.getActiveDocument();
+  var paragraphs = doc.getBody().getParagraphs();
+  var lab_count = { 'fig': 0 };
   
-  for (var i in paragraphs) {
-    var paragraph = paragraphs[i];
-    for (var j = 0; j < paragraph.getNumChildren(); j++) {
-      if (paragraph.getChild(j).getType() == 'TEXT') {
-        var text = paragraph.getChild(j).asText(),
-            locations = findCrossLinks(1, text);
-        if (!locations[1][0]) {continue}
-        
-        var start = locations[0][0];
-
-        if (text.getLinkUrl(start).substr(0,6) === '#figur') {
-          text.deleteText(start, start + 1)
-              .insertText(start, '☙');
-          label_count['fig'] = label_count['fig'] + 1;
-        }
-      }
+  for ( var i = 0; i < paragraphs.length; i++ ) {
+    var text = paragraphs[i].editAsText();
+    var locs = getCL( text, 5 );
+    var start = locs[0][0];
+    var url = locs[2][0];
+    
+    if ( !start ) continue;
+    
+    if ( url.substr(0,6) === '#figur' ) {
+      text.deleteText( start, start + 1 )
+        .insertText( start, '☙' );
+      lab_count[ 'fig' ]++;
     }
   }
-  return label_count
+  return lab_count;
 }
 
 
 function deleteLoF() {
   var lof_table = findLoF();
-  if (lof_table) {
-    var index = lof_table.getParent().getChildIndex(lof_table);
+  if ( lof_table ) {
+    var index = lof_table.getParent().getChildIndex( lof_table );
     lof_table.removeFromParent();
     
     return index;
@@ -77,33 +63,33 @@ function deleteLoF() {
 
 
 function findLoF() {
-  var ranges = DocumentApp.getActiveDocument().getNamedRanges('lof_table'),
+  var ranges = DocumentApp.getActiveDocument().getNamedRanges( 'lof_table' ),
       lof = ranges[0];
   
-  if (lof) {return lof.getRange().getRangeElements()[0].getElement().asTable()}
+  return lof ? lof.getRange().getRangeElements()[0].getElement().asTable() : null;
 }
 
 
-function insertDummyLof(label_count, label_text, position) {
+function insertDummyLof( lab_count, lab_text, position ) {
   var doc = DocumentApp.getActiveDocument(),
       body = doc.getBody(),
       lof_cells = [],
-      label_text_capitalised = label_text.substr(0, 1).toUpperCase() + label_text.substr(1, label_text.length);
+      lab_text = toCap( lab_text );
   
-  for (var i = 0; i < label_count['fig']; i++) {
-    var name = label_text_capitalised + (i + 1);
-    var placeholder = '...',
-        row = [name, placeholder];
+  for ( var i = 0; i < lab_count[ 'fig' ]; i++ ) {
+    var name = lab_text + (i + 1);
+    var placeholder = '...';
+    var row = [ name, placeholder ];
     lof_cells.push(row);
   }
   
-  var lof_table = body.insertTable(position, lof_cells);
+  var lof_table = body.insertTable( position, lof_cells );
   
-  styleLoF(lof_table);
+  styleLoF( lof_table );
   
   var lof_ranges = doc.getNamedRanges('lof_table');
   
-  for (var i in lof_ranges) {lof_ranges[i].remove()}
+  for (var i in lof_ranges) { lof_ranges[i].remove() }
   
   var range = doc.newRange();
   range.addElement(lof_table);
@@ -115,21 +101,23 @@ function styleLoF(lof_table) {
   
   lof_table.setBorderWidth(0);
   
-  var style_attributes = {};
-  style_attributes[DocumentApp.Attribute.BOLD] = null;
-  style_attributes[DocumentApp.Attribute.ITALIC] = null;
-  style_attributes[DocumentApp.Attribute.UNDERLINE] = null;
-  style_attributes[DocumentApp.Attribute.FONT_SIZE] = null;
+  var style_attributes = {
+    'BOLD': null,
+    'ITALIC': null,
+    'UNDERLINE': null,
+    'FONT_SIZE': null
+  };
   
-  for (var i = 0; i < lof_table.getNumRows(); i++) {
+  for ( var i = lof_table.getNumRows(); i--; ) {
     var left_cell = lof_table.getRow(i).getCell(0),
         right_cell = lof_table.getRow(i).getCell(1);
     lof_table.setAttributes(style_attributes);
     
     left_cell.setPaddingLeft(0);
     right_cell.setPaddingRight(0)
-              .getChild(0).asParagraph()
-              .setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
+      .getChild(0)
+      .asParagraph()
+      .setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
   }
 }
 
@@ -140,52 +128,45 @@ function getDocAsPDF() {
 }
 
 
-function insertLoFNumbers(page_numbers) {
+function insertLoFNumbers( pg_nums ) {
   
   var lof_table = findLoF(),
       current_row = 0;
   
-  for (var i = 0; i < page_numbers.length; i++) {
-    var page_number = (i + 1),
-        label_count = page_numbers[i];
-    if (label_count === 0){continue}
+  for ( var i = 0; i < pg_nums.length; i++ ) {
+    var pg = (i + 1);
+    var lab_count = pg_nums[i];
+    if (lab_count === 0) continue;
 
-    for (var j = current_row; j < current_row + label_count; j++) {
-      lof_table.getCell(j, 1)
-               .clear()
-               .getChild(0).asParagraph()
-               .appendText(page_number);
+    for ( var j = current_row; j < current_row + lab_count; j++ ) {
+      lof_table.getCell( j, 1 )
+        .clear()
+        .getChild( 0 ).asParagraph()
+        .appendText( pg );
     }
-    var current_row = current_row + label_count;
+    var current_row = current_row + lab_count;
   }
 }
 
 
 function restoreLabels() {
-  var doc = DocumentApp.getActiveDocument(),
-      paragraphs = doc.getBody().getParagraphs(),
-      label_count = {'fig': 0};
+  var doc = DocumentApp.getActiveDocument();
+  var paras = doc.getBody().getParagraphs();
   
-  for (var i in paragraphs) {
-    var paragraph = paragraphs[i];
+  for ( var i = 0; i < paras.length; i++ ) {
+    var text = paras[i].editAsText();
+    var locs = getCL( text, 5 );
+    var starts = locs[ 0 ];
+    var urls = locs[ 2 ];
     
-    for (var j = 0; j < paragraph.getNumChildren(); j++) {
-      if (paragraph.getChild(j).getType() == "TEXT") {
-        var text = paragraph.getChild(j).asText();
-        var locations = findCrossLinks(1, text);
-        
-        if (!locations[0][0]) {continue}
-        
-        var starts = locations[0];
-        
-        for (var k = starts.length - 1; k >= 0; k--) {
-          var start = starts[k],
-              url = text.getLinkUrl(start);
-          if (url.substr(0,6) === '#figur') {text.deleteText(start - 1, start)}
-        }
-        Logger.log('no probs');
-      }
+    if ( !starts.length ) continue;
+    
+    for ( var k = starts.length; k--; ) {
+      var start = starts[ k ];
+      var url = urls[ k ];
+      if (url.substr( 0, 4 ) === '#fig') text.deleteText( start - 1, start );
     }
   }
-  updateDocument();
+  
+  updateDoc();
 }
