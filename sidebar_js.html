@@ -69,8 +69,8 @@ function updateSidebar(category) {
   $('#ref_text').val(ref_text);
   
   // Update preview text
-  $('#lab').find('.preview__text').html(lab_text);
-  $('#ref').find('.preview__text').html(ref_text);
+  $('#lab').find('.preview__text').html(lab_text + '1');
+  $('#ref').find('.preview__text').html(ref_text + '1');
   
   // Update colors
   function updateColor(id, color) {
@@ -122,11 +122,12 @@ function selectCategory(category) {
   updateSidebar(category);
   
   // Remove button should only show with custom categories
-  var del_display = (category === 'Equation' || category === 'Figure' || category === 'Table') ?
-                  'none' :
-                  'block';
+  var del_display = 'EquationFigureFootnoteTable'.includes( category ) ? 'none' : 'block';
+  
+  var lab_display = 'Footnote'.includes( category ) ? 'block' : 'none';
                   
   $('#delete-category').css('display', del_display);
+  $('#lab-cover').css('display', lab_display);
 }
 
 
@@ -405,6 +406,7 @@ function confirmColor(button) {
 
 
 function updateColorCode(gs_array) {
+  if (typeof gs_array == 'undefined') return;
   var lab_or_ref = '#' + gs_array[0];
   var cloned_hex = gs_array[1];
   $(lab_or_ref).find('.color-code').val(cloned_hex);
@@ -456,7 +458,6 @@ $(document).on("click", function(e){
   if($(e.target).is('.color-pane, .color-pane *, .color-button')) return;
   $('.color-hide').hide();
 });
-
 
 //
 // ## Main buttons
