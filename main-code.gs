@@ -1,437 +1,370 @@
-
 //
 // # Set things up
 //
 
 
-function onInstall(e) {
-  onOpen(e);
+function onInstall( e ) {
+  onOpen( e );
 }
 
 
-function onOpen(e) {
+function onOpen( e ) {
   DocumentApp.getUi()
     .createAddonMenu()
-    .addItem('Update document', 'updateDocument')
-    .addItem('Configure', 'showSidebar')
+    .addItem( 'Update document', 'updateDoc' )
+    .addItem( 'Configure', 'showSidebar' )
     .addSeparator()
-    .addItem('Create list of figures (beta)', 'createLoF')
+    .addItem( 'Create list of figures (beta)', 'createLoF' )
     .addToUi();
 }
 
 
-function include(filename) {
-  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+function include( filename ) {
+  return HtmlService.createHtmlOutputFromFile( filename ).getContent();
 }
 
 
 function showSidebar() {
-  var sidebar = HtmlService.createTemplateFromFile('sidebar').evaluate();
-  sidebar.setTitle('Cross Reference');
-  DocumentApp.getUi().showSidebar(sidebar);
+  var sidebar = HtmlService.createTemplateFromFile( 'sidebar' ).evaluate();
+  sidebar.setTitle( 'Cross Reference' );
+  DocumentApp.getUi().showSidebar( sidebar );
 }
 
 
-//
-// # Update document
-//
+function updateDoc() {
 
-// Apply current settings to the document
-function updateDocument() {
-
-  doc = DocumentApp.getActiveDocument();
+  var doc = DocumentApp.getActiveDocument();
+  var paras = doc.getBody().getParagraphs();
+  var foots = doc.getFootnotes();
   
-  var paragraphs = doc.getBody().getParagraphs();
-  var footnotes = doc.getFootnotes();
-  var doc_props = PropertiesService.getDocumentProperties().getProperties();
-  var user_props = PropertiesService.getUserProperties().getProperties();
-  var lab_props = getStoredLabelSettings(doc_props, user_props);
-  var ref_props = getStoredReferenceSettings(doc_props, user_props);
+  var num_pairs = {};
   
-  // counter for label numbering
-  var counter = {};
-  // storage for the numbers assigned to each name
-  var pairings = {};
-   
-  userPropsToDocProps();
+  var lab_props = getStored( true );
+  var ref_props = getStored( false );
   
-  var final_pairings = sweepParagraphs(paragraphs, 1, pairings, counter, lab_props);
+  uPropsToDProps();
   
-  // Error handling from first sweep
-  if (typeof final_pairings === 'string') {
-    if (final_pairings.charAt(0) === '#') {
-      DocumentApp.getUi().alert('There are two labels with the code ' + final_pairings + '.' +
-        "\n\nLabel codes must be 5 letters and label names (e.g. '" +
-        final_pairings.substr(7, final_pairings.length) + "') must be unique."
-      );
-    } else if (final_pairings === 'multiple') {
-      DocumentApp.getUi().alert('One of your paragraphs contains more than one label.' +
-        '\n\nParagraphs may contain multiple references, but only one label.' +
-        '\nYou probably meant to insert a reference. The last label in' +
-        '\nthe paragraph has been highlighed in red.'
-      );
-    } else {
-      DocumentApp.getUi().alert('The label code #' + final_pairings + ' was not recognised.' +
-        '\nIt might be a typo or it might be a custom label you' +
-        '\nhave not yet added in the configuration sidebar.'
-      );
-    }
+  num_pairs = updateParas( paras, true, num_pairs, lab_props );
+  
+  if ( Array.isArray( num_pairs ) ) {
+    handleErr( num_pairs );
     return 'error';
-  }
-  
-  // Second sweep
-  var error = sweepParagraphs(paragraphs, 0, final_pairings, counter, ref_props);
-  
-  // Footnote sweep
-  for (var i in footnotes) {
-    var footnote_paragraphs = footnotes[i].getFootnoteContents().getParagraphs();
-    var error = sweepParagraphs(footnote_paragraphs, 0, final_pairings, counter, ref_props);
-  }
-  
-  if (error === 'missrefs') {
-    DocumentApp.getUi().alert('The reference highlighted in red has nothing to refer to.' +
-      '\nIt might contain a typo or the corresponding label might be missing.' +
-      '\n\nUpdating the document when this has been fixed will automatically' +
-      '\nrestore the correct colour.'
-    );
-    
-    return 'error';
-  }
-}
-
-
-// Return the user/document/default settings for labels
-function getStoredLabelSettings(doc_props, user_props) {
-  
-  // Default properties
-  var lab_props = {
-    'figur': ['Figure ',null, null, null, null],
-    'table': ['Table ',null, null, null, null],
-    'equat': ['Equation ', null, null, null, null]
   };
+  
+  var error = updateParas( paras, false, num_pairs, ref_props );
+  
+  if ( Array.isArray( error ) ) {
+    handleErr( error );
+    return 'error';
+  };
+  
+  for ( var i = 0, len = foots.length; i < len; i++ ) {
+    paras = foots[ i ].getFootnoteContents().getParagraphs();
+    error = updateParas( paras, false, num_pairs, ref_props );
+    if ( Array.isArray( error ) ) {
+      handleErr( error );
+      return 'error';
+    };
+  }
+}
+
+
+function updateParas( paras, is_lab, num_pairs, props ) {
+  
+  var num = 0;
+  var code_len = ( is_lab ) ? 5 : 3;
+  
+  for ( var i = 0, len = paras.length; i < len; i++ ) {
+    
+    var text = paras[ i ].editAsText();
+    
+    // Get location of cross links in text
+    var idxs = getCL( text, code_len );
+    
+    var [ starts, ends, urls ] = idxs;
+
+    if ( !starts ) continue;
+    
+    var err_details = [ text, starts[ 0 ], ends[ 0 ], urls[ 0 ] ];
+    
+    if ( is_lab && starts.length > 1 ) return [ 'multiple', err_details ];
+    
+    // Iterate through the cross links in the text
+    for ( var j = starts.length; j--; ) {
       
-  var splice = [2,6];
-
-  // Overwrite with user properties if they exist
-  overwriteProps(lab_props, user_props, splice, 10, true, true);
-  
-  // Overwrite with document properties if they exist
-  overwriteProps(lab_props, doc_props, splice, 10, false, true);
-
-  return lab_props;
+      var start = starts[ j ];
+      var end = ends[ j ];
+      var url = urls[ j ];
+      var code = url.substr( 1, 3 );
+      
+      if ( !( code in props ) ) return [ 'unrecognised', err_details ];
+      
+      // Get replacement text
+      var rep_text = props[ code ][ 0 ];
+           
+      // Capitalise if necessary
+      rep_text = isCap( text, start, rep_text );
+      
+      // Determine number
+      num = setNumber( is_lab, num, url, num_pairs );
+      if ( num === 'duplicate' ) return [ num, err_details ];
+      if ( num === 'missref' ) return [ num, err_details ];
+      
+      // Append number
+      rep_text += num;
+      
+      // Determine style
+      var style = setStyle( props, code );
+      
+      // Replace and style text
+      var rep_end = start + rep_text.length - 1;
+      text.deleteText( start, end )
+        .insertText( start, rep_text)
+        .setLinkUrl( start, rep_end, url )
+        .setAttributes( start, rep_end, style )
+    } 
+  }
+  return num_pairs;
 }
 
 
-// Return the user/document/default settings for references
-function getStoredReferenceSettings(doc_props, user_props) {
+function getCL( text, code_len ) {
+
+  var url, pre_url, loc;
+  var starts = [], ends = [], urls = [];
+  var len = text.getText().length;
+  var idxs = text.getTextAttributeIndices();
+  var reUrl = new RegExp( '#[^_]{' + code_len + '}_' );
+  
+  idxs.push( len );
+
+  for ( var i in idxs ) {
+    loc = idxs[ i ];
+    pre_url = ( i > 0 ) ? text.getLinkUrl( loc - 1 ) : null;
+    url = ( loc !== len ) ? text.getLinkUrl( loc ) : null;
+
+    if ( !reUrl.test( pre_url ) && reUrl.test( url )) {
+      starts.push( loc );
+      urls.push( url );
+    }
+    if ( reUrl.test( pre_url ) && !reUrl.test( url ) ) ends.push( loc - 1 );
+  }
+  
+  return [ starts, ends, urls ];
+}
+
+
+// Check whether to capitalise
+function isCap(text, start, rep_text) {
+  
+  var t = text.getText();
+  var first = rep_text.charAt( 0 );
+  var upper = first.toUpperCase();
+  
+  if ( first === upper ) return rep_text;
+  
+  var b1 = t.charAt( start - 1 );
+  var b2 = t.charAt( start - 2 );
+  var b3 = t.charAt( start - 3 );
+  var b4 = t.charAt( start - 4 );
+  var b5 = t.charAt( start - 5 );
+  
+  if (
+    !b1 ||
+    b1 === '\r' ||
+    /(\!|\?)/.test( b2 ) ||
+    ( b2 === '.' && b4 !== '.' ) ||
+    ( b2 === '”' && /(\!|\?)/.test( b3 ) ) ||
+    ( b1 === '(' && /(\!|\?|\.)/.test( b3 ) && b5 !== '.' )
+  ) return upper + rep_text.substr( 1 );
+  
+  return rep_text;
+}
+
+
+function getStored( is_lab ) {
+
+  var user_props = PropertiesService.getUserProperties().getProperties();
+  var doc_props = PropertiesService.getDocumentProperties().getProperties();
+  var slice = is_lab ? [ 2, 6, 10 ] : [ 6, 10, 11 ];
   
   // Default properties
-  var ref_props = {
-    'fig': ['figure ', null, null, null, null],
-    'tab': ['table ', null, null, null, null],
-    'equ': ['equation ', null, null, null, null]
+  var props = {
+    'fig': [ 'figure ', null, null, null, null ],
+    'tab': [ 'table ', null, null, null, null ],
+    'equ': [ 'equation ', null, null, null, null ]
   };
   
-  var splice = [6,10];
-  
   // Overwrite with user properties if they exist
-  overwriteProps(ref_props, user_props, splice, 11, true, false);
+  owriteProps( props, user_props, slice, true );
     
   // Overwrite with document properties if they exist
-  overwriteProps(ref_props, doc_props, splice, 11, false, false);
+  owriteProps( props, doc_props, slice, false );
   
-  return ref_props;
+  return props;
 }
 
 
-// Overwrite the settings object from a given prop store
-function overwriteProps(to_overwrite, props, slice_index, color_index, is_user, is_label) {
+function owriteProps( to_overwrite, props, slice, is_user ) {
 
-  var prop;
-  var prop_string;
-  var split_props;
-  var code;
-
-  for (prop in props) {
-    if (prop.substr(0,5) !== 'cross') continue;
-    prop_string = props[prop];
-    split_props = prop_string.split('_');
-    code = is_label ? split_props[0] : split_props[0].substr(0,3);
-    to_overwrite[code] = split_props.slice(slice_index[0],slice_index[1]);
-    to_overwrite[code].push(split_props[color_index]);
+  for ( var prop in props ) {
+    if ( prop.substr(0,5) !== 'cross' ) continue;
+    
+    var prop_string = props[ prop ];
+    var split_props = prop_string.split( '_' );
+    var code = split_props[ 0 ].substr( 0, 3 );
+    to_overwrite[ code ] = split_props.slice( slice[ 0 ], slice[ 1 ] );
+    to_overwrite[ code ].push( split_props[ slice[ 2 ] ] );
   }
 }
 
 
 // Copy user props to doc props if not already present
-function userPropsToDocProps() {
+function uPropsToDProps() {
 
   var user_props = PropertiesService.getUserProperties().getProperties();
   var docProps = PropertiesService.getDocumentProperties();
   var doc_props = docProps.getProperties();
-  var final_props = {
+  var props = {
     'cross_fig': 'figur_Figure_figure _null_null_null_figure _null_null_null_null_null',
     'cross_tab': 'table_Table_table _null_null_null_table _null_null_null_null_null',
     'cross_equ': 'equat_Equation_equation _null_null_null_equation _null_null_null_null_null',
   };
   
-  for (var u_prop in user_props) {
-    final_props[u_prop] = user_props[u_prop];
+  for (var u in user_props) {
+    props[ u ] = user_props[ u ];
   }
   
-  for (var d_prop in doc_props) {
-    final_props[d_prop] = doc_props[d_prop];
+  for (var d in doc_props) {
+    props[ d ] = doc_props[ d ];
   }
   
-  docProps.setProperties(final_props);
+  docProps.setProperties( props );
 }
 
 
-// Iterate through paragraphs and update cross references accordingly
-function sweepParagraphs(paragraphs, cross_type, pairings, counter, properties) {
+// Highlight an erroneous label or reference
+function addFlag( text, start, end ) {
+  var doc = DocumentApp.getActiveDocument();
+  var position = doc.newPosition( text, start );
   
-  var para;
-  var text;
-  
-  var cross_link_indices;
-  var starts;
-  var start;
-  var ends;
-  var end;
-  var url;
-  
-  var code;
-  var label_code;
-  var name;
-  var number;
-  var new_style;
-  
-  var paras_length = paragraphs.length;
-  
-  for ( var i = 0; i < paras_length; i++ ) {
-    para = paragraphs[ i ];
-    
-    var para_children = para.getNumChildren();
-    for ( var j = 0; j < para_children; j++ ) {
-      if ( para.getChild( j ).getType() == "TEXT" ) {
-        text = para.getChild( j ).asText();
-        
-        // Where are the cross links?
-        cross_link_indices = findCrossLinks( cross_type, text );
-        
-        starts = cross_link_indices[ 0 ];
-        ends = cross_link_indices[ 1 ];
-        
-        if ( !starts ) continue;
+  text.setForegroundColor( start, end, '#FF0000' );
+  doc.setCursor( position );
+}
 
-        // Zoom into individual label/reference and process
-        // Work backwards because we might change the text length
-        for ( var k = starts.length - 1; k >= 0; k-- ) {
-          start = starts[ k ];
-          end = ends[ k ];
-          url = text.getLinkUrl( start );
-          code = url.substr( 1, 3 );
-          
-          // Labels
-          
-          if ( cross_type === 1 ) {
-            label_code = url.substr( 1, 5 );
-            number = advanceLabCount( code, counter );
-            name = url.substr( 7 );
-            
-            // Error handling
-            
-            if ( starts.length > 1 ) {
-              addFlag( para, text, start, end, j );
-              return 'multiple'
-            };
-            
-            // Label code not recognised
-            if ( !( label_code in properties ) ) {
-              addFlag( para, text, start, end, j );
-              return label_code;
-            }
-            
-            // Duplicate label code found
-            if ( code + 'N' + name in properties ) {
-              addFlag( para, text, start, end, j );
-              return url;
-            }
-            
-            pairings[ code + 'N' + name ] = number;
-            
-            new_style = determineAttributes( text, start, label_code, properties );
-            replaceCrossLink( text, start, end, label_code, number, new_style, properties );
-          }
-          
-          // References
-          
-          if ( cross_type === 0 ) {
-            name = url.substr( 5 );
-            number = pairings[ code + 'N' + name ];
-            
-            // Error handling
-            
-            if ( number === undefined ) {
-              addFlag( para, text, start, end, j );
-              return 'missrefs'
-            }
-            
-            new_style = determineAttributes( text, start,code, properties );
-            replaceCrossLink( text, start, end, code, number, new_style, properties );
-          }
-        }
-      }
+
+function handleErr( err ) {
+    var type = err[ 0 ];
+    var details = err[ 1 ];
+    var [ text, start, end, url ] = details;
+
+    if ( type === 'duplicate' ) {
+      DocumentApp.getUi().alert( 'There are two labels with the code ' + url + '.' +
+        "\n\nLabel codes must be 5 letters and label names (e.g. '" +
+        url.substr( 7 ) + "') must be unique."
+      );
+    } else if ( type === 'multiple' ) {
+      DocumentApp.getUi().alert( 'One of your paragraphs contains more than one label.' +
+        '\n\nParagraphs may contain multiple references, but only one label.' +
+        '\nYou probably meant to insert a reference. The last label in' +
+        '\nthe paragraph has been highlighed in red.'
+      );
+    } else if (type === 'missref') {
+      DocumentApp.getUi().alert( 'The reference highlighted in red has nothing to refer to.' +
+        '\nIt might contain a typo or the corresponding label might be missing.' +
+        '\n\nUpdating the document when this has been fixed will automatically' +
+        '\nrestore the correct colour.'
+      );
+    } else if ( type === 'unrecognised' ) {
+      DocumentApp.getUi().alert( 'The label starting ' + url.substr( 0, 4 ) + ' was not recognised.' +
+        '\nIt might be a typo or it might be a custom label you' +
+        '\nhave not yet added in the configuration sidebar.'
+      );
     }
-  }
-  return pairings;
-}
-
-
-// Detect a label or reference in a paragraph
-function findCrossLinks( cross_type, text ) {
-  
-  var text_length = text.getText().length;
-  var att_ind = text.getTextAttributeIndices();
-  var starts = [];
-  var ends = [];
-  
-  att_ind.push( text_length );
-
-  for ( var i = att_ind.length; i--; ) {
-    var att_i = att_ind[ i ];
-    var url = ( att_i === text_length ) ? 'null' : String( text.getLinkUrl( att_i ) );
-    var url_one_back = ( att_i > 0 ) ? String( text.getLinkUrl( att_i - 1 ) ) : 'null';
     
-    var locations = refOrLab( cross_type, url, url_one_back, starts, ends, att_i );
-  }
-  return locations;
+    addFlag( text, start, end );
 }
 
 
-// Is the link a label or a reference?
-function refOrLab(type, url, url_one_back, starts, ends, format_index) {
-  var position = parseInt(type * 2 + 4); // 4 for references, 6 for labels
+function setStyle( props, code ) {
+  var col = props[ code ][ 4 ];
+  var color = ( col && col != 'null' ) ? '#' + col : null;
   
-  if (url.charAt(0) === '#') {
-    if (url_one_back.charAt(0) !== '#' && url.charAt(position) === '_') starts.push(format_index);
-  }
-  else if (url_one_back.charAt(0) === '#' && url_one_back.charAt(position) === '_') {
-    ends.push(format_index - 1);
-  }
-  return [starts, ends]
+  return {
+    'BOLD': props[ code ][ 1 ],
+    'ITALIC': props[ code ][ 2 ],
+    'UNDERLINE': props[ code ][ 3 ],
+    'FOREGROUND_COLOR': color
+  };   
 }
 
 
-// Advance the label counter for a given label code
-function advanceLabCount(lab_code, counter) {
-  var number = (counter[lab_code]) ? counter[lab_code] : 1;
-  counter[lab_code] = number + 1;
-
-  return number
-}
-
-
-// Highlight the erroneous label or reference
-function addFlag(paragraph, text, start, end, iteration) {
-  text.setForegroundColor(start, end, '#FF0000');
-  var position = doc.newPosition(paragraph.getChild(iteration), start);
-  doc.setCursor(position);
-}
-
-
-// Determine the style attributes to apply
-function determineAttributes(text, start, code, properties) {
-  var current = text.getAttributes(start);
-  var replacements = {};
+function setNumber( is_lab, num, url, num_pairs ) {
   
-  for (var i in current) {
-    replacements[i] = current[i];
-  }
-
-  replacements['BOLD'] = properties[code][1];
-  replacements['ITALIC'] = properties[code][2];
-  replacements['UNDERLINE'] = properties[code][3];
-
-  return replacements;
-}
-
-
-// Determine the text for the replacement
-function determineReplacementText(text, start, code, number, properties) {
-  
-  var text_format = properties[code][0];
-  var first_letter = text_format.charAt(0);
-  
-  // Bail if the text is to be capitalised no matter what
-  if (first_letter === first_letter.toUpperCase()) {
-    return text_format + number;
-  }
-  
-  // Capitalise by context
-  if (isCapitalised(text,start)) {
-    var capitalised = first_letter.toUpperCase() + text_format.substr(1, text_format.length) + number;
-    return capitalised;
-  }
-  
-  return text_format + number;
-}
-
-
-// Replace the given label or reference
-function replaceCrossLink(text, start, end, code, number, style_attributes, properties) {
-  
-  var replacement_text = determineReplacementText(text, start, code, number, properties);
-  var color = properties[code][4];
-
-  text.deleteText(start, end)
-    .insertText(start, replacement_text)
-    .setAttributes(start, start + replacement_text.length - 1, style_attributes);
-  
-  if (!color || color == 'null' || color.length < 3) {
-    text.setForegroundColor(start, start + replacement_text.length - 1, null);
+  if ( is_lab ) {
+    var ref_equiv = url.substr( 0, 4 ) + url.substr( 6 );
+    num++;
+    // Return error code for duplicate labels
+    if ( ref_equiv in num_pairs ) return 'duplicate'; 
+    num_pairs[ ref_equiv ] = num;
   } else {
-    text.setForegroundColor(start, start + replacement_text.length - 1, '#' + color);
-  }
-}
-
-
-// Check whether to capitalise
-function isCapitalised(original_text, start) {
-  
-  var text = original_text.getText();
-  
-  var back_one = text.charAt(start - 1);
-  var back_two = text.charAt(start - 2);
-  var back_three = text.charAt(start - 3);
-  var back_four = text.charAt(start - 4);
-  var back_five = text.charAt(start - 5);
-  
-  var sentence_enders = ['!','?'];
-  
-  if (!back_one) {return true}
-  if (back_one === '\r') {return true}
-  if (sentence_enders.indexOf(back_two) !== -1) {return true}
-  if (back_two === '.' && back_four !== '.') {return true}
-  if (back_two === '”') {
-    if (sentence_enders.indexOf(back_three) !== -1) {return true}
-  }
-  if (back_one === '(') {
-    if (sentence_enders.indexOf(back_three) !== -1 || back_three === '.' && back_five !== '.') {return true}
+    num = num_pairs[ url ] || 'missref';
   }
   
-  return false;
+  return num;
+}
+ 
+ 
+ 
+ 
+ 
+//--- Testing footnote labels ---//
+
+function fnTest() {
+  var doc = DocumentApp.getActiveDocument();
+  var paras = doc.getBody().getParagraphs();
+  var foots = doc.getFootnotes();
+  var num_pairs = {};
+  
+  // Pick up label footnotes
+  
+  for ( var i = 0, len = foots.length; i < len; i++ ) {
+    var text =  foots[ i ].getFootnoteContents().getParagraphs()[0].editAsText();
+    var locs = getCL( text, 2 );
+    
+    var start = locs[ 0 ][ 0 ];
+    var end = locs[ 1 ][ 0 ];
+    var url = locs[ 2 ][ 0 ];
+    
+    if ( !start ) continue;
+    if ( url.substr(0, 3) != '#fn' ) continue;
+    
+    num_pairs[ url ] = [ i + 1 ];
+    text.setUnderline(start, end, null)
+      .setForegroundColor(start, end, null);
+  };
+  
+  // Apply to text
+  
+  for ( var j = 0, len = paras.length; j < len; j++ ) {
+    var text =  paras[ j ].editAsText();
+    var locs = getCL( text, 2 );
+    
+    var start = locs[ 0 ][ 0 ];
+    var end = locs[ 1 ][ 0 ];
+    var url = locs[ 2 ][ 0 ];
+    
+    if ( !start ) continue;
+    if ( url.substr(0, 3) != '#fn' ) continue;
+    
+    var num = 'fn. ' + String( num_pairs[ url ] );
+    var num_end = start + num.length - 1;
+    
+    text.deleteText( start, end )
+      .insertText( start, num )
+      .setLinkUrl( start, num_end, url )
+      .setUnderline(start, num_end, null)
+      .setForegroundColor(start, num_end, null);
+  };
 }
 
-
-//***Testing only***
-
-function clearProperties() {
-  PropertiesService.getDocumentProperties().deleteAllProperties();
-  PropertiesService.getUserProperties().deleteAllProperties();
-}
-
-function logProps() {
-  Logger.log(PropertiesService.getDocumentProperties().getProperties());
-  Logger.log(PropertiesService.getUserProperties().getProperties());
-}
