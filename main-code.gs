@@ -1,4 +1,13 @@
 //
+// 1. Set things up
+// 2. Deal with properties
+// 3. Update references
+// 4. Error handling
+// 5. Footnote references EXPERIMENTAL
+//
+
+
+//
 // # Set things up
 //
 
@@ -31,27 +40,98 @@ function showSidebar() {
 }
 
 
+//
+// # Deal with properties
+//
+
+
+function getStored( is_lab ) {
+
+  var user_props = PropertiesService.getUserProperties().getProperties();
+  var doc_props = PropertiesService.getDocumentProperties().getProperties();
+  var slice = is_lab ? [ 2, 6, 10 ] : [ 6, 10, 11 ];
+  
+  // Default properties
+  var props = {
+    'fig': [ 'figure ', null, null, null, null ],
+    'tab': [ 'table ', null, null, null, null ],
+    'equ': [ 'equation ', null, null, null, null ],
+    'fno': [ 'fn. ', null, null, null, null ]
+  };
+  
+  // Overwrite with user properties if they exist
+  overwriteProps( props, user_props, slice, true );
+    
+  // Overwrite with document properties if they exist
+  overwriteProps( props, doc_props, slice, false );
+  
+  return props;
+}
+
+
+function overwriteProps( to_overwrite, props, slice, is_user ) {
+
+  for ( var prop in props ) {
+    if ( prop.substr(0,5) !== 'cross' ) continue;
+    
+    var prop_string = props[ prop ];
+    var split_props = prop_string.split( '_' );
+    var code = split_props[ 0 ].substr( 0, 3 );
+    to_overwrite[ code ] = split_props.slice( slice[ 0 ], slice[ 1 ] );
+    to_overwrite[ code ].push( split_props[ slice[ 2 ] ] );
+  }
+}
+
+
+function uPropsToDProps() {
+
+  var user_props = PropertiesService.getUserProperties().getProperties();
+  var docProps = PropertiesService.getDocumentProperties();
+  var doc_props = docProps.getProperties();
+  var props = {
+    'cross_fig': 'figur_Figure_figure _null_null_null_figure _null_null_null_null_null',
+    'cross_tab': 'table_Table_table _null_null_null_table _null_null_null_null_null',
+    'cross_equ': 'equat_Equation_equation _null_null_null_equation _null_null_null_null_null',
+    'cross_fno': 'fnote_Footnote__null_null_null_fn. _null_null_null_null_null'
+  };
+  
+  for (var u in user_props) {
+    props[ u ] = user_props[ u ];
+  }
+  
+  for (var d in doc_props) {
+    props[ d ] = doc_props[ d ];
+  }
+  
+  docProps.setProperties( props );
+}
+
+
+//
+// # Update references
+//
+
+
 function updateDoc() {
 
   var doc = DocumentApp.getActiveDocument();
   var paras = doc.getBody().getParagraphs();
   var foots = doc.getFootnotes();
   
-  var num_pairs = {};
-  
   var lab_props = getStored( true );
   var ref_props = getStored( false );
   
   uPropsToDProps();
   
-  num_pairs = updateParas( paras, true, num_pairs, lab_props );
-  
+  var num_pairs = updateParas( paras, true, lab_props );
+  fnLabs( foots, lab_props, num_pairs );
+
   if ( Array.isArray( num_pairs ) ) {
     handleErr( num_pairs );
     return 'error';
   };
   
-  var error = updateParas( paras, false, num_pairs, ref_props );
+  var error = updateParas( paras, false, ref_props, num_pairs );
   
   if ( Array.isArray( error ) ) {
     handleErr( error );
@@ -59,31 +139,35 @@ function updateDoc() {
   };
   
   for ( var i = 0, len = foots.length; i < len; i++ ) {
-    paras = foots[ i ].getFootnoteContents().getParagraphs();
-    error = updateParas( paras, false, num_pairs, ref_props );
+    var f_paras = foots[ i ].getFootnoteContents().getParagraphs();
+    error = updateParas( f_paras, false, num_pairs, ref_props );
     if ( Array.isArray( error ) ) {
       handleErr( error );
       return 'error';
     };
-  }
+  };
+  
+  updateFns();
 }
 
 
-function updateParas( paras, is_lab, num_pairs, props ) {
+function updateParas( paras, is_lab, props, num_pairs ) {
+
+  var code_len = is_lab ? 5 : 3;
   
-  var num = 0;
-  var code_len = ( is_lab ) ? 5 : 3;
+  // Stores the numbers associated with individual labels
+  var num_pairs = num_pairs || {};
+  // Stores running total for each label type
+  var lab_nums = {};
   
   for ( var i = 0, len = paras.length; i < len; i++ ) {
-    
     var text = paras[ i ].editAsText();
     
     // Get location of cross links in text
     var idxs = getCL( text, code_len );
-    
     var [ starts, ends, urls ] = idxs;
 
-    if ( !starts ) continue;
+    if ( !starts.length ) continue;
     
     var err_details = [ text, starts[ 0 ], ends[ 0 ], urls[ 0 ] ];
     
@@ -106,7 +190,7 @@ function updateParas( paras, is_lab, num_pairs, props ) {
       rep_text = isCap( text, start, rep_text );
       
       // Determine number
-      num = setNumber( is_lab, num, url, num_pairs );
+      var num = is_lab ? labNumber( url, code, num_pairs, lab_nums ) : num_pairs[ url ] || 'missref';
       if ( num === 'duplicate' ) return [ num, err_details ];
       if ( num === 'missref' ) return [ num, err_details ];
       
@@ -122,7 +206,7 @@ function updateParas( paras, is_lab, num_pairs, props ) {
         .insertText( start, rep_text)
         .setLinkUrl( start, rep_end, url )
         .setAttributes( start, rep_end, style )
-    } 
+    }
   }
   return num_pairs;
 }
@@ -154,7 +238,6 @@ function getCL( text, code_len ) {
 }
 
 
-// Check whether to capitalise
 function isCap(text, start, rep_text) {
   
   var t = text.getText();
@@ -182,75 +265,34 @@ function isCap(text, start, rep_text) {
 }
 
 
-function getStored( is_lab ) {
-
-  var user_props = PropertiesService.getUserProperties().getProperties();
-  var doc_props = PropertiesService.getDocumentProperties().getProperties();
-  var slice = is_lab ? [ 2, 6, 10 ] : [ 6, 10, 11 ];
+function labNumber( url, code, num_pairs, lab_nums ) {
   
-  // Default properties
-  var props = {
-    'fig': [ 'figure ', null, null, null, null ],
-    'tab': [ 'table ', null, null, null, null ],
-    'equ': [ 'equation ', null, null, null, null ]
+  var ref_equiv = '#' + code + url.substr( 6 );
+  var num = lab_nums[ code ] + 1 || 1;
+  
+  num_pairs[ ref_equiv ] = num;
+  lab_nums[ code ] = num;
+  
+  return num;
+}
+
+
+function setStyle( props, code ) {
+  var col = props[ code ][ 4 ];
+  var color = ( col && col != 'null' ) ? '#' + col : null;
+  
+  return {
+    'BOLD': props[ code ][ 1 ],
+    'ITALIC': props[ code ][ 2 ],
+    'UNDERLINE': props[ code ][ 3 ],
+    'FOREGROUND_COLOR': color
   };
-  
-  // Overwrite with user properties if they exist
-  owriteProps( props, user_props, slice, true );
-    
-  // Overwrite with document properties if they exist
-  owriteProps( props, doc_props, slice, false );
-  
-  return props;
 }
 
 
-function owriteProps( to_overwrite, props, slice, is_user ) {
-
-  for ( var prop in props ) {
-    if ( prop.substr(0,5) !== 'cross' ) continue;
-    
-    var prop_string = props[ prop ];
-    var split_props = prop_string.split( '_' );
-    var code = split_props[ 0 ].substr( 0, 3 );
-    to_overwrite[ code ] = split_props.slice( slice[ 0 ], slice[ 1 ] );
-    to_overwrite[ code ].push( split_props[ slice[ 2 ] ] );
-  }
-}
-
-
-// Copy user props to doc props if not already present
-function uPropsToDProps() {
-
-  var user_props = PropertiesService.getUserProperties().getProperties();
-  var docProps = PropertiesService.getDocumentProperties();
-  var doc_props = docProps.getProperties();
-  var props = {
-    'cross_fig': 'figur_Figure_figure _null_null_null_figure _null_null_null_null_null',
-    'cross_tab': 'table_Table_table _null_null_null_table _null_null_null_null_null',
-    'cross_equ': 'equat_Equation_equation _null_null_null_equation _null_null_null_null_null',
-  };
-  
-  for (var u in user_props) {
-    props[ u ] = user_props[ u ];
-  }
-  
-  for (var d in doc_props) {
-    props[ d ] = doc_props[ d ];
-  }
-  
-  docProps.setProperties( props );
-}
-
-
-// Highlight an erroneous label or reference
-function addFlag( text, start, end ) {
-  var doc = DocumentApp.getActiveDocument();
-  var position = doc.newPosition( text, start );
-  
-  text.setForegroundColor( start, end, '#FF0000' );
-  doc.setCursor( position );
-}
+//
+// # Error handling
+//
 
 
 function handleErr( err ) {
@@ -286,41 +328,46 @@ function handleErr( err ) {
 }
 
 
-function setStyle( props, code ) {
-  var col = props[ code ][ 4 ];
-  var color = ( col && col != 'null' ) ? '#' + col : null;
+// Highlight an erroneous label or reference
+function addFlag( text, start, end ) {
+  var doc = DocumentApp.getActiveDocument();
+  var position = doc.newPosition( text, start );
   
-  return {
-    'BOLD': props[ code ][ 1 ],
-    'ITALIC': props[ code ][ 2 ],
-    'UNDERLINE': props[ code ][ 3 ],
-    'FOREGROUND_COLOR': color
-  };   
+  text.setForegroundColor( start, end, '#FF0000' );
+  doc.setCursor( position );
 }
 
 
-function setNumber( is_lab, num, url, num_pairs ) {
-  
-  if ( is_lab ) {
-    var ref_equiv = url.substr( 0, 4 ) + url.substr( 6 );
-    num++;
-    // Return error code for duplicate labels
-    if ( ref_equiv in num_pairs ) return 'duplicate'; 
-    num_pairs[ ref_equiv ] = num;
-  } else {
-    num = num_pairs[ url ] || 'missref';
+//
+// # Footnote labelling EXPERIMENTAL
+//
+
+
+function fnLabs( foots, fn_props, num_pairs ) {
+  for ( var i = 0; i < foots.length; i++ ) {
+    var paras = foots[ i ].getFootnoteContents().getParagraphs();
+    for ( var j = 0; j < paras.length; j++ ) {
+      var text = paras[ j ].editAsText();
+      var locs = getCL( text, 5 );
+      
+      var start = locs[ 0 ][ 0 ];
+      var end = locs[ 1 ][ 0 ];
+      var url = locs[ 2 ][ 0 ];
+      
+      if ( !start ) continue;
+      if ( url.substr( 0, 4 ) != '#fno' ) continue;
+      
+      var ref_equiv = url.substr( 0, 4 ) + url.substr( 6 );
+      num_pairs[ ref_equiv ] = [ i + 1 ];
+      text.setUnderline(start, end, null)
+        .setForegroundColor(start, end, null);
+    }
   }
   
-  return num;
+  return num_pairs;
 }
- 
- 
- 
- 
- 
-//--- Testing footnote labels ---//
 
-function fnTest() {
+function updateFns() {
   var doc = DocumentApp.getActiveDocument();
   var paras = doc.getBody().getParagraphs();
   var foots = doc.getFootnotes();
@@ -342,7 +389,7 @@ function fnTest() {
     num_pairs[ url ] = [ i + 1 ];
     text.setUnderline(start, end, null)
       .setForegroundColor(start, end, null);
-  };
+  }
   
   // Apply to text
   
@@ -350,21 +397,38 @@ function fnTest() {
     var text =  paras[ j ].editAsText();
     var locs = getCL( text, 2 );
     
-    var start = locs[ 0 ][ 0 ];
-    var end = locs[ 1 ][ 0 ];
-    var url = locs[ 2 ][ 0 ];
+    var [ starts, ends, urls ] = locs;
+    if ( !starts ) continue;
     
-    if ( !start ) continue;
-    if ( url.substr(0, 3) != '#fn' ) continue;
-    
-    var num = 'fn. ' + String( num_pairs[ url ] );
-    var num_end = start + num.length - 1;
-    
-    text.deleteText( start, end )
-      .insertText( start, num )
-      .setLinkUrl( start, num_end, url )
-      .setUnderline(start, num_end, null)
-      .setForegroundColor(start, num_end, null);
-  };
+    for ( var k = starts.length; k--; ) {
+      var start = starts[ k ];
+      var end = ends[ k ];
+      var url = urls[ k ];
+      
+      if ( url.substr( 0, 3 ) != '#fn' ) continue;
+      
+      var num = 'fn. ' + String( num_pairs[ url ] );
+      var num_end = start + num.length - 1;
+      
+      text.deleteText( start, end )
+        .insertText( start, num )
+        .setLinkUrl( start, num_end, url )
+        .setUnderline( start, num_end, null )
+        .setForegroundColor( start, num_end, null );
+    }
+  }
 }
 
+//
+// # General helper functions
+//
+
+function toCap( str ) {
+  return str.charAt( 0 ).toUpperCase() + str.substr( 1 );
+}
+
+function clearProps() {
+  PropertiesService.getDocumentProperties().deleteAllProperties();
+  PropertiesService.getUserProperties().deleteAllProperties();
+  
+}
