@@ -10,7 +10,7 @@ function createLoF() {
   var lab_count = encodeLabel();
   var position = deleteLoF() || cursor;
   
-  insertDummyLof( lab_count, lab_text, position );
+  insertDummyLoF( lab_count, lab_text, position );
   
   var html = HtmlService.createTemplateFromFile( 'lof' ).evaluate();
   html.setWidth( 250 ).setHeight( 90 );
@@ -34,7 +34,7 @@ function encodeLabel() {
   var lab_count = { 'fig': 0 };
   
   for ( var i = 0; i < paragraphs.length; i++ ) {
-    var text = paragraphs[i].editAsText();
+    var text = paragraphs[ i ].editAsText();
     var locs = getCL( text, 5 );
     var start = locs[ 0 ][ 0 ];
     var url = locs[ 2 ][ 0 ];
@@ -53,24 +53,21 @@ function encodeLabel() {
 
 function deleteLoF() {
   var lof_table = findLoF();
-  if ( lof_table ) {
-    var index = lof_table.getParent().getChildIndex( lof_table );
-    lof_table.removeFromParent();
+  if ( !lof_table ) return;
     
-    return index;
-  }
+  lof_table.removeFromParent();
+  return lof_table.getParent().getChildIndex( lof_table );
 }
 
 
 function findLoF() {
-  var ranges = DocumentApp.getActiveDocument().getNamedRanges( 'lof_table' ),
-      lof = ranges[ 0 ];
+  var lof = DocumentApp.getActiveDocument().getNamedRanges( 'lof_table' )[ 0 ];
   
   return lof ? lof.getRange().getRangeElements()[ 0 ].getElement().asTable() : null;
 }
 
 
-function insertDummyLof( lab_count, lab_text, position ) {
+function insertDummyLoF( lab_count, lab_text, position ) {
   var doc = DocumentApp.getActiveDocument();
   var lof_cells = [];
   var lab_text = toCap( lab_text );
@@ -82,8 +79,7 @@ function insertDummyLof( lab_count, lab_text, position ) {
   });
   
   for ( var i = 1; i <= lab_count[ 'fig' ]; i++ ) {
-    var name = lab_text + i;
-    var row = [ name, placeholder ];
+    var row = [ lab_text + i, placeholder ];
     lof_cells.push( row );
   }
   
@@ -107,15 +103,12 @@ function styleLoF( lof_table ) {
   };
   
   for ( var i = lof_table.getNumRows(); i--; ) {
-    var left_cell = lof_table.getRow( i ).getCell( 0 );
-    var right_cell = lof_table.getRow( i ).getCell( 1 );
-    lof_table.setAttributes( style_attributes );
+    var row = lof_table.getRow( i );
     
-    left_cell.setPaddingLeft( 0 );
-    right_cell.setPaddingRight( 0 )
-      .getChild( 0 )
-      .asParagraph()
-      .setAlignment( DocumentApp.HorizontalAlignment.RIGHT );
+    lof_table.setAttributes( style_attributes );
+    row.getCell( 0 ).setPaddingLeft( 0 );
+    row.getCell( 1 ).setPaddingRight( 0 )
+      .getChild( 0 ).asParagraph().setAlignment( DocumentApp.HorizontalAlignment.RIGHT );
   }
 }
 
@@ -131,15 +124,13 @@ function insertLoFNumbers( pg_nums ) {
   var current_row = 0;
   
   for ( var i = 0; i < pg_nums.length; i++ ) {
-    var pg = i + 1;
     var lab_count = pg_nums[ i ];
     if ( !lab_count ) continue;
 
     for ( var j = current_row; j < current_row + lab_count; j++ ) {
       lof_table.getCell( j, 1 )
         .clear()
-        .getChild( 0 ).asParagraph()
-        .appendText( pg );
+        .getChild( 0 ).asParagraph().appendText( i + 1 );
     }
     var current_row = current_row + lab_count;
   }
