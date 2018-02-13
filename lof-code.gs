@@ -5,7 +5,7 @@ function createLoF() {
   var lab_settings = PropertiesService.getDocumentProperties().getProperty( 'cross_fig' );
   var lab_text = lab_settings ?  toCap( lab_settings.split( '_' )[ 2 ] ) : 'Figure ';
 
-  if ( updateDoc() ) return;
+  if ( updateDoc() === 'error' ) return;
   
   var lab_count = encodeLabel();
   var position = deleteLoF() || cursor;
