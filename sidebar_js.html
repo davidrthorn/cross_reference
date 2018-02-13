@@ -1,12 +1,12 @@
 <script>
 
 var temp_settings = {};
-var reference_codes = [];
+var reference_codes = [  ];
 
 
-$(function() {
-  google.script.run.withSuccessHandler(initialiseSidebar).getSettings();
-})
+$( function() {
+  google.script.run.withSuccessHandler( initialiseSidebar ).getSettings();
+} )
 
 
 //
@@ -14,80 +14,80 @@ $(function() {
 //
 
 
-function initialiseSidebar(settings) {
+function initialiseSidebar( settings ) {
   
-  // Add category (as key) and its settings (as values) to temp_settings
-  for (var i in settings) {
-    var the_settings = settings[i].split('_'),
-        category = the_settings[1];
+  // Add category ( as key ) and its settings ( as values ) to temp_settings
+  for ( var i in settings ) {
+    var the_settings = settings[ i ].split( '_' ),
+        category = the_settings[ 1 ];
         
-    temp_settings[category] = the_settings;
-    reference_codes.push(temp_settings[category][0].substr(0, 3));
+    temp_settings[ category ] = the_settings;
+    reference_codes.push( temp_settings[ category ][ 0 ].substr( 0, 3 ) );
   }
   
   // Add names alphabetically to category drop down list
-  var sorted_names = Object.keys(temp_settings).sort();
-  for (var j in sorted_names) {
-    $('#category-select').append($('<option>', {
-      text: sorted_names[j]
-    }))
+  var sorted_names = Object.keys( temp_settings ).sort();
+  for ( var j in sorted_names ) {
+    $( '#category-select' ).append( $( '<option>', {
+      text: sorted_names[ j ]
+    } ) )
   }
 
-  $('#category-select').data('val', sorted_names[0]);
+  $( '#category-select' ).data( 'val', sorted_names[ 0 ] );
 
-  updateSidebar(sorted_names[0]);
+  updateSidebar( sorted_names[ 0 ] );
   
   // Equation, figure, table cannot be deleted, so don't show button
   // Equation will always be first of these categories alphabetically
-  var displayed = (sorted_names[0] === 'Equation') ? 'none' : 'block';
-  $('#delete-category').css('display', displayed);
+  var displayed = ( sorted_names[ 0 ] === 'Equation' ) ? 'none' : 'block';
+  $( '#delete-category' ).css( 'display', displayed );
 }
 
 
-function updateSidebar(category) {
+function updateSidebar( category ) {
   
   // Assign new variables based on settings to be applied
-  var settings = temp_settings[category],
-      lab_code = settings[0],
-      lab_text = settings[2],
-      ref_text = settings[6],
-      lab_color = (!settings[10] || settings[10] == 'null') ? null : settings[10],
-      ref_color = (!settings[11] || settings[11] == 'null') ? null : settings[11],
+  var settings = temp_settings[ category ],
+      lab_code = settings[ 0 ],
+      lab_text = settings[ 2 ],
+      ref_text = settings[ 6 ],
+      lab_color = ( !settings[ 10 ] || settings[ 10 ] == 'null' ) ? null : settings[ 10 ],
+      ref_color = ( !settings[ 11 ] || settings[ 11 ] == 'null' ) ? null : settings[ 11 ],
       style = {
-        'lab_bold': settings[3],
-        'lab_italic': settings[4],
-        'lab_underline': settings[5],
-        'ref_bold': settings[7],
-        'ref_italic': settings[8],
-        'ref_underline': settings[9]
+        'lab_bold': settings[ 3 ],
+        'lab_italic': settings[ 4 ],
+        'lab_underline': settings[ 5 ],
+        'ref_bold': settings[ 7 ],
+        'ref_italic': settings[ 8 ],
+        'ref_underline': settings[ 9 ]
       };
 
   // Update code and text
-  $('#lab_code').html('#' + lab_code);
-  $('#lab_text').val(lab_text);
-  $('#ref_code').val(lab_code.substr(0, 3)).html('#' + lab_code.substr(0, 3));
-  $('#ref_text').val(ref_text);
+  $( '#lab_code' ).html( '#' + lab_code );
+  $( '#lab_text' ).val( lab_text );
+  $( '#ref_code' ).val( lab_code.substr( 0, 3 ) ).html( '#' + lab_code.substr( 0, 3 ) );
+  $( '#ref_text' ).val( ref_text );
   
   // Update preview text
-  $('#lab').find('.preview__text').html(lab_text + '1');
-  $('#ref').find('.preview__text').html(ref_text + '1');
+  $( '#lab' ).find( '.preview__text' ).html( lab_text + '1' );
+  $( '#ref' ).find( '.preview__text' ).html( ref_text + '1' );
   
   // Update colors
-  function updateColor(id, color) {
+  function updateColor( id, color ) {
       var css = color ? '#' + color : '#000',
-          $id = $(id);
+          $id = $( id );
       
-      $id.find('.preview__text')
-         .css('color', css);
-      $id.find('.color-code')
-         .val(color)
-         .data('val', color);
-      $id.find('.color-icon')
-         .css({'color': css, 'border-bottom-color': css});
+      $id.find( '.preview__text' )
+         .css( 'color', css );
+      $id.find( '.color-code' )
+         .val( color )
+         .data( 'val', color );
+      $id.find( '.color-icon' )
+         .css( {'color': css, 'border-bottom-color': css} );
   }
   
-  updateColor('#ref', ref_color);
-  updateColor('#lab', lab_color);
+  updateColor( '#ref', ref_color );
+  updateColor( '#lab', lab_color );
   
   // Update non-color style
   var css_properties = {
@@ -96,18 +96,18 @@ function updateSidebar(category) {
     'underline': 'text-decoration'
   };
 
-  for (var i in style) {
-    var code = i.substr(0, 3),
-        css_name = i.substr(4, i.length),
+  for ( var i in style ) {
+    var code = i.substr( 0, 3 ),
+        css_name = i.substr( 4, i.length ),
         button_id = '#' + code + '_' + css_name,
-        css_value = (style[i] === 'true') ? css_name : 'initial';
+        css_value = ( style[ i ] === 'true' ) ? css_name : 'initial';
     
-    $('#' + code).find('.preview__text')
-                 .css(css_properties[css_name], css_value);
+    $( '#' + code ).find( '.preview__text' )
+                 .css( css_properties[ css_name ], css_value );
 
-    style[i] === 'true' ?
-             $(button_id).addClass('style-button--selected') :
-             $(button_id).removeClass('style-button--selected');
+    style[ i ] === 'true' ?
+             $( button_id ).addClass( 'style-button--selected' ) :
+             $( button_id ).removeClass( 'style-button--selected' );
   }
 }
 
@@ -117,29 +117,29 @@ function updateSidebar(category) {
 //
 
 
-function selectCategory(category) {
+function selectCategory( category ) {
   updateTemp();
-  updateSidebar(category);
+  updateSidebar( category );
   
   // Remove button should only show with custom categories
-  var del_display = 'EquationFigureFootnoteTable'.includes( category ) ? 'none' : 'block';
+  var del_display = 'EquationFigureFootnoteTable'.includes(  category  ) ? 'none' : 'block';
   
-  var lab_display = 'Footnote'.includes( category ) ? 'block' : 'none';
+  var lab_display = 'Footnote'.includes(  category  ) ? 'block' : 'none';
                   
-  $('#delete-category').css('display', del_display);
-  $('#lab-cover').css('display', lab_display);
+  $( '#delete-category' ).css( 'display', del_display );
+  $( '#lab-cover' ).css( 'display', lab_display );
 }
 
 
 function updateTemp() {
 
-  var prev_name = $('#category-select').data('val'),
-      settings = [
-        $('#lab_code').html().substr(1),
+  var prev_name = $( '#category-select' ).data( 'val' ),
+      settings = [ 
+        $( '#lab_code' ).html().substr( 1 ),
         prev_name,
-        $('#lab_text').val()
-      ],
-      ids = [
+        $( '#lab_text' ).val()
+       ],
+      ids = [ 
         '#lab_bold',
         '#lab_italic',
         '#lab_underline',
@@ -147,83 +147,83 @@ function updateTemp() {
         '#ref_bold',
         '#ref_italic',
         '#ref_underline'
-      ];
+       ];
   
-  for (var i = 0; i < ids.length; i++) {
-    if (ids[i] === 'ref_text') {
-      settings.push($('#ref_text').val());
+  for ( var i = 0; i < ids.length; i++ ) {
+    if ( ids[ i ] === 'ref_text' ) {
+      settings.push( $( '#ref_text' ).val() );
       continue;
     }
-    if ($(ids[i]).hasClass('style-button--selected'))
-      settings.push('true');
+    if ( $( ids[ i ] ).hasClass( 'style-button--selected' ) )
+      settings.push( 'true' );
     else
-      settings.push('null');
+      settings.push( 'null' );
   }
   
-  var $color_code = $('.details').find('.color-code');
+  var $color_code = $( '.details' ).find( '.color-code' );
   
-  var lab_color = $($color_code[0]).data('val') != undefined ?
-                  $($color_code[0]).data('val') :
+  var lab_color = $( $color_code[ 0 ] ).data( 'val' ) != undefined ?
+                  $( $color_code[ 0 ] ).data( 'val' ) :
                   null;
-  var ref_color = $($color_code[1]).data('val') != undefined ?
-                  $($color_code[1]).data('val') :
+  var ref_color = $( $color_code[ 1 ] ).data( 'val' ) != undefined ?
+                  $( $color_code[ 1 ] ).data( 'val' ) :
                   null;
   
-  settings.push(lab_color, ref_color);
+  settings.push( lab_color, ref_color );
   
-  temp_settings[prev_name] = settings
+  temp_settings[ prev_name ] = settings
 
-  $('#category-select').data('val', $('#category-select').val());
+  $( '#category-select' ).data( 'val', $( '#category-select' ).val() );
 }
 
 
 
-$('#category-select').on('focusin', function() {
-  $(this).data('val', $(this).val());
-})
+$( '#category-select' ).on( 'focusin', function() {
+  $( this ).data( 'val', $( this ).val() );
+} )
 
 
-$('#category-select').on('change', function() {
-  selectCategory(this.value)
-})
+$( '#category-select' ).on( 'change', function() {
+  selectCategory( this.value )
+} )
 
 
-$('#add-category').on('click', function() {
+$( '#add-category' ).on( 'click', function() {
   
-  var to_hide = '.category__button, #category-select, #lab_code, .actions__row:not(:last-child)',
+  var to_hide = '.category__button, #category-select, #lab_code, .actions__row:not( :last-child )',
       to_show = '#custom-category-name, #cs_lab_code, .actions__row:last-child',
       to_clear = '#custom-category-name, #lab_code, #lab_code_entry, #lab_text, #ref_code, #ref_text';
    
-  $(to_hide).css('display', 'none');
-  $(to_show).css('display', 'block');
-  $(to_clear).val('');
-  $('#ref_code').html('#');
-  $('.preview__text').css({
+  $( to_hide ).css( 'display', 'none' );
+  $( to_show ).css( 'display', 'block' );
+  $( to_clear ).val( '' );
+  $( '#ref_code' ).html( '#' );
+  $( '.preview__text' ).css( {
     'color': 'unset',
     'font-weight': 'unset',
     'font-style': 'unset',
     'text-decoration': 'unset'
-  }).html('&lt;element&gt;')
+  } ).html( '&lt;element&gt;' )
   
-  $('.color-button, .color-button *').css({'color': 'unset', 'border-bottom-color': 'unset'});
-  $('.color-code').val(null).data('val', null);
+  $( '.color-button, .color-button *' ).css( {'color': 'unset', 'border-bottom-color': 'unset'} );
+  $( '.color-code' ).val( null ).data( 'val', null );
 
-  $('.style-button--selected').removeClass('style-button--selected')
-})
+  $( '.style-button--selected' ).removeClass( 'style-button--selected' )
+} )
 
 
-$('#delete-category').on('click', function() {
-  var ref = $('#ref_code').html().substr(1, 4);
-  var current_name = $('#category-select').val();
+$( '#delete-category' ).on( 'click', function() {
+  var ref = $( '#ref_code' ).html().substr( 1, 4 );
+  var current_name = $( '#category-select' ).val();
   
-  $(this).css('display', 'none')
-  google.script.run.withSuccessHandler(revertToFirstCategory).removePair(ref);
-  $('#category-select option:contains("' + current_name + '")').remove();
+  $( this ).css( 'display', 'none' )
+  google.script.run.withSuccessHandler( revertToFirstCategory ).removePair( ref );
+  $( '#category-select option:contains( "' + current_name + '" )' ).remove();
   
-  if (reference_codes.indexOf(ref) !== -1) {
-    reference_codes.splice(reference_codes.indexOf(ref), 1);
+  if ( reference_codes.indexOf( ref ) !== -1 ) {
+    reference_codes.splice( reference_codes.indexOf( ref ), 1 );
   }
-})
+} )
 
 
 //
@@ -234,86 +234,86 @@ $('#delete-category').on('click', function() {
 function revertCustomScreen() {
 
   var to_hide = '#custom-category-name, #cs_lab_code, .actions__row:last-child',
-      to_show = '#category-select, #lab_code, .actions__row:not(:last-child)';
+      to_show = '#category-select, #lab_code, .actions__row:not( :last-child )';
   
-  $(to_hide).css('display', 'none');
-  $(to_show).css('display', 'block');
-  $('#add-category').css('display', 'block');
-  $('#set_defaults').prop('disabled', false);
+  $( to_hide ).css( 'display', 'none' );
+  $( to_show ).css( 'display', 'block' );
+  $( '#add-category' ).css( 'display', 'block' );
+  $( '#set_defaults' ).prop( 'disabled', false );
 }
 
 
 function revertToFirstCategory() {
-  var safe_categories = ['Equation', 'Figure', 'Table'],
-      first_category = $('#category-select option:first').val(),
-      is_displayed = (safe_categories.indexOf(first_category) < 0) ? 'block' : 'none';
+  var safe_categories = [ 'Equation', 'Figure', 'Table' ],
+      first_category = $( '#category-select option:first' ).val(),
+      is_displayed = ( safe_categories.indexOf( first_category ) < 0 ) ? 'block' : 'none';
   
-  $('#delete-category').css('display', is_displayed);
-  $('#category-select').val($('#category-select option:first'));
+  $( '#delete-category' ).css( 'display', is_displayed );
+  $( '#category-select' ).val( $( '#category-select option:first' ) );
 
-  updateSidebar(first_category);
+  updateSidebar( first_category );
 }
 
 
 
-$('#lab_code_entry').keyup(function() {
-  var lab_code = $(this).val();
+$( '#lab_code_entry' ).keyup( function() {
+  var lab_code = $( this ).val();
   
-  $(this).val(lab_code.toLowerCase());
+  $( this ).val( lab_code.toLowerCase() );
 
-  if (reference_codes.indexOf(lab_code.substr(0, 3)) >= 0) {
-    $('#taken').html('⚠ in use')
-               .css('color', '#9c3030');
-    $(this).attr('maxlength', '3');
+  if ( reference_codes.indexOf( lab_code.substr( 0, 3 ) ) >= 0 ) {
+    $( '#taken' ).html( '⚠ in use' )
+               .css( 'color', '#9c3030' );
+    $( this ).attr( 'maxlength', '3' );
   }
   else {
-    $(this).attr('maxlength', '5');
-    $('#taken').html('5 letters min')
-               .css('color', 'gray');
+    $( this ).attr( 'maxlength', '5' );
+    $( '#taken' ).html( '5 letters min' )
+               .css( 'color', 'gray' );
   }
 
-  $('#lab_code').html('#' + lab_code);
-  $('#ref_code').html('#' + lab_code.substr(0, 3));
-})
+  $( '#lab_code' ).html( '#' + lab_code );
+  $( '#ref_code' ).html( '#' + lab_code.substr( 0, 3 ) );
+} )
 
 
-$('#custom-category-name').keyup(function() {
-  $('#category-select').data('val', this.value);
-})
+$( '#custom-category-name' ).keyup( function() {
+  $( '#category-select' ).data( 'val', this.value );
+} )
 
 
-$('#save-custom').on('click', function() {
-  var custom_name = $('#custom-category-name').val();
+$( '#save-custom' ).on( 'click', function() {
+  var custom_name = $( '#custom-category-name' ).val();
   var custom_settings;
   
-  $('#save-apply').prop('disabled', true);
-  saveProperties('#save-apply');
+  $( '#save-apply' ).prop( 'disabled', true );
+  saveProperties( '#save-apply' );
   
-  custom_settings = temp_settings[custom_name];
+  custom_settings = temp_settings[ custom_name ];
 
-  google.script.run.storeCustom(custom_settings);
+  google.script.run.storeCustom( custom_settings );
 
-  $('#category-select option:last').after($('<option>', {text: custom_name}))
-  $('#category-select').val(custom_name);
+  $( '#category-select option:last' ).after( $( '<option>', {text: custom_name} ) )
+  $( '#category-select' ).val( custom_name );
   revertCustomScreen();
-  $('#delete-category').css('display', 'block');
-})
+  $( '#delete-category' ).css( 'display', 'block' );
+} )
 
 
-$('#cancel-custom').on('click', function() {
+$( '#cancel-custom' ).on( 'click', function() {
   revertToFirstCategory();
   revertCustomScreen();
-})
+} )
 
 
 // Disable saving a custom pairing while nameless or label code too short
-document.onkeyup=function(e){
-  var name_length = $('#custom-category-name').val().length,
-      lab_length = $('#lab_code_entry').val().length;
+document.onkeyup=function( e ){
+  var name_length = $( '#custom-category-name' ).val().length,
+      lab_length = $( '#lab_code_entry' ).val().length;
   
-  var disabled = (name_length > 0 && lab_length === 5) ? false : true;
+  var disabled = ( name_length > 0 && lab_length === 5 ) ? false : true;
   
-  $('#save-custom').prop('disabled', disabled);
+  $( '#save-custom' ).prop( 'disabled', disabled );
 }
 
 
@@ -326,14 +326,14 @@ document.onkeyup=function(e){
 //
 
 
-$('#lab_text').keyup(function() {
-  $('#lab').find('.preview__text').html($(this).val() + '1');
-})
+$( '#lab_text' ).keyup( function() {
+  $( '#lab' ).find( '.preview__text' ).html( $( this ).val() + '1' );
+} )
 
 
-$('#ref_text').keyup(function() {
-  $('#ref').find('.preview__text').html($(this).val() + '1');
-})
+$( '#ref_text' ).keyup( function() {
+  $( '#ref' ).find( '.preview__text' ).html( $( this ).val() + '1' );
+} )
 
 
 //
@@ -341,12 +341,12 @@ $('#ref_text').keyup(function() {
 //
 
 
-$('.style-button').on('click', function() {
-  $(this).toggleClass('style-button--selected');
+$( '.style-button' ).on( 'click', function() {
+  $( this ).toggleClass( 'style-button--selected' );
   
   var id = this.id,
-      css_value_name = id.substr(4, this.length),
-      category = '#' + id.substr(0, 3);
+      css_value_name = id.substr( 4, this.length ),
+      category = '#' + id.substr( 0, 3 );
     
   var css_properties = {
     'bold': 'font-weight',
@@ -354,10 +354,10 @@ $('.style-button').on('click', function() {
     'underline': 'text-decoration'
   }
   
-  var css_value = ($(this).hasClass('style-button--selected')) ? css_value_name : 'initial';
+  var css_value = ( $( this ).hasClass( 'style-button--selected' ) ) ? css_value_name : 'initial';
   
-  $(category).find('.preview__text').css(css_properties[css_value_name], css_value);
-})
+  $( category ).find( '.preview__text' ).css( css_properties[ css_value_name ], css_value );
+} )
 
 
 //
@@ -365,17 +365,17 @@ $('.style-button').on('click', function() {
 //
 
 
-function coerceToValidColor(color_value) {
-   if (!color_value) return null;
+function coerceToValidColor( color_value ) {
+   if ( !color_value ) return null;
    
    // Only 3 or 6 character strings allowed. Chars must be valid.
-   if (!Number.isInteger(color_value.length/3) || /[^a-f0-9]+/i.test(color_value)) return null;
+   if ( !Number.isInteger( color_value.length/3 ) || /[ ^a-f0-9 ]+/i.test( color_value ) ) return null;
    
    var new_value = '';
    
    // Convert 3-letter hex codes to 6 letters
-   if (color_value.length === 3)
-     for (var i = 0; i < 3; i++) new_value += color_value.charAt(i).repeat(2);
+   if ( color_value.length === 3 )
+     for ( var i = 0; i < 3; i++ ) new_value += color_value.charAt( i ).repeat( 2 );
    else
      new_value = color_value;
    
@@ -383,81 +383,81 @@ function coerceToValidColor(color_value) {
 }
 
 
-function confirmColor(button) {
+function confirmColor( button ) {
   var $color_pane = button.parent(),
-      $color_text = $color_pane.prev().children('div'),
-      $color_code = $color_pane.children('.color-code'),
-      color_value = coerceToValidColor($color_code.val());
+      $color_text = $color_pane.prev().children( 'div' ),
+      $color_code = $color_pane.children( '.color-code' ),
+      color_value = coerceToValidColor( $color_code.val() );
   
-  if (color_value) {
+  if ( color_value ) {
     var hex = "#" + color_value;
-    $color_code.data('val', color_value)
-               .val(color_value);
+    $color_code.data( 'val', color_value )
+               .val( color_value );
   } else {
     var hex = "#000000";
-    $color_code.data('val', null)
-               .val(color_value);
+    $color_code.data( 'val', null )
+               .val( color_value );
    }
    
-  $color_text.css({'color': hex, 'border-bottom-color': hex});
-  $($color_pane.parentsUntil('.details').find('.preview__text')).css('color', hex);
+  $color_text.css( {'color': hex, 'border-bottom-color': hex} );
+  $( $color_pane.parentsUntil( '.details' ).find( '.preview__text' ) ).css( 'color', hex );
   $color_pane.next().andSelf().hide();
 }
 
 
-function updateColorCode(gs_array) {
-  if (typeof gs_array == 'undefined') return;
-  var lab_or_ref = '#' + gs_array[0];
-  var cloned_hex = gs_array[1];
-  $(lab_or_ref).find('.color-code').val(cloned_hex);
+function updateColorCode( gs_array ) {
+  if ( typeof gs_array == 'undefined' ) return;
+  var lab_or_ref = '#' + gs_array[ 0 ];
+  var cloned_hex = gs_array[ 1 ];
+  $( lab_or_ref ).find( '.color-code' ).val( cloned_hex );
 }
 
 
-function cancelColor(button) {
-  var $code = button.siblings('.color-code').andSelf();
-  $code.val($code.data('val'));
+function cancelColor( button ) {
+  var $code = button.siblings( '.color-code' ).andSelf();
+  $code.val( $code.data( 'val' ) );
   button.parent().next().andSelf().hide();
 }
 
 
 
-$('.color-button').on('click', function() {
-  $(this).nextAll('.color-hide').slice(0,2).toggle();
+$( '.color-button' ).on( 'click', function() {
+  $( this ).nextAll( '.color-hide' ).slice( 0,2 ).toggle();
   event.stopPropagation();
-})
+} )
 
 
-$('.color-code').on('keydown', function(e) {
-  if (e.keyCode == 13) {
-     confirmColor($(this));
-   } else if (e.keyCode == 27) {
-     cancelColor($(this));
+$( '.color-code' ).on( 'keydown', function( e ) {
+  if ( e.keyCode == 13 ) {
+     confirmColor( $( this ) );
+   } else if ( e.keyCode == 27 ) {
+     cancelColor( $( this ) );
    }
-})
+} )
 
 
-$('.clone-color').on('click', function() {
-  var lab_or_ref = $(this).closest('.main-section').attr('id')
-  google.script.run.withSuccessHandler(updateColorCode).cloneColor(lab_or_ref);
-})
+$( '.clone-color' ).on( 'click', function() {
+  var lab_or_ref = $( this ).closest( '.main-section' ).attr( 'id' )
+  google.script.run.withSuccessHandler( updateColorCode ).cloneColor( lab_or_ref );
+} )
 
 
-$('.confirm-color').on('click', function(){
-  confirmColor($(this));
-})
+$( '.confirm-color' ).on( 'click', function(){
+  confirmColor( $( this ) );
+} )
 
 
-$('.cancel-color').on('click', function() {
-  cancelColor($(this));
+$( '.cancel-color' ).on( 'click', function() {
+  cancelColor( $( this ) );
   event.stopPropagation();
-})
+} )
 
 
 // Hide color pane when anything else clicked
-$(document).on("click", function(e){
-  if($(e.target).is('.color-pane, .color-pane *, .color-button')) return;
-  $('.color-hide').hide();
-});
+$( document ).on( "click", function( e ){
+  if( $( e.target ).is( '.color-pane, .color-pane *, .color-button' ) ) return;
+  $( '.color-hide' ).hide();
+} );
 
 //
 // ## Main buttons
@@ -465,39 +465,39 @@ $(document).on("click", function(e){
 
 
 // Save the current sidebar settings as document settings
-function saveProperties(button) {
+function saveProperties( button ) {
   updateTemp();
-  google.script.run.withSuccessHandler(enableButton).updateProps(temp_settings);
+  google.script.run.withSuccessHandler( enableButton ).updateProps( temp_settings );
 }
 
 
-function enableButton(button) {
-  $(button).prop('disabled', false);
+function enableButton( button ) {
+  $( button ).prop( 'disabled', false );
 }
 
 
 
-$('#save-defaults').on('click', function() {
-  $(this).prop('disabled', true);
+$( '#save-defaults' ).on( 'click', function() {
+  $( this ).prop( 'disabled', true );
   updateTemp();
-  google.script.run.withSuccessHandler(enableButton).storeDefault(temp_settings);
-})
+  google.script.run.withSuccessHandler( enableButton ).storeDefault( temp_settings );
+} )
 
 
-$('#restore-defaults').on('click', function() {
-  $('#category-select').find('option').remove().end();
-  google.script.run.withSuccessHandler(initialiseSidebar).restoreDefault();
-})
+$( '#restore-defaults' ).on( 'click', function() {
+  $( '#category-select' ).find( 'option' ).remove().end();
+  google.script.run.withSuccessHandler( initialiseSidebar ).restoreDefault();
+} )
 
 
-$('#save-apply').on('click', function() {
-  $(this).prop('disabled', true);
+$( '#save-apply' ).on( 'click', function() {
+  $( this ).prop( 'disabled', true );
   saveProperties();
-})
+} )
 
 
-$('#cancel').on('click', function() {
+$( '#cancel' ).on( 'click', function() {
   google.script.host.close()
-})
+} )
 
 </script>
