@@ -124,6 +124,7 @@ function updateDoc() {
   uPropsToDProps();
   
   var num_pairs = updateParas( paras, true, lab_props );
+  
   fnLabs( foots, lab_props, num_pairs );
 
   if ( Array.isArray( num_pairs ) ) {
@@ -214,7 +215,6 @@ function updateParas( paras, is_lab, props, num_pairs ) {
 
 function getCL( text, code_len ) {
 
-  var url, pre_url, loc;
   var starts = [], ends = [], urls = [];
   var len = text.getText().length;
   var idxs = text.getTextAttributeIndices();
@@ -222,16 +222,18 @@ function getCL( text, code_len ) {
   
   idxs.push( len );
 
-  for ( var i in idxs ) {
-    loc = idxs[ i ];
-    pre_url = ( i > 0 ) ? text.getLinkUrl( loc - 1 ) : null;
-    url = ( loc !== len ) ? text.getLinkUrl( loc ) : null;
+  for ( var i = 0; i < idxs.length; i++ ) {
+    var loc = idxs[ i ];
+    var pre_url = i ? text.getLinkUrl( loc - 1 ) : null;
+    var url = ( loc !== len ) ? text.getLinkUrl( loc ) : null;
 
-    if ( !reUrl.test( pre_url ) && reUrl.test( url )) {
+    if ( !reUrl.test( pre_url ) && reUrl.test( url ) ) {
       starts.push( loc );
       urls.push( url );
     }
-    if ( reUrl.test( pre_url ) && !reUrl.test( url ) ) ends.push( loc - 1 );
+    if ( reUrl.test( pre_url ) && !reUrl.test( url ) ) {
+      ends.push( loc - 1 );
+    }
   }
   
   return [ starts, ends, urls ];
@@ -367,57 +369,6 @@ function fnLabs( foots, fn_props, num_pairs ) {
   return num_pairs;
 }
 
-function updateFns() {
-  var doc = DocumentApp.getActiveDocument();
-  var paras = doc.getBody().getParagraphs();
-  var foots = doc.getFootnotes();
-  var num_pairs = {};
-  
-  // Pick up label footnotes
-  
-  for ( var i = 0, len = foots.length; i < len; i++ ) {
-    var text =  foots[ i ].getFootnoteContents().getParagraphs()[0].editAsText();
-    var locs = getCL( text, 2 );
-    
-    var start = locs[ 0 ][ 0 ];
-    var end = locs[ 1 ][ 0 ];
-    var url = locs[ 2 ][ 0 ];
-    
-    if ( !start ) continue;
-    if ( url.substr(0, 3) != '#fn' ) continue;
-    
-    num_pairs[ url ] = [ i + 1 ];
-    text.setUnderline(start, end, null)
-      .setForegroundColor(start, end, null);
-  }
-  
-  // Apply to text
-  
-  for ( var j = 0, len = paras.length; j < len; j++ ) {
-    var text =  paras[ j ].editAsText();
-    var locs = getCL( text, 2 );
-    
-    var [ starts, ends, urls ] = locs;
-    if ( !starts ) continue;
-    
-    for ( var k = starts.length; k--; ) {
-      var start = starts[ k ];
-      var end = ends[ k ];
-      var url = urls[ k ];
-      
-      if ( url.substr( 0, 3 ) != '#fn' ) continue;
-      
-      var num = 'fn. ' + String( num_pairs[ url ] );
-      var num_end = start + num.length - 1;
-      
-      text.deleteText( start, end )
-        .insertText( start, num )
-        .setLinkUrl( start, num_end, url )
-        .setUnderline( start, num_end, null )
-        .setForegroundColor( start, num_end, null );
-    }
-  }
-}
 
 //
 // # General helper functions
