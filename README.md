@@ -19,3 +19,5 @@ Once you have some labels and references, you can update the document by going t
 # This didn't work / I don't get it / how do I change the style of labels or references / help me
 
 The wiki covers the use of Cross Reference in more depth, including customising labels and references. Please feel free to raise issues or ask questions!
+
+[WIKI](https://github.com/davidrthorn/cross_reference/wiki/Cross-Reference-for-Google-Docs)
