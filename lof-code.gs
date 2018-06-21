@@ -1,22 +1,20 @@
-
 function createLoF() {
 
   var cursor = getCursorIndex();
-  var lab_settings = PropertiesService.getDocumentProperties().getProperty( 'cross_fig' );
-  var lab_text = lab_settings ?  toCap( lab_settings.split( '_' )[ 2 ] ) : 'Figure ';
+  var labSettings = PropertiesService.getDocumentProperties().getProperty( 'cross_fig' );
+  var labText = labSettings ?  toCap( labSettings.split( '_' )[ 2 ] ) : 'Figure ';
 
   if ( updateDoc() === 'error' ) return;
   
-  var lab_count = encodeLabel();
+  var labCount = encodeLabel();
   var position = deleteLoF() || cursor;
   
-  insertDummyLoF( lab_count, lab_text, position );
+  insertDummyLoF( labCount, labText, position );
   
   var html = HtmlService.createTemplateFromFile( 'lof' ).evaluate();
   html.setWidth( 250 ).setHeight( 90 );
   DocumentApp.getUi().showModalDialog( html, 'Generating list of figures...' );
 }
-
 
 function getCursorIndex() {
   var cursor = DocumentApp.getActiveDocument().getCursor();
@@ -31,81 +29,94 @@ function getCursorIndex() {
 function encodeLabel() {
   var doc = DocumentApp.getActiveDocument();
   var paragraphs = doc.getBody().getParagraphs();
-  var lab_count = { 'fig': 0 };
+  var labCount = { 'fig': 0 };
+  var figDescs = '';
   
   for ( var i = 0; i < paragraphs.length; i++ ) {
     var text = paragraphs[ i ].editAsText();
-    var locs = getCL( text, 5 );
+    var locs = getCrossLinks( text, 5 );
     var start = locs[ 0 ][ 0 ];
     var url = locs[ 2 ][ 0 ];
-    
-    if ( !start ) continue;
+
+    if ( !locs[ 0 ].length ) continue;
     
     if ( url.substr( 0, 4 ) === '#fig' ) {
+
+      figDescs += 'ഛಎ' + text.getText().match(/([ ]\d[^\w]*)([^\.]*)/)[2]
+    
       text.deleteText( start, start + 1 )
         .insertText( start, '☙' );
-      lab_count[ 'fig' ]++;
+      labCount[ 'fig' ]++;
     }
   }
-  return lab_count;
+  
+  PropertiesService.getDocumentProperties().setProperty('fig_descs', figDescs)
+  return labCount;
 }
 
 
 function deleteLoF() {
-  var lof_table = findLoF();
-  if ( !lof_table ) return;
-    
-  lof_table.removeFromParent();
-  return lof_table.getParent().getChildIndex( lof_table );
+  var lofTable = findLoF();
+  if ( !lofTable ) return;
+  
+  var lofIndex = lofTable.getParent().getChildIndex( lofTable );
+  lofTable.removeFromParent();
+  
+  return lofIndex
 }
 
 
 function findLoF() {
-  var lof = DocumentApp.getActiveDocument().getNamedRanges( 'lof_table' )[ 0 ];
+  var lof = DocumentApp.getActiveDocument().getNamedRanges( 'lofTable' )[ 0 ];
   
   return lof ? lof.getRange().getRangeElements()[ 0 ].getElement().asTable() : null;
 }
 
 
-function insertDummyLoF( lab_count, lab_text, position ) {
+function insertDummyLoF( labCount, labText, position ) {
   var doc = DocumentApp.getActiveDocument();
-  var lof_cells = [];
-  var lab_text = toCap( lab_text );
+  var lofCells = [];
+  var labText = toCap( labText );
   var placeholder = '...';
   var range = doc.newRange();
   
-  doc.getNamedRanges( 'lof_table' ).forEach( function( r ) {
+  doc.getNamedRanges( 'lofTable' ).forEach( function( r ) {
     r.remove()
   });
   
-  for ( var i = 1; i <= lab_count[ 'fig' ]; i++ ) {
-    var row = [ lab_text + i, placeholder ];
-    lof_cells.push( row );
+  var figDescs = PropertiesService.getDocumentProperties().getProperty('fig_descs');
+  var splitDescs = figDescs ? figDescs.split('ഛಎ') : null;
+  
+  for ( var i = 1; i <= labCount[ 'fig' ]; i++ ) {
+    var figName = labText + i;
+    var figDesc = splitDescs && splitDescs[i].length ? ': ' + splitDescs[i] : '';
+    var row = [ figName + figDesc, placeholder ];
+    lofCells.push( row );
   }
   
-  var lof_table = doc.getBody().insertTable( position, lof_cells );
-  styleLoF( lof_table );
+  var lofTable = doc.getBody().insertTable( position, lofCells )
+  styleLoF( lofTable );
   
-  range.addElement( lof_table );
-  doc.addNamedRange('lof_table', range.build() )
+  range.addElement( lofTable );
+  doc.addNamedRange('lofTable', range.build() )
 }
 
 
-function styleLoF( lof_table ) {
+function styleLoF( lofTable ) {
   
-  lof_table.setBorderWidth( 0 );
+  lofTable.setBorderWidth( 0 );
   
-  var style_attributes = {
+  var styleAttributes = {
     'BOLD': null,
     'ITALIC': null,
     'UNDERLINE': null,
     'FONT_SIZE': null
   };
   
-  for ( var i = lof_table.getNumRows(); i--; ) {
-    var row = lof_table.getRow( i );
+  for ( var i = lofTable.getNumRows(); i--; ) {
+    var row = lofTable.getRow( i );
     
-    lof_table.setAttributes( style_attributes );
+    lofTable.setAttributes( styleAttributes ).setColumnWidth( 1, 64 );
     row.getCell( 0 ).setPaddingLeft( 0 );
     row.getCell( 1 ).setPaddingRight( 0 )
       .getChild( 0 ).asParagraph().setAlignment( DocumentApp.HorizontalAlignment.RIGHT );
@@ -120,19 +131,19 @@ function getDocAsPDF() {
 
 function insertLoFNumbers( pg_nums ) {
   
-  var lof_table = findLoF();
-  var current_row = 0;
+  var lofTable = findLoF();
+  var currentRow = 0;
   
   for ( var i = 0; i < pg_nums.length; i++ ) {
-    var lab_count = pg_nums[ i ];
-    if ( !lab_count ) continue;
+    var labCount = pg_nums[ i ];
+    if ( !labCount ) continue;
 
-    for ( var j = current_row; j < current_row + lab_count; j++ ) {
-      lof_table.getCell( j, 1 )
+    for ( var j = currentRow; j < lofTable.getNumRows(); j++ ) {
+      lofTable.getCell( j, 1 )
         .clear()
         .getChild( 0 ).asParagraph().appendText( i + 1 );
     }
-    var current_row = current_row + lab_count;
+    var currentRow = currentRow + labCount;
   }
 }
 
@@ -143,7 +154,7 @@ function restoreLabels() {
   
   for ( var i = 0; i < paras.length; i++ ) {
     var text = paras[ i ].editAsText();
-    var locs = getCL( text, 5 );
+    var locs = getCrossLinks( text, 5 );
     var starts = locs[ 0 ];
     var urls = locs[ 2 ];
     
