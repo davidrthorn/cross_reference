@@ -147,8 +147,6 @@ function updateDoc() {
       return 'error';
     };
   };
-  
-  updateFns();
 }
 
 
@@ -165,7 +163,7 @@ function updateParas( paras, is_lab, props, num_pairs ) {
     var text = paras[ i ].editAsText();
     
     // Get location of cross links in text
-    var idxs = getCL( text, code_len );
+    var idxs = getCrossLinks( text, code_len );
     var [ starts, ends, urls ] = idxs;
 
     if ( !starts.length ) continue;
@@ -213,7 +211,7 @@ function updateParas( paras, is_lab, props, num_pairs ) {
 }
 
 
-function getCL( text, code_len ) {
+function getCrossLinks( text, code_len ) {
 
   var starts = [], ends = [], urls = [];
   var len = text.getText().length;
@@ -350,7 +348,7 @@ function fnLabs( foots, fn_props, num_pairs ) {
     var paras = foots[ i ].getFootnoteContents().getParagraphs();
     for ( var j = 0; j < paras.length; j++ ) {
       var text = paras[ j ].editAsText();
-      var locs = getCL( text, 5 );
+      var locs = getCrossLinks( text, 5 );
       
       var start = locs[ 0 ][ 0 ];
       var end = locs[ 1 ][ 0 ];
@@ -381,5 +379,11 @@ function toCap( str ) {
 function clearProps() {
   PropertiesService.getDocumentProperties().deleteAllProperties();
   PropertiesService.getUserProperties().deleteAllProperties();
+  
+}
+
+function viewProps() {
+  Logger.log(PropertiesService.getDocumentProperties().getProperties())
+  Logger.log(PropertiesService.getUserProperties().getProperties())
   
 }
