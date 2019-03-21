@@ -1,3 +1,8 @@
+# CROSS REFERENCE IS NO LONGER BEING ACTIVELY MAINTAINED
+I no longer have time to maintain this extension and I no longer use Google Docs much, so I'm not keeping up with developments in its APIs.
+
+<hr>
+
 <img src="/images/Panel_small.png" width="220px">
 
 # What is Cross Reference?
