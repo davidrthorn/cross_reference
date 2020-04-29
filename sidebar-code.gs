@@ -4,31 +4,59 @@
 // ***
 //
 
+var orderedSettingsKeys = [
+    'labCode',
+    'labName',
+    'labText',
+    'labIsBold',
+    'labIsItalic',
+    'labIsUnderlines',
+    'refText',
+    'refIsBold',
+    'refIsItalic',
+    'refIsUnderlines',
+    'labColor',
+    'refColor',
+    'labSuffix',
+    'refSuffix',
+]
+
+//TODO THIS IS DUPED
+function encodeSettings ( unencoded ) {
+  var result = ''
+  for ( var i = 0; i < orderedSettingsKeys.length; i++ ) {
+    var k = orderedSettingsKeys[ i ];
+    result += (k in unencoded ? unencoded[k] : 'null') + '_'
+  }
+  return result.slice( 0 , -1 )
+
+}
+
 // Update the Docs property stores
-function updateProps(settings) {
-  
+function updateProps(tempSettings) {
   var document_properties = PropertiesService.getDocumentProperties();
   
-  for (var i in document_properties.getProperties()) {
-    if (i.substr(0, 6) === "cross_")  document_properties.deleteProperty(i);
+  for (var key in document_properties.getProperties()) {
+    if (isCrossProp(key)) {
+      document_properties.deleteProperty(i);
+    }
   }
   
-  for (var i in settings) {
-    var setting = settings[i],
-        code = setting[0].substr(0, 3),
-        property_key = 'cross_' + code;
+  for (var labName in tempSettings) {
+    var settings = tempSettings[labName];
+    var code = settings.labCode.substr(0, 3);
+    var property_key = 'cross_' + code;
     var property_value = '';
     
-    for (var j = 0; j < (setting.length - 1); j++) {property_value += setting[j] + '_'}
-    
-    property_value += setting[setting.length - 1];
-    document_properties.setProperty(property_key, property_value);
+    document_properties.setProperty(property_key, encodeSettings(settings));
   }
   
   updateDoc();
   return '#save-apply';
 }
 
+
+function isCrossProp (propKey) { return propKey.substr(0, 6) === 'cross' }
 
 // Get the settings for this document
 function getSettings() {
@@ -42,12 +70,16 @@ function getSettings() {
   settings['equ'] = 'equat_Equation_equation _null_null_null_equation _null_null_null_null_null';
   settings['fno'] = 'fnote_Footnote__null_null_null_fn. _null_null_null_null_null';
   
-  for (var i in user_properties) {
-    if (i.substr(0, 5) === 'cross')  settings[i.substr(6, i.length)] = user_properties[i];
+  for (var key in user_properties) {
+    if (isCrossProp(key)) {
+      settings[i.substr(6, i.length)] = user_properties[i];
+    }
   }
   
-  for (var i in document_properties) {
-    if (i.substr(0, 5) === 'cross')  settings[i.substr(6, i.length)] = document_properties[i];
+  for (var key in document_properties) {
+    if (isCrossProp(key)) {
+      settings[i.substr(6, i.length)] = document_properties[i];
+    }
   }
 
   return settings
