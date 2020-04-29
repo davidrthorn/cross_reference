@@ -1,19 +1,6 @@
 <script>
-
-  var temp_settings = {};
-  var reference_codes = [];
-  
-  $(function() {
-    google.script.run.withSuccessHandler(initialiseSidebar).getSettings();
-  })
-  
-  function htmlEncode(str){
-    return String(str).replace(/[^\w. ]/gi, function(c){
-       return '&#'+c.charCodeAt(0)+';';
-    });
-  }
-  
-  var orderedSettingsKeys = [
+// *** Must be duplicated in settings.gs because gs is not js.
+var orderedSettingsKeys = [
       'labCode',
       'labName',
       'labText',
@@ -29,7 +16,7 @@
       'labSuffix',
       'refSuffix',
   ]
-    
+
   function encodeSettings ( unencoded ) {
     var result = ''
     for ( var i = 0; i < orderedSettingsKeys.length; i++ ) {
@@ -46,6 +33,22 @@
       .reduce( function ( result, current, i ) { result[ orderedSettingsKeys[ i ] ] = current; return result }, {}) 
   }
   
+  // *** END DUPE
+  
+    
+  var temp_settings = {};
+  var reference_codes = [];
+  
+  $(function() {
+    google.script.run.withSuccessHandler(initialiseSidebar).getSettings();
+  })
+  
+  function htmlEncode(str){
+    return String(str).replace(/[^\w. ]/gi, function(c){
+       return '&#'+c.charCodeAt(0)+';';
+    });
+  }
+  
   
   //
   // # Update the sidebar
@@ -56,10 +59,10 @@
     
     // Add category (as key) and its settings (as values) to temp_settings
     for (var i in settings) {
-      var decoded = decodeSettings(settings[i]);
+      var set = settings[i];
       
-      temp_settings[decoded.labName] = decoded;
-      reference_codes.push(decoded.refCode);
+      temp_settings[set.labName] = set;
+      reference_codes.push(set.refCode);
     }
     
     // Add names alphabetically to category drop down list
