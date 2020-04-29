@@ -67,7 +67,7 @@ function getDefaultSettings() {
       refIsUnderlines: 'null',
       labColor: 'null',
       refColor: 'null',
-      labSuffix: 'null',
+      labSuffix: 'sug',
       refSuffix: 'null',
     },
     Footnote: {

@@ -7,46 +7,45 @@
 
 // Update the Docs property stores
 function updateProps(tempSettings) {
-  var documentProperties = PropertiesService.getDocumentProperties();
+  var docProps = PropertiesService.getDocumentProperties();
 
-  for (var key in documentProperties.getProperties()) {
+  for (var key in docProps.getProperties()) {
     if (isCrossProp(key)) {
-      documentProperties.deleteProperty(key);
+      docProps.deleteProperty(key);
     }
   }
 
   for (var labName in tempSettings) {
     var settings = tempSettings[labName];
-    var code = settings.labCode.substr(0, 3);
-    var property_key = 'cross_' + code;
     var property_value = '';
 
-    documentProperties.setProperty(property_key, encodeSettings(settings));
+    docProps.setProperty(getPropKey(settings), encodeSettings(settings));
   }
 
   updateDoc();
   return '#save-apply';
 }
 
-function isCrossProp(propKey) { return propKey.substr(0, 6) === 'cross' }
+function isCrossProp(propKey) { return propKey.substr(0, 6) === 'cross_' };
+function getPropKey(settings) { return 'cross_' + settings.labCode.substr(0, 3) };
 
-// Get the settings for this document
 function getSettings() {
-
-  var document_properties = PropertiesService.getDocumentProperties().getProperties();
-  var user_properties = PropertiesService.getUserProperties().getProperties();
+  var docProps = PropertiesService.getDocumentProperties().getProperties();
+  var userProps = PropertiesService.getUserProperties().getProperties();
 
   var settings = getDefaultSettings();
 
-  for (var key in user_properties) {
+  for (var key in userProps) {
     if (isCrossProp(key)) {
-      settings[key] = user_properties[key];
+      var set = decodeSettings(userProps[key]);
+      settings[set.labName] = set
     }
   }
 
-  for (var key in document_properties) {
+  for (var key in docProps) {
     if (isCrossProp(key)) {
-      settings[key] = document_properties[key];
+      var set = decodeSettings(docProps[key]);
+      settings[set.labName] = set
     }
   }
 
@@ -56,10 +55,10 @@ function getSettings() {
 
 // Store defaults in user props store
 function storeDefault(temp_settings) {
-  var user_properties = PropertiesService.getUserProperties();
+  var userProps = PropertiesService.getUserProperties();
   for (var labName in temp_settings) {
     var settings = temp_settings[labName];
-    storePairing(user_properties, settings);
+    storePairing(userProps, settings);
     Utilities.sleep(200)
   }
   return '#save-defaults'
@@ -68,29 +67,25 @@ function storeDefault(temp_settings) {
 
 // Store custom category in user props store
 function storeCustom(custom_settings) {
-  var user_properties = PropertiesService.getUserProperties();
-  storePairing(user_properties, custom_settings);
+  var userProps = PropertiesService.getUserProperties();
+  storePairing(userProps, custom_settings);
 }
 
 
 // Store given settings in user props store
-function storePairing(user_props, settings) {
-
-  var code = settings[0].substr(0, 3);
-  var property_key = 'cross_' + code;
-
-  user_props.setProperty(property_key, encodeSettings(settings));
+function storePairing(userProps, settings) {
+  userProps.setProperty(getPropKey(settings), encodeSettings(settings));
 }
 
 
 // Return default settings
 function restoreDefault() {
-  var user_properties = PropertiesService.getUserProperties().getProperties();
+  var userProps = PropertiesService.getUserProperties().getProperties();
   var settings = getDefaultSettings();
 
-  for (var key in user_properties) {
+  for (var key in userProps) {
     if (isCrossProp(key)) {
-      settings[key] = user_properties[key];
+      settings[key] = userProps[key];
     }
   }
 
