@@ -8,6 +8,11 @@ $(function() {
   google.script.run.withSuccessHandler(initialiseSidebar).getSettings();
 })
 
+function htmlEncode(str){
+  return String(str).replace(/[^\w. ]/gi, function(c){
+     return '&#'+c.charCodeAt(0)+';';
+  });
+}
 
 //
 // # Update the sidebar
@@ -327,12 +332,14 @@ document.onkeyup=function(e){
 
 
 $('#lab_text').keyup(function() {
-  $('#lab').find('.preview__text').html($(this).val() + '1');
+  var val = htmlEncode($(this).val());
+  $('#lab').find('.preview__text').html(val + '1');
 })
 
 
 $('#ref_text').keyup(function() {
-  $('#ref').find('.preview__text').html($(this).val() + '1');
+  var val = htmlEncode($(this).val());
+  $('#ref').find('.preview__text').html(val + '1');
 })
 
 
