@@ -2,16 +2,16 @@ const isCRUrl = (url, codeLength) => (new RegExp('#[^_]{' + codeLength + '}_')).
 
 const getNumberHandler = (type, recordedNumbers, labelNameNumberMap) =>
   type === 'lab'
-    ? (url) => { // TODO: handle dupes?
+    ? (url, code) => { // TODO: handle dupes?
       const refEquivalent = '#' + code + url.substr(6);
-      const num = labelNumbers[code] + 1 || 1;
+      const num = labelNameNumberMap[code] + 1 || 1;
 
       recordedNumbers[refEquivalent] = num;
-      labelNumbers[code] = num;
+      labelNameNumberMap[code] = num;
 
       return num;
     }
-    : (url) => url in recordedNumbers ? recordedNumbers[url] : new Error('missref');
+    : (url, code) => url in recordedNumbers ? recordedNumbers[url] : new Error('missref');
 
 
 function updateParagraphs(paragraphs, isLabel, props, handleNumbering) {
@@ -29,34 +29,34 @@ function updateParagraphs(paragraphs, isLabel, props, handleNumbering) {
     }
 
     for (let i = CRUrls.length; i--;) { // iterate backwards because we're changing the underlying text length
-      const CRUrl = CURrl[i]
+      const CRUrl = CRUrls[i]
       const errDetails = [text, CRUrl]
 
-      updateText(CRUrl, props, handleNumbering, text);
+      const code = CRUrl.url.substr(1, 3);
+      if (!(code in props)) {
+        return new CRError(text, CRUrl, 'unrecognised')
+      }
+
+      prop = props[code]
+
+      let replacementText = capitalizeIfAppropriate(text, CRUrl.start, prop.text)
+      const num = handleNumbering(CRUrl.url, code)
+      if (num instanceof Error) return new CRError(text, CRUrl, num.message())
+
+      replacementText += num;
+
+      updateText(CRUrl, prop, num, text, replacementText);
     }
   }
 }
 
 
-function updateText(CRUrl, props, handleNumbering, text) {
-  const code = url.substr(1, 3);
-
-  if (!(code in props)) {
-    return new CRError(text, CRUrl, 'unrecognised')
-  }
-
-  const replacementText = capitalizeIfAppropriate(text, CRUrl.start, props.text)
-
-  const num = handleNumbering(url)
-  if (num instanceof Error) return new CRError(text, CRUrl, num.message())
-
-  replacementText += num;
-
+function updateText(CRUrl, prop, num, text, replacementText) {
   const style = {
-    'BOLD': props.isBold,
-    'ITALIC': props.isItalic,
-    'UNDERLINE': props.isUnderlined,
-    'FOREGROUND_COLOR': (props.color && props.color !== 'null') ? '#' + props.color : null,
+    'BOLD': prop.isBold,
+    'ITALIC': prop.isItalic,
+    'UNDERLINE': prop.isUnderlined,
+    'FOREGROUND_COLOR': (prop.color && prop.color !== 'null') ? '#' + prop.color : null,
   }
 
   const { start, end, url } = CRUrl
@@ -70,11 +70,12 @@ function updateText(CRUrl, props, handleNumbering, text) {
 
 function getCRUrls(text, codeLength) {
   const len = text.getText().length;
-  const idxs = text.getTextAttributeIndices().push(len) // the final index is the end of the text
+  const idxs = text.getTextAttributeIndices()
+  idxs.push(len) // the final index is the end of the text
 
   const CRUrls = [];
 
-  for (const i = 0; i < idxs.length; i++) {
+  for (let i = 0; i < idxs.length; i++) {
     const idx = idxs[i];
 
     const urlHere = idx !== len ? text.getLinkUrl(idx) : null;
@@ -95,6 +96,7 @@ function getCRUrls(text, codeLength) {
   }
   return CRUrls;
 }
+
 
 function capitalizeIfAppropriate(text, start, replacementText) {
   const t = text.getText();
@@ -121,6 +123,7 @@ function capitalizeIfAppropriate(text, start, replacementText) {
     ? upper + replacementText.slice(1)
     : replacementText
 }
+
 
 function getLabelNumber(url, code, numPairs, labelNumbers) {
   const refEquivalent = '#' + code + url.substr(6);
