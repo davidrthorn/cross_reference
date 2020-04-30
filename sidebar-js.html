@@ -1,6 +1,6 @@
 <script>
 // *** Must be duplicated in settings.gs because gs is not js.
-var orderedSettingsKeys = [
+const orderedSettingsKeys = [
       'labCode',
       'labName',
       'labText',
@@ -18,9 +18,9 @@ var orderedSettingsKeys = [
   ]
 
   function encodeSettings ( unencoded ) {
-    var result = ''
-    for ( var i = 0; i < orderedSettingsKeys.length; i++ ) {
-      var k = orderedSettingsKeys[ i ];
+    const result = ''
+    for ( const i = 0; i < orderedSettingsKeys.length; i++ ) {
+      const k = orderedSettingsKeys[ i ];
       result += (k in unencoded ? unencoded[k] : 'null') + '_'
     }
     return result.slice( 0 , -1 )
@@ -36,8 +36,8 @@ var orderedSettingsKeys = [
   // *** END DUPE
   
     
-  var temp_settings = {};
-  var reference_codes = [];
+  const temp_settings = {};
+  const reference_codes = [];
   
   $(function() {
     google.script.run.withSuccessHandler(initialiseSidebar).getSettings();
@@ -58,22 +58,22 @@ var orderedSettingsKeys = [
   function initialiseSidebar(settings) {
     
     // Add category (as key) and its settings (as values) to temp_settings
-    for (var i in settings) {
-      var set = settings[i];
+    for (const i in settings) {
+      const set = settings[i];
       
       temp_settings[set.labName] = set;
       reference_codes.push(set.refCode);
     }
     
     // Add names alphabetically to category drop down list
-    var sortedNames = Object.keys(temp_settings).sort();
-    for (var name of sortedNames) {
+    const sortedNames = Object.keys(temp_settings).sort();
+    for (const name of sortedNames) {
       $('#category-select').append($('<option>', {
         text: name
       }))
     }
     
-    var currentName = sortedNames[0];
+    const currentName = sortedNames[0];
   
     $('#category-select').data('val', currentName);
   
@@ -81,7 +81,7 @@ var orderedSettingsKeys = [
     
     // Equation, figure, table cannot be deleted, so don't show button
     // Equation will always be first of these categories alphabetically
-    var displayed = (currentName === 'Equation') ? 'none' : 'block';
+    const displayed = (currentName === 'Equation') ? 'none' : 'block';
     $('#delete-category').css('display', displayed);
   }
   
@@ -89,13 +89,13 @@ var orderedSettingsKeys = [
   function updateSidebar(labName) {
     
     // Assign new variables based on settings to be applied
-    var settings = temp_settings[labName];
-    var lab_code = settings.labCode;
-    var lab_text = settings.labText;
-    var ref_text = settings.refText;
-    var lab_color = settings.labColor;
-    var ref_color = settings.refColor;
-    var style = {
+    const settings = temp_settings[labName];
+    const lab_code = settings.labCode;
+    const lab_text = settings.labText;
+    const ref_text = settings.refText;
+    const lab_color = settings.labColor;
+    const ref_color = settings.refColor;
+    const style = {
           'lab_bold': settings.labBold,
           'lab_italic': settings.labItalic,
           'lab_underline': settings.labUnderline,
@@ -116,7 +116,7 @@ var orderedSettingsKeys = [
     
     // Update colors
     function updateColor(id, color) {
-        var css = color ? '#' + color : '#000',
+        const css = color ? '#' + color : '#000',
             $id = $(id);
         
         $id.find('.preview__text')
@@ -131,14 +131,14 @@ var orderedSettingsKeys = [
     updateColor('#ref', settings.refColor);
     updateColor('#lab', settings.labColor);
    
-    var css_properties = {
+    const css_properties = {
       bold: 'font-weight',
       italic: 'font-style',
       underline: 'text-decoration',
     }
     
-    for (var key in style) {
-      var code = key.substr(0, 3),
+    for (const key in style) {
+      const code = key.substr(0, 3),
           css_name = key.substr(4, key.length),
           button_id = '#' + code + '_' + css_name,
           css_value = (style[key] === 'true') ? css_name : 'initial';
@@ -163,9 +163,9 @@ var orderedSettingsKeys = [
     updateSidebar(category);
     
     // Remove button should only show with custom categories
-    var del_display = 'EquationFigureFootnoteTable'.includes( category ) ? 'none' : 'block';
+    const del_display = 'EquationFigureFootnoteTable'.includes( category ) ? 'none' : 'block';
     
-    var lab_display = 'Footnote'.includes( category ) ? 'block' : 'none';
+    const lab_display = 'Footnote'.includes( category ) ? 'block' : 'none';
                     
     $('#delete-category').css('display', del_display);
     $('#lab-cover').css('display', lab_display);
@@ -178,8 +178,8 @@ var orderedSettingsKeys = [
       return $(id).hasClass('style-button--selected') ? 'true' : 'null';
     }
   
-    var prev_name = $('#category-select').data('val');
-    var settings = {
+    const prev_name = $('#category-select').data('val');
+    const settings = {
       labCode: $('#lab_code').html().substr(1),
       labName: prev_name,
       labText: $('#lab_text').val(),
@@ -192,7 +192,7 @@ var orderedSettingsKeys = [
       refUnderline: fromId('#ref_underline'),
     };
   
-    var $color_code = $('.details').find('.color-code');
+    const $color_code = $('.details').find('.color-code');
     
     settings.labColor = $($color_code[0]).data('val') != undefined ?
                     $($color_code[0]).data('val') :
@@ -220,7 +220,7 @@ var orderedSettingsKeys = [
   
   $('#add-category').on('click', function() {
     
-    var to_hide = '.category__button, #category-select, #lab_code, .actions__row:not(:last-child)',
+    const to_hide = '.category__button, #category-select, #lab_code, .actions__row:not(:last-child)',
         to_show = '#custom-category-name, #cs_lab_code, .actions__row:last-child',
         to_clear = '#custom-category-name, #lab_code, #lab_code_entry, #lab_text, #ref_code, #ref_text';
      
@@ -243,8 +243,8 @@ var orderedSettingsKeys = [
   
   
   $('#delete-category').on('click', function() {
-    var ref = $('#ref_code').html().substr(1, 4);
-    var current_name = $('#category-select').val();
+    const ref = $('#ref_code').html().substr(1, 4);
+    const current_name = $('#category-select').val();
     
     $(this).css('display', 'none')
     google.script.run.withSuccessHandler(revertToFirstCategory).removePair(ref);
@@ -263,7 +263,7 @@ var orderedSettingsKeys = [
   
   function revertCustomScreen() {
   
-    var to_hide = '#custom-category-name, #cs_lab_code, .actions__row:last-child',
+    const to_hide = '#custom-category-name, #cs_lab_code, .actions__row:last-child',
         to_show = '#category-select, #lab_code, .actions__row:not(:last-child)';
     
     $(to_hide).css('display', 'none');
@@ -274,7 +274,7 @@ var orderedSettingsKeys = [
   
   
   function revertToFirstCategory() {
-    var safe_categories = ['Equation', 'Figure', 'Table'],
+    const safe_categories = ['Equation', 'Figure', 'Table'],
         first_category = $('#category-select option:first').val(),
         is_displayed = (safe_categories.indexOf(first_category) < 0) ? 'block' : 'none';
     
@@ -287,7 +287,7 @@ var orderedSettingsKeys = [
   
   
   $('#lab_code_entry').keyup(function() {
-    var lab_code = $(this).val();
+    const lab_code = $(this).val();
     
     $(this).val(lab_code.toLowerCase());
   
@@ -313,18 +313,18 @@ var orderedSettingsKeys = [
   
   
   $('#save-custom').on('click', function() {
-    var custom_name = $('#custom-category-name').val();
-    var custom_settings;
+    const customName = $('#custom-category-name').val();
+    let customSettings;
     
     $('#save-apply').prop('disabled', true);
     saveProperties('#save-apply');
     
-    custom_settings = temp_settings[custom_name];
+    customSettings = temp_settings[customName];
   
-    google.script.run.storeCustom(custom_settings);
+    google.script.run.storeCustom(customSettings);
   
-    $('#category-select option:last').after($('<option>', {text: custom_name}))
-    $('#category-select').val(custom_name);
+    $('#category-select option:last').after($('<option>', {text: customName}))
+    $('#category-select').val(customName);
     revertCustomScreen();
     $('#delete-category').css('display', 'block');
   })
@@ -338,10 +338,10 @@ var orderedSettingsKeys = [
   
   // Disable saving a custom pairing while nameless or label code too short
   document.onkeyup=function(e){
-    var name_length = $('#custom-category-name').val().length,
+    const name_length = $('#custom-category-name').val().length,
         lab_length = $('#lab_code_entry').val().length;
     
-    var disabled = (name_length > 0 && lab_length === 5) ? false : true;
+    const disabled = (name_length > 0 && lab_length === 5) ? false : true;
     
     $('#save-custom').prop('disabled', disabled);
   }
@@ -357,13 +357,13 @@ var orderedSettingsKeys = [
   
   
   $('#lab_text').keyup(function() {
-    var val = htmlEncode($(this).val());
+    const val = htmlEncode($(this).val());
     $('#lab').find('.preview__text').html(val + '1');
   })
   
   
   $('#ref_text').keyup(function() {
-    var val = htmlEncode($(this).val());
+    const val = htmlEncode($(this).val());
     $('#ref').find('.preview__text').html(val + '1');
   })
   
@@ -376,17 +376,17 @@ var orderedSettingsKeys = [
   $('.style-button').on('click', function() {
     $(this).toggleClass('style-button--selected');
     
-    var id = this.id,
+    const id = this.id,
         css_value_name = id.substr(4, this.length),
         category = '#' + id.substr(0, 3);
       
-    var css_properties = {
+    const css_properties = {
       'bold': 'font-weight',
       'italic': 'font-style',
       'underline': 'text-decoration'
     }
     
-    var css_value = ($(this).hasClass('style-button--selected')) ? css_value_name : 'initial';
+    const css_value = ($(this).hasClass('style-button--selected')) ? css_value_name : 'initial';
     
     $(category).find('.preview__text').css(css_properties[css_value_name], css_value);
   })
@@ -403,11 +403,11 @@ var orderedSettingsKeys = [
      // Only 3 or 6 character strings allowed. Chars must be valid.
      if (!Number.isInteger(color_value.length/3) || /[^a-f0-9]+/i.test(color_value)) return null;
      
-     var new_value = '';
+     const new_value = '';
      
      // Convert 3-letter hex codes to 6 letters
      if (color_value.length === 3)
-       for (var i = 0; i < 3; i++) new_value += color_value.charAt(i).repeat(2);
+       for (const i = 0; i < 3; i++) new_value += color_value.charAt(i).repeat(2);
      else
        new_value = color_value;
      
@@ -416,17 +416,17 @@ var orderedSettingsKeys = [
   
   
   function confirmColor(button) {
-    var $color_pane = button.parent(),
+    const $color_pane = button.parent(),
         $color_text = $color_pane.prev().children('div'),
         $color_code = $color_pane.children('.color-code'),
         color_value = coerceToValidColor($color_code.val());
     
     if (color_value) {
-      var hex = "#" + color_value;
+      const hex = "#" + color_value;
       $color_code.data('val', color_value)
                  .val(color_value);
     } else {
-      var hex = "#000000";
+      const hex = "#000000";
       $color_code.data('val', null)
                  .val(color_value);
      }
@@ -439,14 +439,14 @@ var orderedSettingsKeys = [
   
   function updateColorCode(gs_array) {
     if (typeof gs_array == 'undefined') return;
-    var lab_or_ref = '#' + gs_array[0];
-    var cloned_hex = gs_array[1];
+    const lab_or_ref = '#' + gs_array[0];
+    const cloned_hex = gs_array[1];
     $(lab_or_ref).find('.color-code').val(cloned_hex);
   }
   
   
   function cancelColor(button) {
-    var $code = button.siblings('.color-code').andSelf();
+    const $code = button.siblings('.color-code').andSelf();
     $code.val($code.data('val'));
     button.parent().next().andSelf().hide();
   }
@@ -469,7 +469,7 @@ var orderedSettingsKeys = [
   
   
   $('.clone-color').on('click', function() {
-    var lab_or_ref = $(this).closest('.main-section').attr('id')
+    const lab_or_ref = $(this).closest('.main-section').attr('id')
     google.script.run.withSuccessHandler(updateColorCode).cloneColor(lab_or_ref);
   })
   

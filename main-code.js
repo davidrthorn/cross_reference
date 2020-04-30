@@ -34,7 +34,7 @@ function include(filename) {
 
 
 function showSidebar() {
-  var sidebar = HtmlService.createTemplateFromFile('sidebar').evaluate();
+  const sidebar = HtmlService.createTemplateFromFile('sidebar').evaluate();
   sidebar.setTitle('Cross Reference');
   DocumentApp.getUi().showSidebar(sidebar);
 }
@@ -45,60 +45,45 @@ function showSidebar() {
 //
 
 
-function getStored(isLab) {
+function getStoredProps(type) {
+  const userProps = PropertiesService.getUserProperties().getProperties();
+  const docProps = PropertiesService.getDocumentProperties().getProperties();
 
-  var userProps = PropertiesService.getUserProperties().getProperties();
-  var docProps = PropertiesService.getDocumentProperties().getProperties();
-  var slice = isLab ? [2, 6, 10] : [6, 10, 11];
+  let settings = getDefaultSettings();
+  overwriteSettings(settings, userProps);
+  overwriteSettings(settings, docProps);
 
-  // Default properties
-  var props = {
-    'fig': ['figure ', null, null, null, null],
-    'tab': ['table ', null, null, null, null],
-    'equ': ['equation ', null, null, null, null],
-    'fno': ['fn. ', null, null, null, null]
-  };
-
-  // Overwrite with user properties if they exist
-  overwriteProps(props, userProps, slice, true);
-
-  // Overwrite with document properties if they exist
-  overwriteProps(props, docProps, slice, false);
-
-  return props;
+  return getPropsForType(type, settings)
 }
 
-
-function overwriteProps(to_overwrite, props, slice, is_user) {
-  for (var prop in props) {
-    if (!isCrossProp) continue;
-    var prop_string = props[prop];
-    var split_props = prop_string.split('_');
-    var code = split_props[0].substr(0, 3);
-    to_overwrite[code] = split_props.slice(slice[0], slice[1]);
-    to_overwrite[code].push(split_props[slice[2]]);
+function overwriteSettings(settings, storedProps) {
+  let final = {}
+  for (const propKey in storedProps) {
+    if (!isCrossProp(propKey)) continue;
+    const prop = storedProps[propKey];
+    const decoded = decodeSettings(prop);
+    final = {decoded, ...final}
   }
 }
 
-
 function copyUserPropsToDocProps() {
 
-  var user_props = PropertiesService.getUserProperties().getProperties();
-  var docProps = PropertiesService.getDocumentProperties();
-  var doc_props = docProps.getProperties();
-  var defaults = getDefaultSettings();
-  var props = {
+  const user_props = PropertiesService.getUserProperties().getProperties();
+  const docProps = PropertiesService.getDocumentProperties();
+  const doc_props = docProps.getProperties();
+  const defaults = getDefaultSettings();
+  const props = {
     'cross_fig': encodeSettings(defaults.Figure),
     'cross_tab': encodeSettings(defaults.Table),
     'cross_equ': encodeSettings(defaults.Equation),
     'cross_fno': encodeSettings(defaults.Footnote),
   };
 
-  for (var u in user_props) {
+  for (const u in user_props) {
     props[u] = user_props[u];
   }
 
-  for (var d in doc_props) {
+  for (const d in doc_props) {
     props[d] = doc_props[d];
   }
 
@@ -113,55 +98,55 @@ function copyUserPropsToDocProps() {
 
 function updateDoc() {
 
-  var document = DocumentApp.getActiveDocument();
-  var paragraphs = document.getBody().getParagraphs();
-  var footnotes = document.getFootnotes();
+  const document = DocumentApp.getActiveDocument();
+  const paragraphs = document.getBody().getParagraphs();
+  const footnotes = document.getFootnotes();
 
-  var labProps = getStored(true);
-  var refProps = getStored(false);
+  const labProps = getStoredProps('lab');
+  const refProps = getStoredProps('ref');
 
   copyUserPropsToDocProps();
 
-  var numPairs = updateParagraphs(paragraphs, true, labProps);
+  const numPairs = updateParagraphs(paragraphs, true, labProps);
 
-  fnLabs(footnotes, labProps, numPairs);
+  // fnLabs(footnotes, labProps, numPairs);
 
   if (Array.isArray(numPairs)) {
     handleErr(numPairs);
     return 'error';
   };
 
-  var error = updateParagraphs(paragraphs, false, refProps, numPairs);
+  const error = updateParagraphs(paragraphs, false, refProps, numPairs);
 
   if (Array.isArray(error)) {
     handleErr(error);
     return 'error';
   };
 
-  for (var i = 0, len = footnotes.length; i < len; i++) {
-    var f_paras = footnotes[i].getFootnoteContents().getParagraphs();
-    error = updateParagraphs(f_paras, false, numPairs, refProps);
-    if (Array.isArray(error)) {
-      handleErr(error);
-      return 'error';
-    };
-  };
+  // for (const i = 0, len = footnotes.length; i < len; i++) {
+  //   const f_paras = footnotes[i].getFootnoteContents().getParagraphs();
+  //   error = updateParagraphs(f_paras, false, numPairs, refProps);
+  //   if (Array.isArray(error)) {
+  //     handleErr(error);
+  //     return 'error';
+  //   };
+  // };
 }
 
 
 function updateParagraphs(paragraphs, isLabel, props, numPairs) {
-  var codeLen = isLabel ? 5 : 3;
+  const codeLen = isLabel ? 5 : 3;
 
   // Stores the numbers associated with individual labels
-  var numPairs = numPairs || {};
+  numPairs = numPairs || {};
 
   // Stores running total for each label type
-  var labNums = {};
+  const labNums = {};
 
-  for (var i = 0, len = paragraphs.length; i < len; i++) {
-    var text = paragraphs[i].editAsText();
+  for (const i = 0, len = paragraphs.length; i < len; i++) {
+    const text = paragraphs[i].editAsText();
 
-    var CRUrls = getCRUrls(text, codeLen);
+    const CRUrls = getCRUrls(text, codeLen);
 
     if (!CRUrls.length) {
       return;
@@ -171,9 +156,9 @@ function updateParagraphs(paragraphs, isLabel, props, numPairs) {
       return ['multiple', errDetails];
     }
 
-    for (var j = CRUrls.length; j--;) { // iterate backwards because we are changing the text as we go
-      var CRUrl = CURrl[j]
-      var errDetails = [text, CRUrl]
+    for (const j = CRUrls.length; j--;) { // iterate backwards because we are changing the text as we go
+      const CRUrl = CURrl[j]
+      const errDetails = [text, CRUrl]
       updateText(CRUrl, props, numPairs, labNums, text);
     }
   }
@@ -185,20 +170,20 @@ function updateParagraph(paragraph, codeLen, isLabel, url, props, numPairs, labN
 }
 
 function updateText(CRUrl, props, numPairs, labNums, text) {
-  var { start, end, url } = CRUrl
+  const { start, end, url } = CRUrl
 
-  var code = url.substr(1, 3);
+  const code = url.substr(1, 3);
 
   if (!(code in props)) {
     return ['unrecognised', errDetails];
   }
 
   // Get replacement text
-  var replacementText = props[code][0]; // TODO: this should be object based
+  const replacementText = props[code][0]; // TODO: this should be object based
 
   replacementText = capitalizeIfAppropriate(text, start, replacementText)
 
-  var num = isLabel
+  const num = isLabel
     ? getLabelNumber(url, code, numPairs, labNums)
     : numPairs[url] || 'missref';
 
@@ -207,12 +192,12 @@ function updateText(CRUrl, props, numPairs, labNums, text) {
   // Append number
   replacementText += num;
 
-  var style = setStyle(props, code);
+  const style = setStyle(props, code);
   executeTextUpdate(CRUrl, replacementText, style, text)
 }
 
 function executeTextUpdate(CRUrl, replacementText, style, text) {
-  var replacementEnd = start + replacementText.length - 1;
+  const replacementEnd = start + replacementText.length - 1;
   text.deleteText(start, end)
     .insertText(start, replacementText)
     .setLinkUrl(start, replacementEnd, url)
@@ -220,19 +205,19 @@ function executeTextUpdate(CRUrl, replacementText, style, text) {
 }
 
 function getCRUrls(text, codeLength) {
-  var len = text.getText().length;
-  var idxs = text.getTextAttributeIndices().push(len) // the final index is the end of the text
+  const len = text.getText().length;
+  const idxs = text.getTextAttributeIndices().push(len) // the final index is the end of the text
 
-  var CRUrls = [];
+  const CRUrls = [];
 
-  for (var i = 0; i < idxs.length; i++) {
-    var idx = idxs[i];
+  for (const i = 0; i < idxs.length; i++) {
+    const idx = idxs[i];
 
-    var urlHere = idx !== len ? text.getLinkUrl(idx) : null;
-    var urlToTheLeft = i > 0 ? text.getLinkUrl(idx - 1) : null;
+    const urlHere = idx !== len ? text.getLinkUrl(idx) : null;
+    const urlToTheLeft = i > 0 ? text.getLinkUrl(idx - 1) : null;
 
-    var isStart = !isCRUrl(urlToTheLeft) && isCRUrl(urlHere)
-    var isEnd = isCRUrl(urlToTheLeft) && !isCRUrl(urlHere)
+    const isStart = !isCRUrl(urlToTheLeft) && isCRUrl(urlHere)
+    const isEnd = isCRUrl(urlToTheLeft) && !isCRUrl(urlHere)
 
     if (isStart) {
       CRUrls.push({
@@ -248,25 +233,25 @@ function getCRUrls(text, codeLength) {
 }
 
 function isCRUrl(url) {
-  var re = new RegExp('#[^_]{' + codeLength + '}_');
+  const re = new RegExp('#[^_]{' + codeLength + '}_');
   return re.test(url)
 }
 
 function capitalizeIfAppropriate(text, start, replacementText) {
 
-  var t = text.getText();
-  var first = replacementText.charAt(0);
-  var upper = first.toUpperCase();
+  const t = text.getText();
+  const first = replacementText.charAt(0);
+  const upper = first.toUpperCase();
 
   if (first === upper) return replacementText;
 
-  var b1 = t.charAt(start - 1);
-  var b2 = t.charAt(start - 2);
-  var b3 = t.charAt(start - 3);
-  var b4 = t.charAt(start - 4);
-  var b5 = t.charAt(start - 5);
+  const b1 = t.charAt(start - 1);
+  const b2 = t.charAt(start - 2);
+  const b3 = t.charAt(start - 3);
+  const b4 = t.charAt(start - 4);
+  const b5 = t.charAt(start - 5);
 
-  var isInCapitalizationContext = 
+  const isInCapitalizationContext = 
     !b1 ||
     b1 === '\r' ||
     /(\!|\?)/.test(b2) ||
@@ -286,8 +271,8 @@ function shouldCapitalize(text, start) {
 
 function getLabelNumber(url, code, numPairs, labelNumbers) {
 
-  var refEquivalent = '#' + code + url.substr(6);
-  var num = labelNumbers[code] + 1 || 1;
+  const refEquivalent = '#' + code + url.substr(6);
+  const num = labelNumbers[code] + 1 || 1;
 
   numPairs[refEquivalent] = num;
   labelNumbers[code] = num;
@@ -301,8 +286,8 @@ function addToLabelNumbers(code, url, labelNumbers) {
 
 
 function setStyle(props, code) {
-  var col = props[code][4];
-  var color = (col && col != 'null') ? '#' + col : null;
+  const col = props[code][4];
+  const color = (col && col != 'null') ? '#' + col : null;
 
   return {
     'BOLD': props[code][1],
@@ -319,9 +304,9 @@ function setStyle(props, code) {
 
 
 function handleErr(err) {
-  var type = err[0];
-  var details = err[1];
-  var [text, start, end, url] = details;
+  const type = err[0];
+  const details = err[1];
+  const [text, start, end, url] = details;
 
   if (type === 'duplicate') {
     DocumentApp.getUi().alert('There are two labels with the code ' + url + '.' +
@@ -353,8 +338,8 @@ function handleErr(err) {
 
 // Highlight an erroneous label or reference
 function addFlag(text, start, end) {
-  var doc = DocumentApp.getActiveDocument();
-  var position = doc.newPosition(text, start);
+  const doc = DocumentApp.getActiveDocument();
+  const position = doc.newPosition(text, start);
 
   text.setForegroundColor(start, end, '#FF0000');
   doc.setCursor(position);
@@ -367,16 +352,16 @@ function addFlag(text, start, end) {
 
 
 function fnLabs(foots, fn_props, num_pairs) {
-  for (var i = 0; i < foots.length; i++) {
-    var paras = foots[i].getFootnoteContents().getParagraphs();
-    for (var j = 0; j < paras.length; j++) {
-      var text = paras[j].editAsText();
-      var { start, end, url } = getCRUrls(text, 5);
+  for (const i = 0; i < foots.length; i++) {
+    const paras = foots[i].getFootnoteContents().getParagraphs();
+    for (const j = 0; j < paras.length; j++) {
+      const text = paras[j].editAsText();
+      const { start, end, url } = getCRUrls(text, 5);
 
       if (!start) continue;
       if (url.substr(0, 4) != '#fno') continue;
 
-      var ref_equiv = url.substr(0, 4) + url.substr(6);
+      const ref_equiv = url.substr(0, 4) + url.substr(6);
       num_pairs[ref_equiv] = [i + 1];
       text.setUnderline(start, end, null)
         .setForegroundColor(start, end, null);

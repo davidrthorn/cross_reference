@@ -1,38 +1,65 @@
 // *** Must be duplicated in sidebar-js.html because gs is not js.
-var orderedSettingsKeys = [
+const orderedSettingsKeys = [
   'labCode',
   'labName',
   'labText',
   'labIsBold',
   'labIsItalic',
-  'labIsUnderlines',
+  'labIsUnderlined',
   'refText',
   'refIsBold',
   'refIsItalic',
-  'refIsUnderlines',
+  'refIsUnderlined',
   'labColor',
   'refColor',
   'labSuffix',
   'refSuffix',
 ]
 
-function encodeSettings(unencoded) {
-  var result = ''
-  for (var i = 0; i < orderedSettingsKeys.length; i++) {
-    var k = orderedSettingsKeys[i];
-    result += (k in unencoded ? unencoded[k] : 'null') + '_'
-  }
-  return result.slice(0, -1)
+const encodeSettings = (unencoded) =>
+  orderedSettingsKeys
+    .reduce((total, k) => total + (k in unencoded ? unencoded[k] : 'null') + '_', '')
+    .slice(0, -1);
 
-}
-
-function decodeSettings(encoded) {
-  return encoded
+const decodeSettings = (encoded) =>
+  encoded
     .split('_')
-    .reduce(function (result, current, i) { result[orderedSettingsKeys[i]] = current; return result }, {})
-}
+    .reduce((result, current, i) => { result[orderedSettingsKeys[i]] = current; return result }, {});
+
+const refCodeFromLabCode = (labCode) => labCode.substr(0,3);
 
 // *** END DUPE
+
+const getPropsForType = (type, settings) => {
+  let final = {};
+  for (const name in settings) {
+    const s = settings[name];
+    const refCode = refCodeFromLabCode(s['labCode']);
+    final[refCode] = propsFromSetting(type, s);
+  }
+  return final;
+}
+
+const propsFromSetting = (type, setting) =>
+  type === 'lab'
+  ? {
+      code: setting['labCode'],
+      text: setting['labText'],
+      isBold: setting['labIsBold'],
+      isItalic: setting['labIsItalic'],
+      isUnderlined: setting['labIsUnderlined'],
+      color: setting['labColor'],
+      suffix: setting['labSuffix'],
+    }
+    : {
+      code: refCodeFromLabCode(setting['labCode']),
+      text: setting['refText'],
+      isBold: setting['refIsBold'],
+      isItalic: setting['refIsItalic'],
+      isUnderlined: setting['refIsUnderlined'],
+      color: setting['refColor'],
+      suffix: setting['refSuffix'],
+    }
 
 // Defaults
 
