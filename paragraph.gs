@@ -1,5 +1,5 @@
 const CRUrlChecker = (codeLength) => (url) => (new RegExp('^#[^_]{' + codeLength + '}_')).test(url)
-const codeFromUrl = (url) => url.substr(1, 4)
+const codeFromUrl = (url) => url.substr(1, 3)
 
 const getNumberHandler = (type, recordedNumbers, labelNameNumberMap) =>
   type === 'lab'
@@ -20,7 +20,7 @@ const getNumberHandler = (type, recordedNumbers, labelNameNumberMap) =>
 
 function updateParagraphs(paragraphs, isLabel, props, handleNumbering) {
   for (let i = 0, len = paragraphs.length; i < len; i++) {
-    const text = paragraph[i].editAsText()
+    const text = paragraphs[i].editAsText()
 
     const result = updateText(text, isLabel, props, handleNumbering)
     if (result instanceof CRError) {
@@ -34,8 +34,8 @@ function updateText(text, isLabel, props, handleNumbering) {
   const isCRUrl = CRUrlChecker(isLabel ? 5 : 3)
   const CRUrls = getCRUrls(text, isCRUrl)
 
-  if (!CRUrls.length) return;
-
+  if (!CRUrls.length) return
+  
   if (isLabel && CRUrls.length > 1) {
     return new CRError(text, CRUrls, 'multiple')
   }
@@ -43,7 +43,7 @@ function updateText(text, isLabel, props, handleNumbering) {
   for (let i = CRUrls.length; i--;) { // iterate backwards because we're changing the underlying text length
     const CRUrl = CRUrls[i]
 
-    const result = handleCRUrl(props, text, CRUrl)
+    const result = handleCRUrl(props, text, CRUrl, handleNumbering)
     if (result instanceof CRError) {
       return result
     }
@@ -51,14 +51,14 @@ function updateText(text, isLabel, props, handleNumbering) {
 }
 
 
-function handleCRUrl(props, text, CRUrl) {
+function handleCRUrl(props, text, CRUrl, handleNumbering) {
   const code = codeFromUrl(CRUrl.url)
-
+  
   const prop = props[code]
   if (!prop) {
     return new CRError(text, CRUrl, 'unrecognised')
   }
-
+  
   let replacementText = capitalizeIfAppropriate(text, CRUrl.start, prop.text)
   const num = handleNumbering(CRUrl.url)
   if (num instanceof Error) {
@@ -68,6 +68,7 @@ function handleCRUrl(props, text, CRUrl) {
   replacementText += num;
 
   const style = getStyle(prop)
+
   replaceText(text, CRUrl, replacementText, style)
 }
 
@@ -105,7 +106,7 @@ function getCRUrls(text, isCRUrl) {
 
     const isStart = !isCRUrl(urlToTheLeft) && isCRUrl(urlHere)
     const isEnd = isCRUrl(urlToTheLeft) && !isCRUrl(urlHere)
-
+    
     if (isStart) {
       CRUrls.push({ start: idx, url: urlHere })
     }

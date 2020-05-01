@@ -39,7 +39,7 @@ function updateDocProps() {
     props[propKey] = docProps[propKey];
   }
 
-  docProps.setProperties(props);
+  PropertiesService.getDocumentProperties().setProperties(props);
 }
 
 function clearProps() {
