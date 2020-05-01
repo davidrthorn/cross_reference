@@ -31,9 +31,11 @@ function updateDoc() {
   const labProps = getStoredProps('lab');
   const refProps = getStoredProps('ref');
 
-  copyUserPropsToDocProps();
+  updateDocProps();
 
-  const [recordedNumbers, labelNameNumberMap] = [{}, {}]
+  const recordedNumbers = {}
+  const labelNameNumberMap = {}
+
   const handleLabNumber = getNumberHandler('lab', recordedNumbers, labelNameNumberMap)
 
   let error = updateParagraphs(paragraphs, true, labProps, handleLabNumber);
@@ -61,25 +63,4 @@ function updateDoc() {
   //     return 'error';
   //   };
   // };
-}
-
-
-function fnLabs(foots, fn_props, num_pairs) {
-  for (const i = 0; i < foots.length; i++) {
-    const paras = foots[i].getFootnoteContents().getParagraphs();
-    for (const j = 0; j < paras.length; j++) {
-      const text = paras[j].editAsText();
-      const { start, end, url } = getCRUrls(text, 5);
-
-      if (!start) continue;
-      if (url.substr(0, 4) != '#fno') continue;
-
-      const ref_equiv = url.substr(0, 4) + url.substr(6);
-      num_pairs[ref_equiv] = [i + 1];
-      text.setUnderline(start, end, null)
-        .setForegroundColor(start, end, null);
-    }
-  }
-
-  return num_pairs;
 }

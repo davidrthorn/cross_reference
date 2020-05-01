@@ -19,25 +19,24 @@ function overwriteSettings(settings, storedProps) {
   }
 }
 
-function copyUserPropsToDocProps() {
+function updateDocProps() {
 
-  const user_props = PropertiesService.getUserProperties().getProperties();
-  const docProps = PropertiesService.getDocumentProperties();
-  const doc_props = docProps.getProperties();
-  const defaults = getDefaultSettings();
+  const userProps = PropertiesService.getUserProperties().getProperties()
+  const docProps = PropertiesService.getDocumentProperties().getProperties()
+  const defaultSettings = getDefaultSettings();
   const props = {
-    'cross_fig': encodeSettings(defaults.Figure),
-    'cross_tab': encodeSettings(defaults.Table),
-    'cross_equ': encodeSettings(defaults.Equation),
-    'cross_fno': encodeSettings(defaults.Footnote),
+    'cross_fig': encodeSettings(defaultSettings.Figure),
+    'cross_tab': encodeSettings(defaultSettings.Table),
+    'cross_equ': encodeSettings(defaultSettings.Equation),
+    'cross_fno': encodeSettings(defaultSettings.Footnote),
   };
 
-  for (const u in user_props) {
-    props[u] = user_props[u];
+  for (const propKey in userProps) {
+    props[propKey] = userProps[propKey];
   }
 
-  for (const d in doc_props) {
-    props[d] = doc_props[d];
+  for (const propKey in docProps) {
+    props[propKey] = docProps[propKey];
   }
 
   docProps.setProperties(props);
