@@ -26,19 +26,19 @@ const decodeSettings = (encoded) =>
     .split('_')
     .reduce((result, current, i) => { result[orderedSettingsKeys[i]] = current; return result }, {});
 
-const refCodeFromLabCode = (labCode) => labCode.substr(0,3);
+const refCodeFromLabCode = (labCode) => labCode.substr(0,3)
 
 // *** END DUPE
 
-const getPropsForType = (type, settings) => {
-  let final = {};
-  for (const name in settings) {
-    const s = settings[name];
-    const refCode = refCodeFromLabCode(s['labCode']);
-    final[refCode] = propsFromSetting(type, s);
-  }
-  return final;
-}
+
+const getPropsForType = (type, settings) =>
+  Object.keys(settings).reduce((total, key) => {
+    const s = settings[key]
+    const code = refCodeFromLabCode(s['labCode'])
+    total[code] = propsFromSetting(type, s)
+    return total
+  }, {})
+
 
 const propsFromSetting = (type, setting) =>
   type === 'lab'
