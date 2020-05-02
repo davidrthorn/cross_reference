@@ -59,7 +59,7 @@ function handleCRUrl(props, text, CRUrl, handleNumbering) {
     return new CRError(text, CRUrl, 'unrecognised')
   }
   
-  let replacementText = capitalizeIfAppropriate(text, CRUrl.start, prop.text)
+  let replacementText = capitalizeIfAppropriate(text.getText(), CRUrl.start, prop.text)
   const num = handleNumbering(CRUrl.url)
   if (num instanceof Error) {
     return new CRError(text, CRUrl, num.message())
@@ -119,7 +119,6 @@ function getCRUrls(text, isCRUrl) {
 
 
 function capitalizeIfAppropriate(text, start, replacementText) {
-  const t = text.getText()
   const firstLetter = replacementText.charAt(0)
   const firstLetterCapitalized = firstLetter.toUpperCase()
 
