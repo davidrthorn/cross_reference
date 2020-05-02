@@ -1,9 +1,10 @@
-const It = (description, got, want) =>
+const Expect = (description, got, want) =>
   Logger.log(
     assertEqual(got, want)
-      ? '✅ It ' + description
-      : '❌ It ' + description + '. Expected ' + want + '; got ' + got
+      ? '✅' + description
+      : '❌' + description + '. Expected ' + JSON.stringify(want) + '; got ' + JSON.stringify(got)
   )
+
 
 const assertEqual = (a, b) => {
   if (typeof a !== typeof b) return false
@@ -24,18 +25,25 @@ const assertEqual = (a, b) => {
   return true
 }
 
-function testSuite(name, suite=[]) {
+
+const objectToString = (obj) => {
+  let result = '{'
+  for (const key in obj) {
+    result += key + ': ' + obj[key]
+  }
+  return
+}
+
+
+function testSuite(name, suite = []) {
   Logger.log('=========')
   Logger.log('TEST SUITE: ' + name)
   Logger.log('=========')
 
   suite.forEach((s) => {
     Logger.log('---------')
-    Logger.log(formatTestName(s.name))
+    Logger.log(s.name)
     Logger.log('---------')
     s()
   })
 }
-
-const formatTestName = (name) =>
-  name.replace(/((^|[A-Z])[^A-Z]*)/g, (word) => word + ' ') .toLowerCase()

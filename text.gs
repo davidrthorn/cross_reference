@@ -5,7 +5,7 @@ const getNumberHandler = (type, recordedNumbers, labelNameNumberMap) =>
   type === 'lab'
     ? (url) => {
       const code = codeFromUrl(url)
-      const refEquivalent = '#' + code + url.substr(6);
+      const refEquivalent = '#' + code + '_' + url.substr(5);
       const num = labelNameNumberMap[code] + 1 || 1;
 
       if (refEquivalent in recordedNumbers) return new Error('duplicate')
@@ -87,7 +87,7 @@ const getStyle = (prop) => ({
   'BOLD': prop.isBold,
   'ITALIC': prop.isItalic,
   'UNDERLINE': prop.isUnderlined,
-  'FOREGROUND_COLOR': (prop.color && prop.color !== 'null') ? '#' + prop.color : null,
+  'FOREGROUND_COLOR': (prop.color && prop.color !== 'null') ? '#' + prop.color : 'null',
 })
 
 
@@ -118,7 +118,7 @@ function getCRUrls(text, isCRUrl) {
 }
 
 
-const isCapitalized = (str) => str.charAt(0) === str.charAt(0).toUpperCase()
+const isCapitalized = (str) => str !== '' && str.charAt(0) === str.charAt(0).toUpperCase()
 
 
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1)
