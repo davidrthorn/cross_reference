@@ -14,11 +14,11 @@ const areSameLength = (a, b) =>
     ? isObject(b) && Object.keys(a).length === Object.keys(b).length
     : a.length === b.length
 
-const deepEqual = (a, b) => {
+const areDeepEqual = (a, b) => {
   if (isIterable(a)) {
     if (!isIterable(b) || !areSameLength(a, b)) return false    
     for (const key in a) {
-      if (!deepEqual(a[key], b[key])) return false
+      if (!areDeepEqual(a[key], b[key])) return false
     }
   } else {
     if (a !== b) return false
