@@ -118,30 +118,16 @@ function getCRUrls(text, isCRUrl) {
 }
 
 
-function capitalizeIfAppropriate(text, start, replacementText) {
-  const firstLetter = replacementText.charAt(0)
-  const firstLetterCapitalized = firstLetter.toUpperCase()
+const isCapitalized = (str) => str.charAt(0) === str.charAt(0).toUpperCase()
 
-  if (firstLetter === firstLetterCapitalized) return replacementText
 
-  const b1 = t.charAt(start - 1)
-  const b2 = t.charAt(start - 2)
-  const b3 = t.charAt(start - 3)
-  const b4 = t.charAt(start - 4)
-  const b5 = t.charAt(start - 5)
+const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1)
 
-  const isInCapitalizationContext =
-    !b1 ||
-    b1 === '\r' ||
-    ['!', '?'].includes(b2) ||
-    (b2 === '.' && b4 !== '.') ||
-    (b2 === '”' && ['!', '?'].includes(b3)) ||
-    (b1 === '(' && ['!', '?', '.'].includes(b3) && b5 !== '.')
 
-  return isInCapitalizationContext
-    ? firstLetterCapitalized + replacementText.slice(1)
-    : replacementText
-}
+const capitalizeIfAppropriate = (text, start, replacementText) => 
+  isCapitalized(replacementText) || !isCapitalized(text.substr(start, start + 1))
+    ? replacementText
+    : capitalize(replacementText)
 
 
 function fnLabs(footnotes, fnProps, num_pairs) {

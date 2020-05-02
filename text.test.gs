@@ -1,17 +1,32 @@
+function testCapitalizeIfAppropriate() {
+  It('returns capitalized when reference text is already capitalized',
+    capitalizeIfAppropriate('aa bb Figure', 5, 'Figure'),
+    'Figure'
+  )
+  It('returns capitalized when text to replace is already capitalized',
+    capitalizeIfAppropriate('aa bb Figur', 5, 'figure'),
+    'Figure'
+  )
+  It('returns uncapitalized when text to replace is not capitalized',
+    capitalizeIfAppropriate('aa bb figur', 5, 'figure'),
+    'Figure'
+  )
+}
 
-function testCapitalization() {
-  let replacementText = 'figure'
-  let context = 'abcde'
-  It('capitalises when start of paragraph',
-    capitalizeIfAppropriate(context, 0, replacementText),
-    'Figure'
+function testCapitalize() {
+  It('returns empty for empty',
+    capitalize(''),
+    ''
   )
-  It('capitalises when following a question',
-    capitalizeIfAppropriate('abc? ', 0, replacementText),
-    'Figure'
+  It('capitalizes non-empty string',
+    capitalize('hello'),
+    'Hello'
   )
-  It('capitalises when following an exclamation',
-    capitalizeIfAppropriate('abc! ', 0, replacementText),
-    'Figure'
-  )
+}
+
+function testAllText() {
+  testSuite('text.js', [
+    testCapitalizeIfAppropriate,
+    testCapitalize,
+  ])
 }
