@@ -1,6 +1,6 @@
 const isCrossProp = (propKey) =>  propKey.substr(0, 6) === 'cross_' 
 
-const getPropKey = (labCode) => 'cross_' + cur.substr(0, 3)
+const getPropKey = (labCode) => 'cross_' + labCode.substr(0, 3)
 
 const refCodeFromLabCode = (labCode) => labCode.substr(0, 3)
 
@@ -29,12 +29,15 @@ function patchSettings(settings, storedProps) {
   return settings
 }
 
-// TODO: what is this actually doing?
-const encodeSettings = (settings) =>
-  Object.Entries(getSettings())
-    .reduce(
-      (acc, cur) => acc[getPropKey(cur[0])] = encodeSetting(cur[1])
-      , {})
+
+function encodeSettings(settings) {
+  const result = {}
+  for (const key in settings) {
+    const setting = settings[key]
+    result[getPropKey(setting.lab.code)] = encodeSetting(setting)
+  }
+  return result
+}
 
 
 function updateDocProps() {
