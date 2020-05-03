@@ -10,39 +10,6 @@ settings = {
 }
 */
 
-// *** Must be duplicated in sidebar-js.html because gs is not js.
-const orderedSettingsKeys = [
-  'labCode',
-  'labName',
-  'labText',
-  'labIsBold',
-  'labIsItalic',
-  'labIsUnderlined',
-  'refText',
-  'refIsBold',
-  'refIsItalic',
-  'refIsUnderlined',
-  'labColor',
-  'refColor',
-  'labSuffix',
-  'refSuffix',
-]
-
-const isLegacy = (encoded) => settings.charAt(0) !== '{'
-const decodeLegacy = (encoded) =>
-  encoded
-    .split('_')
-    .reduce((result, current, i) => {
-      result[orderedSettingsKeys[i]] = current;
-      return result
-    }, {});
-
-
-// const encodeSettings = (unencoded) =>
-//   orderedSettingsKeys
-//     .reduce((total, k) => total + (k in unencoded ? unencoded[k] : 'null') + '_', '')
-//     .slice(0, -1);
-
 const encodeSettings = (unencoded) => JSON.stringify(unencoded)
 
 const decodeSettings = (encoded) =>
@@ -51,8 +18,6 @@ const decodeSettings = (encoded) =>
     : JSON.parse(encoded)
 
 const refCodeFromLabCode = (labCode) => labCode.substr(0, 3)
-
-// *** END DUPE
 
 
 const getPropsForType = (type, settings) =>
@@ -64,29 +29,6 @@ const getPropsForType = (type, settings) =>
   }, {})
 
 
-const propsFromSetting = (type, setting) =>
-  type === 'lab'
-    ? {
-      code: setting['labCode'],
-      text: setting['labText'],
-      isBold: setting['labIsBold'],
-      isItalic: setting['labIsItalic'],
-      isUnderlined: setting['labIsUnderlined'],
-      color: setting['labColor'],
-      suffix: setting['labSuffix'],
-    }
-    : {
-      code: refCodeFromLabCode(setting['labCode']),
-      text: setting['refText'],
-      isBold: setting['refIsBold'],
-      isItalic: setting['refIsItalic'],
-      isUnderlined: setting['refIsUnderlined'],
-      color: setting['refColor'],
-      suffix: setting['refSuffix'],
-    }
-
-// Defaults
-
 function getDefaultSettings() {
   return {
     equ: {
@@ -94,41 +36,41 @@ function getDefaultSettings() {
       lab: {
         code: 'equat',
         text: 'equation ',
-        isBold: 'null',
-        isItalic: 'null',
-        isUnderlined: 'null',
-        color: 'null',
-        suffix: 'null',
+        isBold: false,
+        isItalic: false,
+        isUnderlined: false,
+        color: null,
+        suffix: '',
       },
       ref: {
         code: 'equ',
         text: 'equation ',
-        isBold: 'null',
-        isItalic: 'null',
-        isUnderlined: 'null',
-        color: 'null',
+        isBold: false,
+        isItalic: false,
+        isUnderlined: false,
+        color: null,
+        suffix: '',
       }
-      suffix: 'null',
     },
     Figure: {
       name: 'Figure',
       lab: {
         code: 'figur',
         text: 'figure ',
-        isBold: 'null',
-        isItalic: 'null',
-        isUnderlined: 'null',
-        color: 'null',
-        suffix: 'sug',
+        isBold: false,
+        isItalic: false,
+        isUnderlined: false,
+        color: null,
+        suffix: '',
       },
       ref: {
         code: 'fig',
         text: 'figure ',
-        isBold: 'null',
-        isItalic: 'null',
-        isUnderlined: 'null',
-        color: 'null',
-        suffix: 'null',
+        isBold: false,
+        isItalic: false,
+        isUnderlined: false,
+        color: null,
+        suffix: '',
       }
     },
     Footnote: {
@@ -136,20 +78,20 @@ function getDefaultSettings() {
       lab: {
         code: 'fnote',
         text: '',
-        isBold: 'null',
-        isItalic: 'null',
-        isUnderlined: 'null',
-        color: 'null',
-        suffix: 'null',
+        isBold: false,
+        isItalic: false,
+        isUnderlined: false,
+        color: null,
+        suffix: '',
       },
       ref: {
         code: 'fno',
         text: 'fn. ',
-        isBold: 'null',
-        isItalic: 'null',
-        isUnderlined: 'null',
-        color: 'null',
-        suffix: 'null',
+        isBold: false,
+        isItalic: false,
+        isUnderlined: false,
+        color: null,
+        suffix: '',
       },
     },
     Table: {
@@ -157,21 +99,51 @@ function getDefaultSettings() {
       lab: {
         code: 'table',
         text: 'table ',
-        isBold: 'null',
-        isItalic: 'null',
-        isUnderlined: 'null',
-        color: 'null',
-        suffix: 'null',
+        isBold: false,
+        isItalic: false,
+        isUnderlined: false,
+        color: null,
+        suffix: '',
       },
       ref: {
         code: 'tab',
         text: 'table ',
-        isBold: 'null',
-        isItalic: 'null',
-        isUnderlined: 'null',
-        color: 'null',
-        suffix: 'null',
+        isBold: false,
+        isItalic: false,
+        isUnderlined: false,
+        color: null,
+        suffix: '',
       }
+    }
+  }
+}
+
+/* Required for legacy. Hardcoded as hell */
+const isLegacy = (encoded) => settings.charAt(0) !== '{'
+const decodeLegacy = (encoded) => {
+  const asArr = encoded.split('_')
+  const bool = (str) => str === 'true'
+  const realNull = (str) => str === 'null' ? null : str
+
+  return {
+    name: asArr[1],
+    lab: {
+      code: asArr[0],
+      text: asArr[2],
+      isBold: bool(asArr[3]),
+      isItalic:  bool(asArr[4]),
+      isUnderlined: bool(asArr[5]),
+      color:  realNull(asArr[10]),
+      suffix: '',
+    },
+    ref: {
+      code: refCodeFromLabCode(asArr[0]),
+      text: asArr[6],
+      isBold: bool(asArr[7]),
+      isItalic: bool(asArr[8]),
+      isUnderlined: bool(asArr[9]),
+      color: realNull(asArr[11]),
+      suffix: '',
     }
   }
 }

@@ -1,8 +1,8 @@
 const Expect = (description, got, want) =>
   Logger.log(
-    deepEqual(got, want)
+    areDeepEqual(got, want)
       ? '✅ ' + description
-      : '❌ ' + description + '. Expected ' + JSON.stringify(want) + '; got ' + JSON.stringify(got)
+      : '❌ ' + description + '.\nExpected\n' + JSON.stringify(want) + '\n Got\n' + JSON.stringify(got)
   )
 
 const isObject = (thing) => Object.prototype.toString.call(thing) === '[object Object]'
@@ -28,14 +28,10 @@ const areDeepEqual = (a, b) => {
 
 
 function testSuite(name, suite = []) {
-  Logger.log('=========')
-  Logger.log('TEST SUITE: ' + name)
-  Logger.log('=========')
+  Logger.log('SUITE: ' + name + '\n======')
 
   suite.forEach((s) => {
-    Logger.log('---------')
-    Logger.log(s.name)
-    Logger.log('---------')
+    Logger.log('\ns.name\n------')
     s()
   })
 }
