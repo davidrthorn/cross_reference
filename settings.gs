@@ -1,3 +1,15 @@
+/*
+settings = {
+  lab: {
+    code: ...
+  }
+  ref: {
+    code: ...
+    ...
+  }
+}
+*/
+
 // *** Must be duplicated in sidebar-js.html because gs is not js.
 const orderedSettingsKeys = [
   'labCode',
@@ -16,17 +28,29 @@ const orderedSettingsKeys = [
   'refSuffix',
 ]
 
-const encodeSettings = (unencoded) =>
-  orderedSettingsKeys
-    .reduce((total, k) => total + (k in unencoded ? unencoded[k] : 'null') + '_', '')
-    .slice(0, -1);
-
-const decodeSettings = (encoded) =>
+const isLegacy = (encoded) => settings.charAt(0) !== '{'
+const decodeLegacy = (encoded) =>
   encoded
     .split('_')
-    .reduce((result, current, i) => { result[orderedSettingsKeys[i]] = current; return result }, {});
+    .reduce((result, current, i) => {
+      result[orderedSettingsKeys[i]] = current;
+      return result
+    }, {});
 
-const refCodeFromLabCode = (labCode) => labCode.substr(0,3)
+
+// const encodeSettings = (unencoded) =>
+//   orderedSettingsKeys
+//     .reduce((total, k) => total + (k in unencoded ? unencoded[k] : 'null') + '_', '')
+//     .slice(0, -1);
+
+const encodeSettings = (unencoded) => JSON.stringify(unencoded)
+
+const decodeSettings = (encoded) =>
+  isLegacy(encoded)
+    ? decodeLegacy(encoded)
+    : JSON.parse(encoded)
+
+const refCodeFromLabCode = (labCode) => labCode.substr(0, 3)
 
 // *** END DUPE
 
@@ -42,7 +66,7 @@ const getPropsForType = (type, settings) =>
 
 const propsFromSetting = (type, setting) =>
   type === 'lab'
-  ? {
+    ? {
       code: setting['labCode'],
       text: setting['labText'],
       isBold: setting['labIsBold'],
@@ -65,69 +89,89 @@ const propsFromSetting = (type, setting) =>
 
 function getDefaultSettings() {
   return {
-    Equation: {
-      labCode: 'equat',
-      labName: 'Equation',
-      labText: 'equation ',
-      labIsBold: 'null',
-      labIsItalic: 'null',
-      labIsUnderlines: 'null',
-      refText: 'equation ',
-      refIsBold: 'null',
-      refIsItalic: 'null',
-      refIsUnderlined: 'null',
-      labColor: 'null',
-      refColor: 'null',
-      labSuffix: 'null',
-      refSuffix: 'null',
+    equ: {
+      name: 'Equation',
+      lab: {
+        code: 'equat',
+        text: 'equation ',
+        isBold: 'null',
+        isItalic: 'null',
+        isUnderlined: 'null',
+        color: 'null',
+        suffix: 'null',
+      },
+      ref: {
+        code: 'equ',
+        text: 'equation ',
+        isBold: 'null',
+        isItalic: 'null',
+        isUnderlined: 'null',
+        color: 'null',
+      }
+      suffix: 'null',
     },
     Figure: {
-      labCode: 'figur',
-      labName: 'Figure',
-      labText: 'figure ',
-      labIsBold: 'null',
-      labIsItalic: 'null',
-      labIsUnderlined: 'null',
-      refText: 'figure ',
-      refIsBold: 'null',
-      refIsItalic: 'null',
-      refIsUnderlines: 'null',
-      labColor: 'null',
-      refColor: 'null',
-      labSuffix: 'sug',
-      refSuffix: 'null',
+      name: 'Figure',
+      lab: {
+        code: 'figur',
+        text: 'figure ',
+        isBold: 'null',
+        isItalic: 'null',
+        isUnderlined: 'null',
+        color: 'null',
+        suffix: 'sug',
+      },
+      ref: {
+        code: 'fig',
+        text: 'figure ',
+        isBold: 'null',
+        isItalic: 'null',
+        isUnderlined: 'null',
+        color: 'null',
+        suffix: 'null',
+      }
     },
     Footnote: {
-      labCode: 'fnote',
-      labName: 'Footnote',
-      labText: '',
-      labIsBold: 'null',
-      labIsItalic: 'null',
-      labIsUnderlines: 'null',
-      refText: 'fn. ',
-      refIsBold: 'null',
-      refIsItalic: 'null',
-      refIsUnderlined: 'null',
-      labColor: 'null',
-      refColor: 'null',
-      labSuffix: 'null',
-      refSuffix: 'null',
+      name: 'Footnote',
+      lab: {
+        code: 'fnote',
+        text: '',
+        isBold: 'null',
+        isItalic: 'null',
+        isUnderlined: 'null',
+        color: 'null',
+        suffix: 'null',
+      },
+      ref: {
+        code: 'fno',
+        text: 'fn. ',
+        isBold: 'null',
+        isItalic: 'null',
+        isUnderlined: 'null',
+        color: 'null',
+        suffix: 'null',
+      },
     },
     Table: {
-      labCode: 'table',
-      labName: 'Table',
-      labText: 'table ',
-      labIsBold: 'null',
-      labIsItalic: 'null',
-      labIsUnderlined: 'null',
-      refText: 'table ',
-      refIsBold: 'null',
-      refIsItalic: 'null',
-      refIsUnderlined: 'null',
-      labColor: 'null',
-      refColor: 'null',
-      labSuffix: 'null',
-      refSuffix: 'null',
+      name: 'Table',
+      lab: {
+        code: 'table',
+        text: 'table ',
+        isBold: 'null',
+        isItalic: 'null',
+        isUnderlined: 'null',
+        color: 'null',
+        suffix: 'null',
+      },
+      ref: {
+        code: 'tab',
+        text: 'table ',
+        isBold: 'null',
+        isItalic: 'null',
+        isUnderlined: 'null',
+        color: 'null',
+        suffix: 'null',
+      }
     }
   }
 }
