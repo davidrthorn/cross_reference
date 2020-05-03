@@ -115,3 +115,18 @@ function testGetPropKey() {
     'cross_fig'
   )
 }
+
+
+function testGetProps() {
+  const settings = {figur: getDefaultSettings().figur}
+  let got = getProps('lab', settings)
+
+  Expect('returns correct key',
+    Object.keys(got)[0],
+    settings.figur.lab.code,
+  )
+  Expect('returns correct value',
+    got[settings.figur.lab.code],
+    settings.figur.lab,
+  )
+}

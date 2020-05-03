@@ -19,7 +19,7 @@ function updateProps(tempSettings) {
     const settings = tempSettings[labName]
     const property_value = ''
 
-    docProps.setProperty(getPropKey(settings), encodeSetting(settings))
+    docProps.setProperty(getPropKey(settings.lab.code), encodeSetting(settings))
   }
 
   updateDoc()

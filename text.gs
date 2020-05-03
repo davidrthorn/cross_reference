@@ -1,7 +1,7 @@
 const CRUrlChecker = (codeLength) => (url) => (new RegExp('^#[^_]{' + codeLength + '}_')).test(url)
 const codeFromUrl = (url) => url.substr(1, 3)
 
-const getNumberHandler = (type, recordedNumbers, labelNameNumberMap) =>
+const getNumberHandler = (type, recordedNumbers, labelNameNumberMap) => //TODO: this is an ugly function
   type === 'lab'
     ? (url) => {
       const code = codeFromUrl(url)
@@ -19,7 +19,7 @@ const getNumberHandler = (type, recordedNumbers, labelNameNumberMap) =>
 
 
 function updateParagraphs(paragraphs, type, props, handleNumbering) {
-  for (let i = 0, len = paragraphs.length; i < len; i++) {
+  for (let i=0, len=paragraphs.length; i<len; i++) {
     const text = paragraphs[i].editAsText()
 
     const result = updateText(text, type, props, handleNumbering)
@@ -40,7 +40,7 @@ function updateText(text, type, props, handleNumbering) {
     return new CRError(text, CRUrls, 'multiple')
   }
 
-  for (let i = CRUrls.length; i--;) { // iterate backwards because we're changing the underlying text length
+  for (let i=CRUrls.length; i--;) { // iterate backwards because we're changing the underlying text length
     const CRUrl = CRUrls[i]
 
     const result = handleCRUrl(props, text, CRUrl, handleNumbering)
@@ -52,7 +52,7 @@ function updateText(text, type, props, handleNumbering) {
 
 
 function handleCRUrl(props, text, CRUrl, handleNumbering) {
-  const foundCode = codeFromUrl(CRUrl.url)
+  const foundCode = codeFromUrl(CRUrl.url) // TODO: return code for fig or label
   
   const prop = props[foundCode]
   if (!prop) {

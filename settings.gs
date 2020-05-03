@@ -46,11 +46,17 @@ function updateDocProps() {
 }
 
 
-//TODO: test this and all the other functions in this file
-// const getProps = (type, settings)
-// Object.Entries(settings).reduce(
-//   (acc, cur) => acc[cur.type.code] = cur.type
-//   , {})
+/**
+ * return e.g. {fig: {code: fig, ...}}
+ */
+function getProps(type, settings) {
+  const props = {}
+  for (const key in settings) {
+    const setting = settings[key]
+    props[setting[type].code] = setting[type]
+  }
+  return props
+}
 
 
 function getDefaultSettings() {
