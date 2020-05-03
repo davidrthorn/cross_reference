@@ -1,15 +1,3 @@
-/*
-settings = {
-  lab: {
-    code: ...
-  }
-  ref: {
-    code: ...
-    ...
-  }
-}
-*/
-
 const encodeSettings = (unencoded) => JSON.stringify(unencoded)
 
 const decodeSettings = (encoded) =>
@@ -31,7 +19,7 @@ const getPropsForType = (type, settings) =>
 
 function getDefaultSettings() {
   return {
-    equ: {
+    equat: {
       name: 'Equation',
       lab: {
         code: 'equat',
@@ -52,7 +40,7 @@ function getDefaultSettings() {
         suffix: '',
       }
     },
-    Figure: {
+    figur: {
       name: 'Figure',
       lab: {
         code: 'figur',
@@ -73,7 +61,7 @@ function getDefaultSettings() {
         suffix: '',
       }
     },
-    Footnote: {
+    fnote: {
       name: 'Footnote',
       lab: {
         code: 'fnote',
@@ -94,7 +82,7 @@ function getDefaultSettings() {
         suffix: '',
       },
     },
-    Table: {
+    table: {
       name: 'Table',
       lab: {
         code: 'table',
