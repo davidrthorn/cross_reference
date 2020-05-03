@@ -33,6 +33,10 @@ function testCapitalize() {
     capitalize('hello'),
     'Hello'
   )
+  Expect('does not modify already capitalized',
+    capitalize('Hello'),
+    'Hello'
+  )
 }
 
 function testIsCapitalized() {
@@ -80,8 +84,8 @@ function testLabelNumberHandler() {
 
   got = sut('#fig_first')
   Expect('returns duplicate error',
-    got.message(),
-    'duplicate'
+    got,
+    new Error('duplicate')
   )
 }
 
