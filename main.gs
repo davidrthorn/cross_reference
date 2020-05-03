@@ -30,17 +30,15 @@ function updateDoc() {
   const paragraphs = document.getBody().getParagraphs()
   const footnotes = document.getFootnotes()
 
-  const labProps = getStoredProps('lab')
-  const refProps = getStoredProps('ref')
-
-  updateDocProps()
+  const settings = getSettings()
+  updateDocProps(settings)
 
   const recordedNumbers = {}
   const labelNameNumberMap = {}
 
   const handleLabNumber = getNumberHandler('lab', recordedNumbers, labelNameNumberMap)
 
-  let error = updateParagraphs(paragraphs, true, labProps, handleLabNumber)
+  let error = updateParagraphs(paragraphs, 'lab', settings, handleLabNumber)
 
   // fnLabs(footnotes, labProps, numPairs)
 
@@ -49,8 +47,9 @@ function updateDoc() {
     return 'error'
   }
 
-  const handleRefNumber = getNumberHandler('ref', recordedNumbers, labelNameNumberMap)
-  error = updateParagraphs(paragraphs, false, refProps, handleRefNumber)
+  const handleRefNumber = getNumberHandler('ref', recordedNumbers)
+
+  error = updateParagraphs(paragraphs, 'ref', settings, handleRefNumber)
 
   if (error instanceof CRError) {
     handleErr(error)

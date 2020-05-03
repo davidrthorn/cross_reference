@@ -19,46 +19,32 @@ function updateProps(tempSettings) {
     const settings = tempSettings[labName]
     const property_value = ''
 
-    docProps.setProperty(getPropKey(settings), encodeSettings(settings))
+    docProps.setProperty(getPropKey(settings), encodeSetting(settings))
   }
 
   updateDoc()
   return '#save-apply'
 }
 
-function isCrossProp(propKey) { return propKey.substr(0, 6) === 'cross_' }
-function getPropKey(settings) { return 'cross_' + settings.labCode.substr(0, 3) }
 
 function getSettings() {
   const docProps = PropertiesService.getDocumentProperties().getProperties()
   const userProps = PropertiesService.getUserProperties().getProperties()
 
-  const settings = getDefaultSettings()
+  settings = getDefaultSettings()
 
-  // TODO: update for new settings data structure
-  // for (const key in userProps) {
-  //   if (isCrossProp(key)) {
-  //     const set = decodeSettings(userProps[key])
-  //     settings[set.labName] = set
-  //   }
-  // }
-
-  // for (const key in docProps) {
-  //   if (isCrossProp(key)) {
-  //     const set = decodeSettings(docProps[key])
-  //     settings[set.labName] = set
-  //   }
-  // }
+  settings = patchSettings(settings, userProps)
+  settings = patchSettings(settings, docProps)
 
   return settings
 }
 
 
 // Store defaults in user props store
-function storeDefault(temp_settings) {
+function storeDefault(tempSettings) {
   const userProps = PropertiesService.getUserProperties()
-  for (const labName in temp_settings) {
-    const settings = temp_settings[labName]
+  for (const labName in tempSettings) {
+    const settings = tempSettings[labName]
     storePairing(userProps, settings)
     Utilities.sleep(200)
   }
@@ -66,17 +52,9 @@ function storeDefault(temp_settings) {
 }
 
 
-// Store custom category in user props store
-function storeCustom(custom_settings) {
-  const userProps = PropertiesService.getUserProperties()
-  storePairing(userProps, custom_settings)
-}
+const storeCustom = (customSettings) => storePairing(PropertiesService.getUserProperties(), customSettings)
 
-
-// Store given settings in user props store
-function storePairing(userProps, settings) {
-  userProps.setProperty(getPropKey(settings), encodeSettings(settings))
-}
+const storePairing = (props, settings) => props.setProperty(getPropKey(settings), encodeSettings(settings)) 
 
 
 // Return default settings

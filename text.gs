@@ -18,11 +18,11 @@ const getNumberHandler = (type, recordedNumbers, labelNameNumberMap) =>
     : (url) => recordedNumbers[url] || new Error('missref');
 
 
-function updateParagraphs(paragraphs, isLabel, props, handleNumbering) {
+function updateParagraphs(paragraphs, type, props, handleNumbering) {
   for (let i = 0, len = paragraphs.length; i < len; i++) {
     const text = paragraphs[i].editAsText()
 
-    const result = updateText(text, isLabel, props, handleNumbering)
+    const result = updateText(text, type, props, handleNumbering)
     if (result instanceof CRError) {
       return result
     }
@@ -30,13 +30,13 @@ function updateParagraphs(paragraphs, isLabel, props, handleNumbering) {
 }
 
 
-function updateText(text, isLabel, props, handleNumbering) {
-  const isCRUrl = CRUrlChecker(isLabel ? 5 : 3)
+function updateText(text, type, props, handleNumbering) {
+  const isCRUrl = CRUrlChecker(type === 'lab' ? 5 : 3) // TODO: there must be a better way
   const CRUrls = getCRUrls(text, isCRUrl)
 
   if (!CRUrls.length) return
   
-  if (isLabel && CRUrls.length > 1) {
+  if (type === 'lab' && CRUrls.length > 1) { // TODO: this is a hack for working out if label or reference. Not ideal.
     return new CRError(text, CRUrls, 'multiple')
   }
 
@@ -52,9 +52,9 @@ function updateText(text, isLabel, props, handleNumbering) {
 
 
 function handleCRUrl(props, text, CRUrl, handleNumbering) {
-  const code = codeFromUrl(CRUrl.url)
+  const foundCode = codeFromUrl(CRUrl.url)
   
-  const prop = props[code]
+  const prop = props[foundCode]
   if (!prop) {
     return new CRError(text, CRUrl, 'unrecognised')
   }
@@ -87,7 +87,7 @@ const getStyle = (prop) => ({
   'BOLD': prop.isBold,
   'ITALIC': prop.isItalic,
   'UNDERLINE': prop.isUnderlined,
-  'FOREGROUND_COLOR': (prop.color && prop.color !== 'null') ? '#' + prop.color : null,
+  'FOREGROUND_COLOR': (prop.color && prop.color !== 'null') ? '#' + prop.color : null, // TODO: surely we can make this data clean when creating settings
 })
 
 

@@ -28,10 +28,13 @@ const areDeepEqual = (a, b) => {
 
 
 function testSuite(name, suite = []) {
-  Logger.log('SUITE: ' + name + '\n======')
+  Logger.log('SUITE: ' + name)
+  Logger.log('======')
 
   suite.forEach((s) => {
-    Logger.log('\ns.name\n------')
+    Logger.log(s.name)
+    Logger.log('------')
     s()
+    Logger.log('')
   })
 }

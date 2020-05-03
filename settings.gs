@@ -1,20 +1,53 @@
-const encodeSettings = (unencoded) => JSON.stringify(unencoded)
+const isCrossProp = (propKey) =>  propKey.substr(0, 6) === 'cross_' 
 
-const decodeSettings = (encoded) =>
+const getPropKey = (labCode) => 'cross_' + cur.substr(0, 3)
+
+const refCodeFromLabCode = (labCode) => labCode.substr(0, 3)
+
+const encodeSetting = (unencoded) => JSON.stringify(unencoded)
+
+const decodeSetting = (encoded) =>
   isLegacy(encoded)
     ? decodeLegacy(encoded)
     : JSON.parse(encoded)
 
-const refCodeFromLabCode = (labCode) => labCode.substr(0, 3)
+
+function getSettings() {
+  let settings = getDefaultSettings()
+  settings = patchSettings(getDefaultSettings(), PropertiesService.getUserProperties().getProperties())
+  settings = patchSettings(getDefaultSettings(), PropertiesService.getDocumentProperties().getProperties())
+  return settings
+}
 
 
-const getPropsForType = (type, settings) =>
-  Object.keys(settings).reduce((total, key) => {
-    const s = settings[key]
-    const code = refCodeFromLabCode(s['labCode'])
-    total[code] = propsFromSetting(type, s)
-    return total
-  }, {})
+function patchSettings(settings, storedProps) {
+  for (const key in storedProps) {
+    if (!isCrossProp(key)) continue
+    const setting = decodeSetting(storedProps[key])
+    settings[setting.lab.code] = setting
+  }
+  return settings
+}
+
+// TODO: what is this actually doing?
+const encodeSettings = (settings) =>
+  Object.Entries(getSettings())
+    .reduce(
+      (acc, cur) => acc[getPropKey(cur[0])] = encodeSetting(cur[1])
+      , {})
+
+
+function updateDocProps() {
+  const encoded = encodeSettings(getSettings())
+  PropertiesService.getDocumentProperties().setProperties(encoded)
+}
+
+
+//TODO: test this and all the other functions in this file
+// const getProps = (type, settings)
+// Object.Entries(settings).reduce(
+//   (acc, cur) => acc[cur.type.code] = cur.type
+//   , {})
 
 
 function getDefaultSettings() {
@@ -107,7 +140,8 @@ function getDefaultSettings() {
 }
 
 /* Required for legacy. Hardcoded as hell */
-const isLegacy = (encoded) => settings.charAt(0) !== '{'
+const isLegacy = (encoded) => encoded.charAt(0) !== '{'
+
 const decodeLegacy = (encoded) => {
   const asArr = encoded.split('_')
   const bool = (str) => str === 'true'
@@ -134,4 +168,16 @@ const decodeLegacy = (encoded) => {
       suffix: '',
     }
   }
+}
+
+/** debug */
+
+function clearProps() {
+  PropertiesService.getDocumentProperties().deleteAllProperties()
+  PropertiesService.getUserProperties().deleteAllProperties()
+}
+
+function viewProps() {
+  Logger.log(PropertiesService.getDocumentProperties().getProperties())
+  Logger.log(PropertiesService.getUserProperties().getProperties())
 }
