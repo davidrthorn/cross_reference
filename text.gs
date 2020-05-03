@@ -62,7 +62,7 @@ function handleCRUrl(props, text, CRUrl, handleNumbering) {
   let replacementText = capitalizeIfAppropriate(text.getText(), CRUrl.start, prop.text)
   const num = handleNumbering(CRUrl.url)
   if (num instanceof Error) {
-    return new CRError(text, CRUrl, num.message())
+    return new CRError(text, CRUrl, num.message)
   }
 
   replacementText += num;
@@ -87,7 +87,7 @@ const getStyle = (prop) => ({
   'BOLD': prop.isBold,
   'ITALIC': prop.isItalic,
   'UNDERLINE': prop.isUnderlined,
-  'FOREGROUND_COLOR': (prop.color && prop.color !== 'null') ? '#' + prop.color : 'null',
+  'FOREGROUND_COLOR': (prop.color && prop.color !== 'null') ? '#' + prop.color : null,
 })
 
 
@@ -130,6 +130,7 @@ const capitalizeIfAppropriate = (text, start, replacementText) =>
     : capitalize(replacementText)
 
 
+// TODO: footnotes
 function fnLabs(footnotes, fnProps, num_pairs) {
   const isCRUrl = CRUrlChecker(5)
   for (let i = 0; i < footnotes.length; i++) {
