@@ -1,5 +1,6 @@
 function testAllText() {
   testSuite('text.js', [
+    testCodeFromCRUrl,
     testCapitalizeIfAppropriate,
     testIsCapitalized,
     testCapitalize,
@@ -7,6 +8,25 @@ function testAllText() {
     testRefNumberHandler,
     getStyle,
   ])
+}
+
+function testCodeFromCRUrl() {
+  Expect('ref url returns 3-string code',
+    codeFromUrl('#fig_hello'),
+    'fig'
+  )
+  Expect('lab url returns 5 string code',
+    codeFromUrl('#figur_hello'),
+    'figur'
+  )
+  Expect('returns null for other url',
+    codeFromUrl('https://google.com'),
+    null
+  )
+  Expect('returns null for malformed CRUrl',
+    codeFromUrl('#figu_hello'),
+    null
+  )
 }
 
 function testCapitalizeIfAppropriate() {

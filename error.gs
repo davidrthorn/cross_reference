@@ -23,10 +23,6 @@ function CRError(containingText, CRUrl, error) {
     duplicate: 'There are at least 2 labels with the code ' + url + '.' +
         "\n\nLabel codes must be 5 letters and label names (e.g. '" +
         url.substr(7) + "') must be unique.",
-    multiple: 'One of your paragraphs contains more than one label.' +
-        '\n\nParagraphs may contain multiple references, but only one label.' +
-        '\nYou probably meant to insert a reference. The last label in' +
-        '\nthe paragraph has been highlighed in red.',
     missref: 'The reference highlighted in red has nothing to refer to.' +
         '\nIt might contain a typo or the corresponding label might be missing.' +
         '\n\nUpdating the document when this has been fixed will automatically' +

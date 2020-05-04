@@ -1,5 +1,9 @@
-const CRUrlChecker = (codeLength) => (url) => (new RegExp('^#[^_]{' + codeLength + '}_')).test(url)
-const codeFromUrl = (url) => url.substr(1, 3)
+const isCRUrl = codeLength => url => (new RegExp('^#[^_]{' + codeLength + '}_')).test(url)
+
+function codeFromUrl(url) {
+  const match = url.match(/^#([^_]{3}|[^_]{5})_/)
+  return match ? match[1] : null
+}
 
 const getNumberHandler = (type, recordedNumbers, labelNameNumberMap) => //TODO: this is an ugly function
   type === 'lab'
@@ -18,11 +22,12 @@ const getNumberHandler = (type, recordedNumbers, labelNameNumberMap) => //TODO: 
     : (url) => recordedNumbers[url] || new Error('missref');
 
 
-function updateParagraphs(paragraphs, type, props, handleNumbering) {
+const updateParagraphs = paragraphs => getFunc => handleFunc => {
   for (let i=0, len=paragraphs.length; i<len; i++) {
     const text = paragraphs[i].editAsText()
-
-    const result = updateText(text, type, props, handleNumbering)
+    const handleText = handleFunc(text)
+    const CRUrls = getFunc(text)
+    const result = updateText(CRUrls)(Text)
     if (result instanceof CRError) {
       return result
     }
@@ -30,20 +35,13 @@ function updateParagraphs(paragraphs, type, props, handleNumbering) {
 }
 
 
-function updateText(text, type, props, handleNumbering) {
-  const isCRUrl = CRUrlChecker(type === 'lab' ? 5 : 3) // TODO: there must be a better way
-  const CRUrls = getCRUrls(text, isCRUrl)
-
+const updateText = CRUrls => handleFunc => {
   if (!CRUrls.length) return
-  
-  if (type === 'lab' && CRUrls.length > 1) { // TODO: this is a hack for working out if label or reference. Not ideal.
-    return new CRError(text, CRUrls, 'multiple')
-  }
 
   for (let i=CRUrls.length; i--;) { // iterate backwards because we're changing the underlying text length
     const CRUrl = CRUrls[i]
 
-    const result = handleCRUrl(props, text, CRUrl, handleNumbering)
+    const result = handleFunc(CRUrl)
     if (result instanceof CRError) {
       return result
     }
@@ -51,9 +49,8 @@ function updateText(text, type, props, handleNumbering) {
 }
 
 
-function handleCRUrl(props, text, CRUrl, handleNumbering) {
-  const foundCode = codeFromUrl(CRUrl.url) // TODO: return code for fig or label
-  
+const handleCRUrl = props => handleNumbering  => text => CRUrl => {
+  const foundCode = codeFromUrl(CRUrl.url)
   const prop = props[foundCode]
   if (!prop) {
     return new CRError(text, CRUrl, 'unrecognised')
@@ -91,7 +88,7 @@ const getStyle = (prop) => ({
 })
 
 
-function getCRUrls(text, isCRUrl) {
+const getCRUrls = isCRUrl => text => {
   const textLength = text.getText().length;
   const idxs = text.getTextAttributeIndices()
   idxs.push(textLength) // the final index is the end of the text
@@ -132,7 +129,7 @@ const capitalizeIfAppropriate = (text, start, replacementText) =>
 
 // TODO: footnotes
 function fnLabs(footnotes, fnProps, num_pairs) {
-  const isCRUrl = CRUrlChecker(5)
+  const isCRUrl = isCRUrl(5)
   for (let i = 0; i < footnotes.length; i++) {
     const paras = footnotes[i].getFootnoteContents().getParagraphs();
     for (let j = 0; j < paras.length; j++) {

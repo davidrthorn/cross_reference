@@ -37,8 +37,11 @@ function updateDoc() {
   const labelNameNumberMap = {}
 
   const handleLabNumber = getNumberHandler('lab', recordedNumbers, labelNameNumberMap)
+  const labProps = getProps('lab', settings)
 
-  let error = updateParagraphs(paragraphs, 'lab', settings, handleLabNumber)
+  const getLabs = getCRUrls(isCRUrl(5))
+  const handleLabs = handleCRUrl(labProps)(handleLabNumber)
+  let error = updateParagraphs(paragraphs)(getLabs)(handleLabs)
 
   // fnLabs(footnotes, labProps, numPairs)
 
@@ -48,8 +51,11 @@ function updateDoc() {
   }
 
   const handleRefNumber = getNumberHandler('ref', recordedNumbers)
+  const refProps = getProps('ref', settings)
 
-  error = updateParagraphs(paragraphs, 'ref', settings, handleRefNumber)
+  const getRefs = getCRUrls(isCRUrl(3))
+  const handleRefs = handleCRUrl(refProps)(handleRefNumber)
+  error = updateParagraphs(paragraphs)(getRefs)(handleRefs)
 
   if (error instanceof CRError) {
     handleErr(error)
@@ -64,4 +70,12 @@ function updateDoc() {
   //     return 'error'
   //   }
   // }
+}
+
+
+/** ALL TESTS */
+
+function runAllTests() {
+  testAllSettings()
+  testAllText()
 }
