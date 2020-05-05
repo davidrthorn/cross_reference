@@ -32,18 +32,18 @@ function testLegacySettingsMapsToNewSettings() {
       suffix: '',
     }
   }
-  Expect('returns correctly formatted new settings for legacy string',
+  It('returns correctly formatted new settings for legacy string',
     decodeLegacy(legacy),
     want
   )
 }
 
 function testIsLegacy() {
-  Expect('returns false for JSON',
+  It('returns false for JSON',
     isLegacy(JSON.stringify({ a: 'hello' })),
     false
   )
-  Expect('returns true for non-JSON',
+  It('returns true for non-JSON',
     isLegacy('hello'),
     true
   )
@@ -58,7 +58,7 @@ function testPatchSettings() {
     })
   }
 
-  Expect('replaces "figur" entry with one in stored props',
+  It('replaces "figur" entry with one in stored props',
     patchSettings(settings, storedProps)['figur'],
     decodeSetting(storedProps['cross_fig'])
   )
@@ -70,14 +70,14 @@ function testPatchSettings() {
       lab: { 'code': 'tiger' },
     })
   }
-  Expect('adds entry if not present',
+  It('adds entry if not present',
     patchSettings(settings, storedProps)['tiger'],
     decodeSetting(storedProps['cross_tig'])
   )
 
   settings = getDefaultSettings()
   const originalLength = Object.keys(settings).length
-  Expect('does not overwrite existing',
+  It('does not overwrite existing',
     Object.keys(patchSettings(settings, storedProps)).length,
     originalLength + 1
   )
@@ -86,31 +86,31 @@ function testPatchSettings() {
 function testEncodeSettings() {
   let settings = { figur: getDefaultSettings().figur }
 
-  Expect('encoded setting object reflects original',
+  It('encoded setting object reflects original',
     encodeSettings(settings),
     { cross_fig: encodeSetting(settings.figur) }
   )
 
   settings = getDefaultSettings()
-  Expect('encoded object is correct length',
+  It('encoded object is correct length',
     Object.keys(encodeSettings(settings)).length,
     Object.keys(settings).length
   )
 }
 
 function testIsCrossProp() {
-  Expect('crossprop returns true',
+  It('crossprop returns true',
     isCrossProp('cross_fig'),
     true
   )
-  Expect('non-cross prop returns false',
+  It('non-cross prop returns false',
     isCrossProp('something'),
     false
   )
 }
 
 function testGetPropKey() {
-  Expect('formats correctly',
+  It('formats correctly',
     getPropKey('figur'),
     'cross_fig'
   )
@@ -121,11 +121,11 @@ function testGetProps() {
   const settings = {figur: getDefaultSettings().figur}
   let got = getProps('lab', settings)
 
-  Expect('returns correct key',
+  It('returns correct key',
     Object.keys(got)[0],
     settings.figur.lab.code,
   )
-  Expect('returns correct value',
+  It('returns correct value',
     got[settings.figur.lab.code],
     settings.figur.lab,
   )

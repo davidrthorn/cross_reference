@@ -1,74 +1,74 @@
 function testAllText() {
   testSuite('text.js', [
+    testGetStyle,
     testCodeFromCRUrl,
     testCapitalizeIfAppropriate,
     testIsCapitalized,
     testCapitalize,
     testLabelNumberHandler,
     testRefNumberHandler,
-    getStyle,
   ])
 }
 
 function testCodeFromCRUrl() {
-  Expect('ref url returns 3-string code',
+  It('ref url returns 3-string code',
     codeFromUrl('#fig_hello'),
     'fig'
   )
-  Expect('lab url returns 5 string code',
+  It('lab url returns 5 string code',
     codeFromUrl('#figur_hello'),
     'figur'
   )
-  Expect('returns null for other url',
+  It('returns null for other url',
     codeFromUrl('https://google.com'),
     null
   )
-  Expect('returns null for malformed CRUrl',
+  It('returns null for malformed CRUrl',
     codeFromUrl('#figu_hello'),
     null
   )
 }
 
 function testCapitalizeIfAppropriate() {
-  Expect('returns capitalized when reference text is already capitalized',
+  It('returns capitalized when reference text is already capitalized',
     capitalizeIfAppropriate('aa bb Figure', 5, 'Figure'),
     'Figure'
   )
-  Expect('returns capitalized when text to replace is already capitalized',
+  It('returns capitalized when text to replace is already capitalized',
     capitalizeIfAppropriate('aa bb Figur', 5, 'figure'),
     'Figure'
   )
-  Expect('returns uncapitalized when text to replace is not capitalized',
+  It('returns uncapitalized when text to replace is not capitalized',
     capitalizeIfAppropriate('aa bb figur', 5, 'figure'),
     'Figure'
   )
 }
 
 function testCapitalize() {
-  Expect('returns empty for empty',
+  It('returns empty for empty',
     capitalize(''),
     ''
   )
-  Expect('capitalizes non-empty string',
+  It('capitalizes non-empty string',
     capitalize('hello'),
     'Hello'
   )
-  Expect('does not modify already capitalized',
+  It('does not modify already capitalized',
     capitalize('Hello'),
     'Hello'
   )
 }
 
 function testIsCapitalized() {
-  Expect('returns false for empty string',
+  It('returns false for empty string',
     isCapitalized(''),
     false
   )
-  Expect('returns true if is capitalized',
+  It('returns true if is capitalized',
     isCapitalized('Hello'),
     true
   )
-  Expect('returns false if not capitalize',
+  It('returns false if not capitalize',
     isCapitalized('hello'),
     false
   )
@@ -86,26 +86,26 @@ function testLabelNumberHandler() {
 
   let got = sut('#fig_somename')
 
-  Expect('increments the existing entry in the label map',
+  It('increments the existing entry in the label map',
     labelNameNumberMap['fig'],
     2
   )
-  Expect('records the url in the recorded numbers',
+  It('records the url in the recorded numbers',
     recordedNumbers,
     {
       '#fig_first': 1,
       '#fig_somename': 2,
     }
   )
-  Expect('returns the correct number',
+  It('returns the correct number',
     got,
     2
   )
 
-  got = sut('#fig_first')
-  Expect('returns duplicate error',
-    got,
-    new Error('duplicate')
+  got = 
+  It('returns duplicate error',
+    sut('#fig_first').message,
+    'duplicate'
   )
 }
 
@@ -118,25 +118,23 @@ function testRefNumberHandler() {
   let sut = getNumberHandler('ref', recordedNumbers, {})
   
   let got = sut('#fig_second')
-  Expect('returns correct number for url',
+  It('returns correct number for url',
     got,
     2
   )
-
-  got = sut('#fig_missing')
-  Expect('returns correct number for url',
-    got,
-    new Error('missref')
+  It('returns error for missing url',
+    sut('#fig_missing').message,
+    'missref'
   )
 }
 
 
 function testGetStyle() {
   let settings = getDefaultSettings()
-  let prop = getProps('lab')(settings).figur
- 
-  let got = getStyle(prop)
-  Expect('returns correct style object for default',
+  let props = getProps('lab')(settings)
+
+  let got = getStyle(props.figur)
+  It('returns correct style object for default',
     got,
     {BOLD: false, ITALIC: false, UNDERLINE: false, FOREGROUND_COLOR: null}
   )

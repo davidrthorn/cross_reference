@@ -1,4 +1,4 @@
-const Expect = (description, got, want) =>
+const It = (description, got, want) =>
   Logger.log(
     areDeepEqual(got, want)
       ? '✅ ' + description
