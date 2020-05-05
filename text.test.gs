@@ -153,4 +153,11 @@ function testGetCRUrls() {
     getCRUrls(isCR)(mockText),
     [{ start: 6, end: 9, url: '#figur_test'}]
   )
+
+  mockText.getLinkUrl = idx => [6, 9].includes(idx) ? '#figur_test' : 'https://google.com'
+  It("doesn't get broken by surrounding links",
+    getCRUrls(isCR)(mockText),
+    [{ start: 6, end: 9, url: '#figur_test'}]
+  )
+
 }
