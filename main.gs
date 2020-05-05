@@ -37,7 +37,7 @@ function updateDoc() {
   const labelNameNumberMap = {}
 
   const handleLabNumber = getNumberHandler('lab', recordedNumbers, labelNameNumberMap)
-  const labProps = getProps('lab', settings)
+  const labProps = getProps('lab')(settings)
 
   const getLabs = getCRUrls(isCRUrl(5))
   const handleLabs = handleCRUrl(labProps)(handleLabNumber)
@@ -51,7 +51,7 @@ function updateDoc() {
   }
 
   const handleRefNumber = getNumberHandler('ref', recordedNumbers)
-  const refProps = getProps('ref', settings)
+  const refProps = getProps('ref')(settings)
 
   const getRefs = getCRUrls(isCRUrl(3))
   const handleRefs = handleCRUrl(refProps)(handleRefNumber)

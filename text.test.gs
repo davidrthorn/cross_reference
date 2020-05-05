@@ -102,11 +102,11 @@ function testLabelNumberHandler() {
     2
   )
 
-  got = 
-  It('returns duplicate error',
-    sut('#fig_first').message,
-    'duplicate'
-  )
+  got =
+    It('returns duplicate error',
+      sut('#fig_first').message,
+      'duplicate'
+    )
 }
 
 
@@ -116,7 +116,7 @@ function testRefNumberHandler() {
     '#fig_second': 2,
   }
   let sut = getNumberHandler('ref', recordedNumbers, {})
-  
+
   let got = sut('#fig_second')
   It('returns correct number for url',
     got,
@@ -136,6 +136,21 @@ function testGetStyle() {
   let got = getStyle(props.figur)
   It('returns correct style object for default',
     got,
-    {BOLD: false, ITALIC: false, UNDERLINE: false, FOREGROUND_COLOR: null}
+    { BOLD: false, ITALIC: false, UNDERLINE: false, FOREGROUND_COLOR: null }
+  )
+}
+
+
+function testGetCRUrls() {
+  let mockText = {
+    getText: () => 'lorem ipsum',
+    getTextAttributeIndices: () => [6, 10],
+    getLinkUrl: idx => [6, 9].includes(idx) ? '#figur_test' : null
+  }
+  const isCR = isCRUrl(5)
+
+  It('returns start and url',
+    getCRUrls(isCR)(mockText),
+    [{ start: 6, end: 9, url: '#figur_test'}]
   )
 }

@@ -10,39 +10,24 @@ const getNumberHandler = (type, recordedNumbers, labelNameNumberMap) => //TODO: 
   type === 'lab'
     ? (url) => {
       const code = codeFromUrl(url)
-      const refEquivalent = '#' + code + '_' + url.substr(5);
-      const num = labelNameNumberMap[code] + 1 || 1;
+      const refEquivalent = '#' + code + '_' + url.substr(5)
+      const num = labelNameNumberMap[code] + 1 || 1
 
       if (refEquivalent in recordedNumbers) return new Error('duplicate')
 
-      recordedNumbers[refEquivalent] = num;
-      labelNameNumberMap[code] = num;
+      recordedNumbers[refEquivalent] = num
+      labelNameNumberMap[code] = num
 
-      return num;
+      return num
     }
-    : (url) => recordedNumbers[url] || new Error('missref');
+    : (url) => recordedNumbers[url] || new Error('missref')
 
 
-const updateParagraphs = paragraphs => getFunc => handleFunc => {
-  for (let i=0, len=paragraphs.length; i<len; i++) {
-    const text = paragraphs[i].editAsText()
-    handleFunc = handleFunc(text)
-    const CRUrls = getFunc(text)
-    const result = updateText(CRUrls)(handleFunc)
-    if (result instanceof CRError) {
-      return result
-    }
-  }
-}
-
-
-const updateText = CRUrls => handleFunc => {
-  if (!CRUrls.length) return
-
-  for (let i=CRUrls.length; i--;) { // iterate backwards because we're changing the underlying text length
+const updateText = CRUrls => handleCR => {
+  for (let i = CRUrls.length; i--;) { // iterate backwards because we're changing the underlying text length
     const CRUrl = CRUrls[i]
 
-    const result = handleFunc(CRUrl)
+    const result = handleCR(CRUrl)
     if (result instanceof CRError) {
       return result
     }
@@ -50,30 +35,25 @@ const updateText = CRUrls => handleFunc => {
 }
 
 
-const handleCRUrl = props => handleNumbering => text => CRUrl => {
-  const foundCode = codeFromUrl(CRUrl.url)
-  const prop = props[foundCode]
-  if (!prop) {
-    return new CRError(text, CRUrl, 'unrecognised')
+const updateParagraphs = paragraphs => getCRs => handleText => {
+  for (let i = 0, len = paragraphs.length; i < len; i++) {
+    const text = paragraphs[i].editAsText()
+
+    const CRUrls = getCRs(text)
+    if (!CRUrls.length) continue
+
+    const handleCR = handleText(text)
+    const result = updateText(CRUrls)(handleCR)
+    if (result instanceof CRError) {
+      return result
+    }
   }
-  
-  let replacementText = capitalizeIfAppropriate(text.getText(), CRUrl.start, prop.text)
-  const num = handleNumbering(CRUrl.url)
-  if (num instanceof Error) {
-    return new CRError(text, CRUrl, num.message)
-  }
-
-  replacementText += num;
-
-  const style = getStyle(prop)
-
-  replaceText(text, CRUrl, replacementText, style)
 }
 
 
 const replaceText = (text, CRUrl, replacementText, style) => {
   const { start, end, url } = CRUrl
-  const replacementEnd = start + replacementText.length - 1;
+  const replacementEnd = start + replacementText.length - 1
   text.deleteText(start, end)
     .insertText(start, replacementText)
     .setLinkUrl(start, replacementEnd, url)
@@ -89,22 +69,43 @@ const getStyle = prop => ({
 })
 
 
+const handleCRUrl = props => handleNumbering => text => CRUrl => {
+  const foundCode = codeFromUrl(CRUrl.url)
+  const prop = props[foundCode]
+  if (!prop) {
+    return new CRError(text, CRUrl, 'unrecognised')
+  }
+
+  let replacementText = capitalizeIfAppropriate(text.getText(), CRUrl.start, prop.text)
+  const num = handleNumbering(CRUrl.url)
+  if (num instanceof Error) {
+    return new CRError(text, CRUrl, num.message)
+  }
+
+  replacementText += num
+
+  const style = getStyle(prop)
+
+  replaceText(text, CRUrl, replacementText, style)
+}
+
+
 const getCRUrls = isCRUrl => text => {
-  const textLength = text.getText().length;
+  const textLength = text.getText().length
   const idxs = text.getTextAttributeIndices()
   idxs.push(textLength) // the final index is the end of the text
 
-  const CRUrls = [];
+  const CRUrls = []
 
-  for (let i = 0; i < idxs.length; i++) {
-    const idx = idxs[i];
+  for (let i = 0, len = idxs.length; i < len; i++) {
+    const idx = idxs[i]
 
-    const urlHere = idx !== textLength ? text.getLinkUrl(idx) : null;
-    const urlToTheLeft = i > 0 ? text.getLinkUrl(idx - 1) : null;
+    const urlHere = idx !== textLength ? text.getLinkUrl(idx) : null
+    const urlToTheLeft = i > 0 ? text.getLinkUrl(idx - 1) : null
 
     const isStart = !isCRUrl(urlToTheLeft) && isCRUrl(urlHere)
     const isEnd = isCRUrl(urlToTheLeft) && !isCRUrl(urlHere)
-    
+
     if (isStart) {
       CRUrls.push({ start: idx, url: urlHere })
     }
@@ -122,7 +123,7 @@ const isCapitalized = str => str !== '' && str.charAt(0) === str.charAt(0).toUpp
 const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1)
 
 
-const capitalizeIfAppropriate = (text, start, replacementText) => 
+const capitalizeIfAppropriate = (text, start, replacementText) =>
   isCapitalized(replacementText) || !isCapitalized(text.substr(start, start + 1))
     ? replacementText
     : capitalize(replacementText)
@@ -132,20 +133,20 @@ const capitalizeIfAppropriate = (text, start, replacementText) =>
 function fnLabs(footnotes, fnProps, num_pairs) {
   const isCRUrl = isCRUrl(5)
   for (let i = 0; i < footnotes.length; i++) {
-    const paras = footnotes[i].getFootnoteContents().getParagraphs();
+    const paras = footnotes[i].getFootnoteContents().getParagraphs()
     for (let j = 0; j < paras.length; j++) {
-      const text = paras[j].editAsText();
-      const { start, end, url } = getCRUrls(text, isCRUrl);
+      const text = paras[j].editAsText()
+      const { start, end, url } = getCRUrls(text, isCRUrl)
 
-      if (!start) continue;
-      if (url.substr(0, 4) != '#fno') continue;
+      if (!start) continue
+      if (url.substr(0, 4) != '#fno') continue
 
-      const ref_equiv = url.substr(0, 4) + url.substr(6);
-      num_pairs[ref_equiv] = [i + 1];
+      const ref_equiv = url.substr(0, 4) + url.substr(6)
+      num_pairs[ref_equiv] = [i + 1]
       text.setUnderline(start, end, null)
-        .setForegroundColor(start, end, null);
+        .setForegroundColor(start, end, null)
     }
   }
 
-  return num_pairs;
+  return num_pairs
 }

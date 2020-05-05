@@ -19,6 +19,7 @@ function addFlag(text, CRUrl) {
 
 function CRError(containingText, CRUrl, error) {
   const url = CRUrl.url
+  if (!url) return new Error('got "' + error + '" error but no url')
   const messages = {
     duplicate: 'There are at least 2 labels with the code ' + url + '.' +
         "\n\nLabel codes must be 5 letters and label names (e.g. '" +
