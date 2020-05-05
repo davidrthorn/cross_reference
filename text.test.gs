@@ -133,11 +133,11 @@ function testRefNumberHandler() {
 
 function testGetStyle() {
   let settings = getDefaultSettings()
-  let prop = getPropsForType('lab', settings).fig
-
+  let prop = getProps('lab')(settings).figur
+ 
   let got = getStyle(prop)
   Expect('returns correct style object for default',
     got,
-    {BOLD: 'null', ITALIC: 'null', UNDERLINE: 'null', FOREGROUND_COLOR: 'null'}
+    {BOLD: false, ITALIC: false, UNDERLINE: false, FOREGROUND_COLOR: null}
   )
 }

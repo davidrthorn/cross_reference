@@ -8,7 +8,7 @@ function onOpen(e) {
     .addItem('Update document', 'updateDoc')
     .addItem('Configure', 'showSidebar')
     .addSeparator()
-    .addItem('Create list of figures (beta)', 'createLoF')
+    .addItem('Create list of figures', 'createLoF')
     .addToUi()
 }
 
@@ -41,12 +41,12 @@ function updateDoc() {
 
   const getLabs = getCRUrls(isCRUrl(5))
   const handleLabs = handleCRUrl(labProps)(handleLabNumber)
-  let error = updateParagraphs(paragraphs)(getLabs)(handleLabs)
+  let result = updateParagraphs(paragraphs)(getLabs)(handleLabs)
 
   // fnLabs(footnotes, labProps, numPairs)
 
-  if (error instanceof CRError) {
-    handleErr(error)
+  if (result instanceof CRError) {
+    handleErr(result)
     return 'error'
   }
 
@@ -55,10 +55,10 @@ function updateDoc() {
 
   const getRefs = getCRUrls(isCRUrl(3))
   const handleRefs = handleCRUrl(refProps)(handleRefNumber)
-  error = updateParagraphs(paragraphs)(getRefs)(handleRefs)
+  result = updateParagraphs(paragraphs)(getRefs)(handleRefs)
 
-  if (error instanceof CRError) {
-    handleErr(error)
+  if (result instanceof CRError) {
+    handleErr(result)
     return 'error'
   }
 

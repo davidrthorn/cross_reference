@@ -1,6 +1,7 @@
 const isCRUrl = codeLength => url => (new RegExp('^#[^_]{' + codeLength + '}_')).test(url)
 
 function codeFromUrl(url) {
+  if (!url) return null
   const match = url.match(/^#([^_]{3}|[^_]{5})_/)
   return match ? match[1] : null
 }
@@ -25,9 +26,9 @@ const getNumberHandler = (type, recordedNumbers, labelNameNumberMap) => //TODO: 
 const updateParagraphs = paragraphs => getFunc => handleFunc => {
   for (let i=0, len=paragraphs.length; i<len; i++) {
     const text = paragraphs[i].editAsText()
-    const handleText = handleFunc(text)
+    handleFunc = handleFunc(text)
     const CRUrls = getFunc(text)
-    const result = updateText(CRUrls)(Text)
+    const result = updateText(CRUrls)(handleFunc)
     if (result instanceof CRError) {
       return result
     }
@@ -49,7 +50,7 @@ const updateText = CRUrls => handleFunc => {
 }
 
 
-const handleCRUrl = props => handleNumbering  => text => CRUrl => {
+const handleCRUrl = props => handleNumbering => text => CRUrl => {
   const foundCode = codeFromUrl(CRUrl.url)
   const prop = props[foundCode]
   if (!prop) {
@@ -80,7 +81,7 @@ const replaceText = (text, CRUrl, replacementText, style) => {
 }
 
 
-const getStyle = (prop) => ({
+const getStyle = prop => ({
   'BOLD': prop.isBold,
   'ITALIC': prop.isItalic,
   'UNDERLINE': prop.isUnderlined,
@@ -115,10 +116,10 @@ const getCRUrls = isCRUrl => text => {
 }
 
 
-const isCapitalized = (str) => str !== '' && str.charAt(0) === str.charAt(0).toUpperCase()
+const isCapitalized = str => str !== '' && str.charAt(0) === str.charAt(0).toUpperCase()
 
 
-const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1)
+const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1)
 
 
 const capitalizeIfAppropriate = (text, start, replacementText) => 

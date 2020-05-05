@@ -1,12 +1,12 @@
-const isCrossProp = (propKey) =>  propKey.substr(0, 6) === 'cross_' 
+const isCrossProp = propKey =>  propKey.substr(0, 6) === 'cross_' 
 
-const getPropKey = (labCode) => 'cross_' + labCode.substr(0, 3)
+const getPropKey = labCode => 'cross_' + labCode.substr(0, 3)
 
-const refCodeFromLabCode = (labCode) => labCode.substr(0, 3)
+const refCodeFromLabCode = labCode => labCode.substr(0, 3)
 
-const encodeSetting = (unencoded) => JSON.stringify(unencoded)
+const encodeSetting = unencoded => JSON.stringify(unencoded)
 
-const decodeSetting = (encoded) =>
+const decodeSetting = encoded =>
   isLegacy(encoded)
     ? decodeLegacy(encoded)
     : JSON.parse(encoded)
@@ -14,8 +14,8 @@ const decodeSetting = (encoded) =>
 
 function getSettings() {
   let settings = getDefaultSettings()
-  settings = patchSettings(getDefaultSettings(), PropertiesService.getUserProperties().getProperties())
-  settings = patchSettings(getDefaultSettings(), PropertiesService.getDocumentProperties().getProperties())
+  patchSettings(settings, PropertiesService.getUserProperties().getProperties())
+  patchSettings(settings, PropertiesService.getDocumentProperties().getProperties())
   return settings
 }
 
@@ -49,7 +49,7 @@ function updateDocProps() {
 /**
  * return e.g. {fig: {code: fig, ...}}
  */
-function getProps(type, settings) {
+const getProps = type => settings => {
   const props = {}
   for (const key in settings) {
     const setting = settings[key]
@@ -149,12 +149,12 @@ function getDefaultSettings() {
 }
 
 /* Required for legacy. Hardcoded as hell */
-const isLegacy = (encoded) => encoded.charAt(0) !== '{'
+const isLegacy = encoded => encoded.charAt(0) !== '{'
 
-const decodeLegacy = (encoded) => {
+const decodeLegacy = encoded => {
   const asArr = encoded.split('_')
-  const bool = (str) => str === 'true'
-  const realNull = (str) => str === 'null' ? null : str
+  const bool = str => str === 'true'
+  const realNull = str => str === 'null' ? null : str
 
   return {
     name: asArr[1],
