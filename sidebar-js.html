@@ -21,7 +21,7 @@
 
   function initialiseSidebar(settings) {
 
-    tempSettings = {...settings}
+    tempSettings = { ...settings }
 
     const byName = Object.entries(settings).sort((a, b) => a[1].name - b[1].name)
 
@@ -43,54 +43,61 @@
     $('#delete-category').css('display', isDefault(firstLabCode) ? 'none' : 'block')
   }
 
+  function updateColor(id, color) {
+    color = color || '#000'
+    const $id = $(id)
+
+    $id.find('.preview__text')
+      .css('color', color)
+    $id.find('.color-code')
+      .val(color) // TODO: make it work with #
+      .data('val', color) // TODO: make work with #
+    $id.find('.color-icon')
+      .css({ 'color': color, 'border-bottom-color': css })
+  }
 
   function updateSidebar(labCode) {
-    const settings = tempSettings[labCode]
+    const setting = tempSettings[labCode]
 
-    $('#lab_code').html('#' + settings.lab.code)
-    $('#lab_text').val(settings.lab.text)
-    $('#ref_code').val(settings.ref.code).html('#' + settings.ref.code)
-    $('#ref_text').val(settings.ref.text)
+    $('#lab_code').html('#' + setting.lab.code)
+    $('#lab_text').val(setting.lab.text)
+    $('#ref_code').val(setting.ref.code).html('#' + setting.ref.code)
+    $('#ref_text').val(setting.ref.text)
 
-    $('#lab').find('.preview__text').html(settings.lab.text + '1')
-    $('#ref').find('.preview__text').html(settings.ref.text + '1')
+    $('#lab').find('.preview__text').html(setting.lab.text + '1')
+    $('#ref').find('.preview__text').html(setting.ref.text + '1')
 
-    function updateColor(id, color) {
-      const css = color ? '#' + color : '#000',
-        $id = $(id)
+    updateColor('#lab', setting.lab.color)
+    updateColor('#ref', setting.ref.color)
+    updateStyle(setting)
+  }
 
-      $id.find('.preview__text')
-        .css('color', css)
-      $id.find('.color-code')
-        .val(color)
-        .data('val', color)
-      $id.find('.color-icon')
-        .css({ 'color': css, 'border-bottom-color': css })
+
+  function updateStyle(setting) {
+    const getValue = (styleProp, value = true) => {
+      const css = {
+        isBold: ['font-weight', 'bold'],
+        isItalic: ['font-style', 'italic'],
+        isUnderlined: ['text-decoration', 'underline'],
+      }[styleProp]
+
+      return [css[0], value ? css[1] : 'initial']
     }
 
-    updateColor('#lab', settings.lab.color)
-    updateColor('#ref', settings.ref.color)
+    for (const typeCode in setting) {
+      const subSetting = setting[typeCode]
+      for (const key in subSetting) {
+        const value = subSetting[key]
+        const css = getValue(key, value) // TODO: naming
 
-    const css_properties = {
-      bold: 'font-weight',
-      italic: 'font-style',
-      underline: 'text-decoration',
+        $('#' + code).find('.preview__text')
+          .css(...css)
+
+        value
+          ? $('#' + css[1]).addClass('style-button--selected')
+          : $('#' + css[1]).removeClass('style-button--selected')
+      }
     }
-
-    //TODO: fix
-    // for (const key in style) {
-    //   const code = key.substr(0, 3),
-    //     css_name = key.substr(4, key.length),
-    //     button_id = '#' + code + '_' + css_name,
-    //     css_value = (style[key] === 'true') ? css_name : 'initial'
-
-    //   $('#' + code).find('.preview__text')
-    //     .css(css_properties[css_name], css_value)
-
-    //   style[key] === 'true' ?
-    //     $(button_id).addClass('style-button--selected') :
-    //     $(button_id).removeClass('style-button--selected')
-    // }
   }
 
 
@@ -104,7 +111,7 @@
 
 
   function updateTempSettings() {
-    const idIsSelected = (id) => $(id).hasClass('style-button--selected') ? 'true' : 'null' 
+    const idIsSelected = (id) => $(id).hasClass('style-button--selected') ? 'true' : 'null'
     const getColorValue = (id) => $(id).data('val') != undefined ? $(id).data('val') : null
 
     const labCode = $('#lab_code').html().substr(1)
@@ -307,19 +314,19 @@
   $('.style-button').on('click', function () {
     $(this).toggleClass('style-button--selected')
 
-    const id = this.id,
-      css_value_name = id.substr(4, this.length),
-      category = '#' + id.substr(0, 3)
+    const id = this.id
+    const cssValueName = id.substr(4, this.length),
+    const category = '#' + id.substr(0, 3)
 
-    const css_properties = {
+    const cssProps = {
       'bold': 'font-weight',
       'italic': 'font-style',
       'underline': 'text-decoration'
     }
 
-    const css_value = ($(this).hasClass('style-button--selected')) ? css_value_name : 'initial'
+    const cssValue = ($(this).hasClass('style-button--selected')) ? cssValueName : 'initial'
 
-    $(category).find('.preview__text').css(css_properties[css_value_name], css_value)
+    $(category).find('.preview__text').css(cssProps[cssValueName], cssValue)
   })
 
 
@@ -363,11 +370,11 @@
   }
 
 
-  function updateColorCode(gsArray) {
+  const updateColorCode = type => hex => {
     if (typeof gsArray == 'undefined') return
-    const labOrRef = '#' + gsArray[0]
-    const cloned_hex = gsArray[1]
-    $(labOrRef).find('.color-code').val(cloned_hex)
+    const id = '#' + type
+    const hexNumber = hex.slice(1)
+    $(id).find('.color-code').val(hexNumber)
   }
 
 
@@ -388,15 +395,16 @@
   $('.color-code').on('keydown', function (e) {
     if (e.keyCode == 13) {
       confirmColor($(this))
-    } else if (e.keyCode == 27) {
+    }
+    if (e.keyCode == 27) {
       cancelColor($(this))
     }
   })
 
 
   $('.clone-color').on('click', function () {
-    const labOrRef = $(this).closest('.main-section').attr('id')
-    google.script.run.withSuccessHandler(updateColorCode).cloneColor(labOrRef)
+    const type = $(this).closest('.main-section').attr('id')
+    google.script.run.withSuccessHandler(updateColorCode(type)).cloneColor(type)
   })
 
 

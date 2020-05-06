@@ -1,11 +1,3 @@
-//
-// ***
-// Executes commands issued in sidebar
-// ***
-//
-
-
-// Update the Docs property stores
 function updateProps(tempSettings) {
   const docProps = PropertiesService.getDocumentProperties()
 
@@ -40,7 +32,6 @@ function getSettings() {
 }
 
 
-// Store defaults in user props store
 function storeDefault(tempSettings) {
   const userProps = PropertiesService.getUserProperties()
   for (const labName in tempSettings) {
@@ -52,12 +43,12 @@ function storeDefault(tempSettings) {
 }
 
 
-const storeCustom = (customSettings) => storePairing(PropertiesService.getUserProperties(), customSettings)
+const storeCustom = customSettings => storePairing(PropertiesService.getUserProperties(), customSettings)
 
 const storePairing = (props, settings) => props.setProperty(getPropKey(settings), encodeSettings(settings)) 
 
 
-// Return default settings
+// TODO: rename
 function restoreDefault() {
   const userProps = PropertiesService.getUserProperties().getProperties()
   const settings = getDefaultSettings()
@@ -80,7 +71,7 @@ function removePair(code) {
 
 
 // Return the color of highlighted text
-function cloneColor(lab_or_ref) {
+function cloneColor(type='lab') {
   const selection = DocumentApp.getActiveDocument().getSelection()
   if (!selection) {
     DocumentApp.getUi().alert(
@@ -91,10 +82,10 @@ function cloneColor(lab_or_ref) {
   }
 
   const element = selection.getRangeElements()[0]
-
   if (!element.getElement().editAsText) return
-  const text = element.getElement().editAsText(),
-    offset = (element.isPartial()) ? element.getStartOffset() : 0
 
-  return [lab_or_ref, text.getAttributes(offset).FOREGROUND_COLOR.substr(1, 7)]
+  const text = element.getElement().editAsText()
+  const offset = element.isPartial() ? element.getStartOffset() : 0
+
+  return text.getAttributes(offset).FOREGROUND_COLOR
 }
