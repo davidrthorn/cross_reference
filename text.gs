@@ -8,7 +8,7 @@ function codeFromUrl(url) {
 
 const getNumberHandler = (type, recordedNumbers, labelNameNumberMap) => //TODO: this is an ugly function
   type === 'lab'
-    ? (url) => {
+    ? url => {
       const code = codeFromUrl(url)
       const refEquivalent = '#' + code + '_' + url.substr(5)
       const num = labelNameNumberMap[code] + 1 || 1
@@ -20,7 +20,7 @@ const getNumberHandler = (type, recordedNumbers, labelNameNumberMap) => //TODO: 
 
       return num
     }
-    : (url) => recordedNumbers[url] || new Error('missref')
+    : url => recordedNumbers[url] || new Error('missref')
 
 
 const updateText = CRUrls => handleCR => {
@@ -65,7 +65,7 @@ const getStyle = prop => ({
   'BOLD': prop.isBold,
   'ITALIC': prop.isItalic,
   'UNDERLINE': prop.isUnderlined,
-  'FOREGROUND_COLOR': (prop.color && prop.color !== 'null') ? '#' + prop.color : null, // TODO: surely we can make this data clean when creating settings
+  'FOREGROUND_COLOR': prop.color,
 })
 
 

@@ -23,11 +23,17 @@
 
     tempSettings = { ...settings }
 
-    const byName = Object.entries(settings).sort((a, b) => a[1].name - b[1].name)
-
-    byName.forEach((entry) => {
+    const byName = Object.entries(settings).sort((a, b) => {
+      const n1 = a[1].name.toLowerCase()
+      const n2 = b[1].name.toLowerCase()
+      return n1 < n2 ? -1 : n1 > n2 ? 1 : 0
+    })
+ 
+    byName.forEach(entry => {
       const data = entry[1]
+      
       refCodes.push(data.ref.code)
+      
       $('#category-select').append($('<option>', {
         text: data.name,
         value: data.lab.code,
@@ -39,7 +45,7 @@
 
     $('#category-select').data('val', firstLabCode)
     updateSidebar(firstLabCode)
-
+    
     $('#delete-category').css('display', isDefault(firstLabCode) ? 'none' : 'block')
   }
 
@@ -53,7 +59,7 @@
       .val(color) // TODO: make it work with #
       .data('val', color) // TODO: make work with #
     $id.find('.color-icon')
-      .css({ 'color': color, 'border-bottom-color': css })
+      .css({ color: color, 'border-bottom-color': color })
   }
 
   function updateSidebar(labCode) {
@@ -74,7 +80,7 @@
 
 
   function updateStyle(setting) {
-    const getValue = (styleProp, value = true) => {
+    const getValue = (styleProp, value=true) => {
       const css = {
         isBold: ['font-weight', 'bold'],
         isItalic: ['font-style', 'italic'],
@@ -84,10 +90,11 @@
       return [css[0], value ? css[1] : 'initial']
     }
 
-    for (const typeCode in setting) {
+    for (const typeCode in ['lab', 'ref']) {
       const subSetting = setting[typeCode]
       for (const key in subSetting) {
         const value = subSetting[key]
+        console.log(value)
         const css = getValue(key, value) // TODO: naming
 
         $('#' + code).find('.preview__text')
@@ -140,7 +147,6 @@
     // data property records the previous category
     $('#category-select').data('val', $('#category-select').val())
   }
-
 
 
   // TODO: why?
@@ -219,7 +225,6 @@
 
     updateSidebar(firstCode)
   }
-
 
 
   $('#lab_code_entry').keyup(function () {
@@ -310,12 +315,11 @@
   // ## Text style
   //
 
-
   $('.style-button').on('click', function () {
     $(this).toggleClass('style-button--selected')
 
     const id = this.id
-    const cssValueName = id.substr(4, this.length),
+    const cssValueName = id.substr(4, this.length)
     const category = '#' + id.substr(0, 3)
 
     const cssProps = {
@@ -353,7 +357,7 @@
     const $colorCode = $colorPane.children('.color-code')
     const colorValue = coerceToValidColor($colorCode.val())
 
-    let hex;
+    let hex
     if (colorValue) {
       hex = "#" + colorValue
       $colorCode.data('val', colorValue)
@@ -371,7 +375,6 @@
 
 
   const updateColorCode = type => hex => {
-    if (typeof gsArray == 'undefined') return
     const id = '#' + type
     const hexNumber = hex.slice(1)
     $(id).find('.color-code').val(hexNumber)
@@ -383,7 +386,6 @@
     $code.val($code.data('val'))
     button.parent().next().andSelf().hide()
   }
-
 
 
   $('.color-button').on('click', function () {
@@ -465,5 +467,4 @@
   $('#cancel').on('click', function () {
     google.script.host.close()
   })
-
 </script>
