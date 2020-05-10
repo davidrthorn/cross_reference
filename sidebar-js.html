@@ -49,15 +49,28 @@
     $('#delete-category').css('display', isDefault(firstLabCode) ? 'none' : 'block')
   }
 
-  function updateColor(id, color) {
-    color = color || '#000'
+  const getColorStr = colorHex => colorHex.slice(1)
+
+  function getColorHex (hexStr) {
+    let result = '#'
+    switch (hexStr.length) {
+      case 6:
+        return result + hexStr
+      case 3:
+      return hexStr.reduce((acc, cur) => acc + cur + cur, result)
+    }
+    return new Error("hex strings must be 3 or 6 characters")
+  }
+
+  function updateColor(id, colorHex) {
+    const color = getColorStr(colorHex || '#000')
     const $id = $(id)
 
     $id.find('.preview__text')
       .css('color', color)
     $id.find('.color-code')
-      .val(color) // TODO: make it work with #
-      .data('val', color) // TODO: make work with #
+      .val(color)
+      .data('val', color)
     $id.find('.color-icon')
       .css({ color: color, 'border-bottom-color': color })
   }
@@ -338,47 +351,22 @@
   // ## Color
   //
 
-  const isValidColor = (str) => (/([A-z0-9]{3}|[A-z0-9]{6})/g).test()
-
-  function coerceToValidColor(colorValue) {
-    if (!colorValue || !isValidColor(colorValue)) return null
-
-    return colorValue.length === 3
-      ? colorValue
-        .split('')
-        .reduce((tot, cur) => tot + cur.repeat(2), '')
-      : colorValue
-  }
-
-
   function confirmColor(button) {
     const $colorPane = button.parent()
     const $colorText = $colorPane.prev().children('div')
     const $colorCode = $colorPane.children('.color-code')
-    const colorValue = coerceToValidColor($colorCode.val())
+    const colorStr = $colorCode.val() || '000'
+    const colorHex = getColorHex(colorStr)
 
-    let hex
-    if (colorValue) {
-      hex = "#" + colorValue
-      $colorCode.data('val', colorValue)
-        .val(colorValue)
-    } else {
-      hex = "#000000"
-      $colorCode.data('val', null)
-        .val(colorValue)
-    }
+    $colorCode.data('val', colorStr).val(colorStr)
+    $colorText.css({ 'color': colorHex, 'border-bottom-color':  colorHex})
 
-    $colorText.css({ 'color': hex, 'border-bottom-color': hex })
-    $($colorPane.parentsUntil('.details').find('.preview__text')).css('color', hex)
+    $($colorPane.parentsUntil('.details').find('.preview__text')).css('color', colorHex)
     $colorPane.next().andSelf().hide()
   }
 
 
-  const updateColorCode = type => hex => {
-    const id = '#' + type
-    const hexNumber = hex.slice(1)
-    $(id).find('.color-code').val(hexNumber)
-  }
+  const updateColorCode = type => colorHex => $('#' + type).find('.color-code').val(getColorStr(colorHex))
 
 
   function cancelColor(button) {
