@@ -28,12 +28,12 @@
       const n2 = b[1].name.toLowerCase()
       return n1 < n2 ? -1 : n1 > n2 ? 1 : 0
     })
- 
+
     byName.forEach(entry => {
       const data = entry[1]
-      
+
       refCodes.push(data.ref.code)
-      
+
       $('#category-select').append($('<option>', {
         text: data.name,
         value: data.lab.code,
@@ -45,19 +45,23 @@
 
     $('#category-select').data('val', firstLabCode)
     updateSidebar(firstLabCode)
-    
+
     $('#delete-category').css('display', isDefault(firstLabCode) ? 'none' : 'block')
   }
 
   const getColorStr = colorHex => colorHex.slice(1)
 
-  function getColorHex (hexStr) {
+  function getColorHex(hexStr) {
+    if (hexStr == null) {
+      return hexStr
+    }
+
     let result = '#'
     switch (hexStr.length) {
       case 6:
         return result + hexStr
       case 3:
-      return hexStr.reduce((acc, cur) => acc + cur + cur, result)
+        return hexStr.reduce((acc, cur) => acc + cur + cur, result)
     }
     return new Error("hex strings must be 3 or 6 characters")
   }
@@ -93,7 +97,7 @@
 
 
   function updateStyle(setting) {
-    const getValue = (styleProp, value=true) => {
+    const getValue = (styleProp, value = true) => {
       const css = {
         isBold: ['font-weight', 'bold'],
         isItalic: ['font-style', 'italic'],
@@ -132,7 +136,7 @@
 
   function updateTempSettings() {
     const idIsSelected = (id) => $(id).hasClass('style-button--selected') ? 'true' : 'null'
-    const getColorValue = (id) => $(id).data('val') != undefined ? $(id).data('val') : null
+    const getColorValue = (id) => $(id).data('val') != undefined ? getColorHex($(id).data('val')) : null
 
     const labCode = $('#lab_code').html().substr(1)
     const colorCodes = $('.details').find('.color-code')
@@ -359,7 +363,7 @@
     const colorHex = getColorHex(colorStr)
 
     $colorCode.data('val', colorStr).val(colorStr)
-    $colorText.css({ 'color': colorHex, 'border-bottom-color':  colorHex})
+    $colorText.css({ 'color': colorHex, 'border-bottom-color': colorHex })
 
     $($colorPane.parentsUntil('.details').find('.preview__text')).css('color', colorHex)
     $colorPane.next().andSelf().hide()
