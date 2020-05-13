@@ -1,35 +1,18 @@
+// isCrossProp returns true if a string is a key from the gDocs property store
 const isCrossProp = propKey =>  propKey.substr(0, 6) === 'cross_' 
 
+// getPropKey returns a key to be used in the gDocs property stores
 const getPropKey = labCode => 'cross_' + labCode.substr(0, 3)
 
 const refCodeFromLabCode = labCode => labCode.substr(0, 3)
 
-const encodeSetting = unencoded => JSON.stringify(unencoded)
+const encodeSetting = s => JSON.stringify(s)
 
-const decodeSetting = encoded =>
-  isLegacy(encoded)
-    ? decodeLegacy(encoded)
-    : JSON.parse(encoded)
+const decodeSetting = s => isLegacy(s) ? decodeLegacy(s) : JSON.parse(s)
 
 
-function getSettings() {
-  let settings = getDefaultSettings()
-  patchSettings(settings, PropertiesService.getUserProperties().getProperties())
-  patchSettings(settings, PropertiesService.getDocumentProperties().getProperties())
-  return settings
-}
-
-
-function patchSettings(settings, storedProps) {
-  for (const key in storedProps) {
-    if (!isCrossProp(key)) continue
-    const setting = decodeSetting(storedProps[key])
-    settings[setting.lab.code] = setting
-  }
-  return settings
-}
-
-
+// encodeSettings returns an object where key is the key to be used
+// in the gDocs prop stores and value is the settings encoded as a string
 function encodeSettings(settings) {
   const result = {}
   for (const key in settings) {
@@ -40,15 +23,29 @@ function encodeSettings(settings) {
 }
 
 
-function updateDocProps() {
-  const encoded = encodeSettings(getSettings())
-  PropertiesService.getDocumentProperties().setProperties(encoded)
+// getSettings retrieves a combination of default, user-level and document-level
+// settings (in that order of priority)
+function getSettings() {
+  let settings = getDefaultSettings()
+  patchSettings(settings, PropertiesService.getUserProperties().getProperties())
+  patchSettings(settings, PropertiesService.getDocumentProperties().getProperties())
+  return settings
 }
 
 
-/**
- * return e.g. {fig: {code: fig, ...}}
- */
+// patchSettings overwrites settings with those from a given gDocs property store
+function patchSettings(settings, storedProps) {
+  for (const key in storedProps) {
+    if (!isCrossProp(key)) continue
+    const setting = decodeSetting(storedProps[key])
+    settings[setting.lab.code] = setting
+  }
+  return settings
+}
+
+
+// getProps returns the sub-settings for a particular type of cross reference
+// (e.g. label or reference) with codes as keys (e.g. {fig: {...}}, or {figur: {...}})
 const getProps = type => settings => {
   const props = {}
   for (const key in settings) {
@@ -56,6 +53,21 @@ const getProps = type => settings => {
     props[setting[type].code] = setting[type]
   }
   return props
+}
+
+
+function clearPropStore(store) {
+  for (const key in store) {
+    if (isCrossProp(key)) {
+      store.deleteProperty(key)
+    }
+  }
+}
+
+
+function updateDocProps() {
+  const encoded = encodeSettings(getSettings())
+  PropertiesService.getDocumentProperties().setProperties(encoded)
 }
 
 
@@ -179,7 +191,7 @@ const decodeLegacy = encoded => {
   }
 }
 
-/** debug */
+/** For debugging purposes */
 
 function clearProps() {
   PropertiesService.getDocumentProperties().deleteAllProperties()

@@ -1,11 +1,7 @@
 function updateProps(tempSettings) {
   const docProps = PropertiesService.getDocumentProperties()
 
-  for (const key in docProps.getProperties()) {
-    if (isCrossProp(key)) {
-      docProps.deleteProperty(key)
-    }
-  }
+  clearProps(docProps)
 
   for (const labName in tempSettings) {
     const settings = tempSettings[labName]

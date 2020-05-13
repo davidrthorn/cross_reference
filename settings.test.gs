@@ -86,9 +86,9 @@ function testPatchSettings() {
 function testEncodeSettings() {
   let settings = { figur: getDefaultSettings().figur }
 
-  It('encoded setting object reflects original',
-    encodeSettings(settings),
-    { cross_fig: encodeSetting(settings.figur) }
+  It('encodes such that the decoded result is the same as original',
+    decodeSetting(encodeSettings(settings).cross_fig),
+    settings.figur
   )
 
   settings = getDefaultSettings()
