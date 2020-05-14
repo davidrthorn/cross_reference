@@ -12,7 +12,7 @@
     })
   }
 
-  const isDefault = (labCode) => ['equat', 'figur', 'table', 'fnote'].includes(labCode)
+  const isDefault = labCode => ['equat', 'figur', 'table', 'fnote'].includes(labCode)
 
   //
   // # Update the sidebar
@@ -85,6 +85,7 @@
       .css({ color: color, 'border-bottom-color': color })
   }
 
+
   function updateSidebar(labCode) {
     const setting = tempSettings[labCode]
 
@@ -103,29 +104,28 @@
 
 
   function updateStyle(setting) {
-    const getValue = (styleProp, value = true) => {
-      const css = {
-        isBold: ['font-weight', 'bold'],
-        isItalic: ['font-style', 'italic'],
-        isUnderlined: ['text-decoration', 'underline'],
-      }[styleProp]
-
-      return [css[0], value ? css[1] : 'initial']
+    // gives the css property and the value we want
+    // when the corresponding setting (the key here) is true
+    const cssProps = {
+      isBold: ['font-weight', 'bold'],
+      isItalic: ['font-style', 'italic'],
+      isUnderlined: ['text-decoration', 'underline'],
     }
+    const selected = 'style-button--selected'
 
     for (const typeCode in ['lab', 'ref']) {
-      const subSetting = setting[typeCode]
-      for (const key in subSetting) {
-        const value = subSetting[key]
-        console.log(value)
-        const css = getValue(key, value) // TODO: naming
+      for (const key in setting[typeCode]) {
+        const [cssProp, cssValue] = cssProps[key]
+        const btn = $('#' + css[1]) // css style values (e.g. 'bold') happen to be the same as the button id
 
-        $('#' + code).find('.preview__text')
-          .css(...css)
+        if (subSetting[key]) {
+          btn.addClass(selected)
+        } else {
+          cssValue = 'initial'
+          btn.removeClass(selected)
+        }
 
-        value
-          ? $('#' + css[1]).addClass('style-button--selected')
-          : $('#' + css[1]).removeClass('style-button--selected')
+        $('#' + code).find('.preview__text').css(...css)
       }
     }
   }
