@@ -5,24 +5,54 @@ const It = (description, got, want) =>
       : '❌ ' + description + '.\nExpected\n' + JSON.stringify(want) + '\n Got\n' + JSON.stringify(got)
   )
 
-const isObject = (thing) => Object.prototype.toString.call(thing) === '[object Object]'
-const isArray = (thing) => Array.isArray(thing)
-const isIterable = (thing) => isObject(thing) || isArray(thing) // Symbol.iterator approach does not work in gs
+const isObject = thing => Object.prototype.toString.call(thing) === '[object Object]'
+const isIterable = thing => isObject(thing) || Array.isArray(thing) // Symbol.iterator approach does not work in gs. No need for sets or maps yet
 
-const areSameLength = (a, b) =>
-  isObject(a)
-    ? isObject(b) && Object.keys(a).length === Object.keys(b).length
-    : a.length === b.length
 
-const areDeepEqual = (a, b) => {
+// areSameType returns true if two things are the same type.
+// Only supports primitives, objects and arrays
+function areSameType(a, b) {
+  if (isObject(a)) {
+    return isObject(b)
+  }
+  if (Array.isArray(a)) {
+    return Array.isArray(b)
+  }
+  return typeof a === typeof b
+}
+
+
+// areSameLength returns true if two items are the same length
+// This function is liberal: an array can be the same length as a string;
+// an object has a length (the count of its iterable properties)
+const areSameLength = (a, b) => {
+  const lenA = isObject(a) ? Object.keys(a).length : a.length
+  const lenB = isObject(b) ? Object.keys(b).length : b.length
+
+  return lenA === lenB
+}
+
+
+// areDeepEqual returns true if two inputs are deeply equal.
+// It only drills down into array and object iterable types
+const areDeepEqual = (a, b, strict=true) => {
+  if (strict && !areSameType(a, b)) {
+    return false
+  }
+
   if (isIterable(a)) {
-    if (!isIterable(b) || !areSameLength(a, b)) return false    
+    if (!isIterable(b) || !areSameLength(a, b)) {
+      return false    
+    }
     for (const key in a) {
-      if (!areDeepEqual(a[key], b[key])) return false
+      if (!areDeepEqual(a[key], b[key], strict)) {
+        return false
+      }
     }
   } else {
-    if (a !== b) return false
+    return string ? a === b : a == b
   }
+
   return true
 }
 

@@ -138,6 +138,9 @@
     $('#delete-category').css('display', isDefault(labCode) ? 'none' : 'block')
     $('#lab-cover').css('display', labCode === 'fnote' ? 'block' : 'none')
   }
+  
+  
+  const getSelectedOptionText = $el => $.trim($el.children("option:selected").text())
 
 
   function updateTempSettings() {
@@ -148,7 +151,7 @@
     const colorCodes = $('.details').find('.color-code')
 
     tempSettings[labCode] = {
-      name: $('#category-select').data('val'),
+      name: getSelectedOptionText($('#category-select')), // FIXME: this is overwriting the names of other options
       lab: {
         code: labCode,
         text: $('#lab_text').val(),
@@ -441,7 +444,6 @@
   function enableButton(button) {
     $(button).prop('disabled', false)
   }
-
 
 
   $('#save-defaults').on('click', function () {
