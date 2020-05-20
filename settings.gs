@@ -19,6 +19,7 @@ function encodeSettings(settings) {
     const setting = settings[key]
     result[getPropKey(setting.lab.code)] = encodeSetting(setting)
   }
+  console.log(result)
   return result
 }
 

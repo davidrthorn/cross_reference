@@ -1,13 +1,9 @@
 function updateProps(tempSettings) {
   const docProps = PropertiesService.getDocumentProperties()
-
   clearProps(docProps)
 
-  for (const labName in tempSettings) {
-    const settings = tempSettings[labName]
-    const property_value = ''
-
-    docProps.setProperty(getPropKey(settings.lab.code), encodeSetting(settings))
+  for (const labCode in tempSettings) {
+    docProps.setProperty(getPropKey(labCode), encodeSetting(tempSettings[labCode]))
   }
 
   updateDoc()
@@ -32,16 +28,14 @@ function storeDefault(tempSettings) {
   const userProps = PropertiesService.getUserProperties()
   for (const labName in tempSettings) {
     const settings = tempSettings[labName]
-    storePairing(userProps, settings)
-    Utilities.sleep(200)
+    storePairing(userProps, settings) // TODO: this doesn't exist anymore
+    Utilities.sleep(200) // TODO: why?
   }
   return '#save-defaults'
 }
 
 
 const storeCustom = customSettings => storePairing(PropertiesService.getUserProperties(), customSettings)
-
-const storePairing = (props, settings) => props.setProperty(getPropKey(settings), encodeSettings(settings)) 
 
 
 // TODO: rename

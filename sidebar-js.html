@@ -6,11 +6,55 @@
     google.script.run.withSuccessHandler(initialiseSidebar).getSettings()
   })
 
-  function htmlEncode(str) {
-    return String(str).replace(/[^\w. ]/gi, function (c) {
-      return '&#' + c.charCodeAt(0) + ''
-    })
+
+  // Save the current sidebar settings as document settings
+  function saveProperties(button) {
+    updateTempSettings()
+    google.script.run.withSuccessHandler(enableButton).updateProps(tempSettings)
   }
+
+
+  $('#save-defaults').on('click', function () {
+    $(this).prop('disabled', true)
+    updateTempSettings()
+    google.script.run.withSuccessHandler(enableButton).storeDefault(tempSettings)
+  })
+
+
+  $('#restore-defaults').on('click', function () {
+    $('#category-select').find('option').remove().end()
+    google.script.run.withSuccessHandler(initialiseSidebar).restoreDefault()
+  })
+
+
+  $('.clone-color').on('click', function () {
+    const type = $(this).closest('.main-section').attr('id')
+    google.script.run.withSuccessHandler(updateColorCode(type)).cloneColor(type)
+  })
+
+
+  $('#delete-category').on('click', function () {
+    const ref = $('#ref_code').html().substr(1)
+    const currentName = tempSettings[$('#category-select').val()].name
+
+    $(this).css('display', 'none')
+    google.script.run.withSuccessHandler(revertToFirstCategory).removePair(ref)
+    $('#category-select option:contains("' + currentName + '")').remove()
+
+
+    refCodes = arrayMinus(refCodes, ref)
+  })
+
+  // TODO: should really put this at the top
+  const arrayMinus = (arr, item) => arr.filter(a => a !== item)
+
+  // 
+
+  const htmlEncode = str => String(str).replace(
+    /[^\w. ]/gi,
+    match => '&#' + match.charCodeAt(0) + ''
+    ) 
+
 
   const isDefault = labCode => ['equat', 'figur', 'table', 'fnote'].includes(labCode)
 
@@ -18,20 +62,28 @@
   // # Update the sidebar
   //
 
+  const byProp = (getProp, asc=true) => (a, b) => {
+    const x = asc ? getProp(a) : getProp(b)
+    const y = asc ? getProp(b) : getProp(a)
+
+    return typeof x === 'string'
+      ? x < y ? -1 : y > x ? 1 : 0
+      : x - y
+  }
+
 
   function initialiseSidebar(settings) {
-
     tempSettings = { ...settings }
 
-    const byName = Object.entries(settings).sort((a, b) => {
-      const n1 = a[1].name.toLowerCase()
-      const n2 = b[1].name.toLowerCase()
-      return n1 < n2 ? -1 : n1 > n2 ? 1 : 0
-    })
+    const nameLowercase = entry => a[1].name.toLowerCase()
 
-    byName.forEach(entry => {
+    const byNameAsc = byProp(nameLowercase)
+
+    const inNameOrder = Object.entries(settings).sort(byNameAsc)
+
+    inNameOrder.forEach(entry => {
       const data = entry[1]
-
+ 
       refCodes.push(data.ref.code)
 
       $('#category-select').append($('<option>', {
@@ -41,7 +93,7 @@
       }))
     })
 
-    const firstLabCode = byName[0][1].lab.code
+    const firstLabCode = inNameOrder[0][1].lab.code
 
     $('#category-select').data('val', firstLabCode)
     updateSidebar(firstLabCode)
@@ -49,9 +101,61 @@
     $('#delete-category').css('display', isDefault(firstLabCode) ? 'none' : 'block')
   }
 
+
+  function updateSidebar(labCode) {
+    const setting = tempSettings[labCode]
+
+    $('#lab_code').html('#' + setting.lab.code)
+    $('#lab_text').val(setting.lab.text)
+    $('#ref_code').val(setting.ref.code).html('#' + setting.ref.code)
+    $('#ref_text').val(setting.ref.text)
+
+    $('#lab').find('.preview__text').html(setting.lab.text + '1')
+    $('#ref').find('.preview__text').html(setting.ref.text + '1')
+
+    updateColor('#lab', setting.lab.color)
+    updateColor('#ref', setting.ref.color)
+    updateStyle(setting)
+  }
+
+
+  function updateTempSettings() {
+    const idIsSelected = (id) => $(id).hasClass('style-button--selected') ? 'true' : 'null'
+    const getColorValue = (id) => $(id).data('val') != undefined ? getColorHex($(id).data('val')) : null
+
+    const labCode = $('#lab_code').html().substr(1)
+    const colorCodes = $('.details').find('.color-code')
+    
+    tempSettings[labCode] = {
+      name: getSelectedOptionText($('#category-select')),
+      lab: {
+        code: labCode,
+        text: $('#lab_text').val(),
+        isBold: idIsSelected('#lab_bold'),
+        isItalic: idIsSelected('#lab_italic'),
+        isUnderlined: idIsSelected('#lab_underline'),
+        color: getColorValue(colorCodes[0]),
+      },
+      ref: {
+        code: labCode.substr(0, 3),
+        text: $('#ref_text').val(),
+        isBold: idIsSelected('#ref_bold'),
+        isItalic: idIsSelected('#ref_italic'),
+        isUnderlined: idIsSelected('#ref_underline'),
+        color: getColorValue(colorCodes[1]),
+      }
+    }
+
+    // data property records the previous category
+    $('#category-select').data('val', $('#category-select').val())
+  }
+
+
   const getColorStr = colorHex => colorHex.slice(1)
   
+
   const isValidColor = color => /[#|^]([0-9A-f]{3}|[0-9A-f]{6})$/.test(color)
+
 
   function getColorHex(hexStr) {
     if (hexStr == null) {
@@ -72,6 +176,7 @@
     return new Error("hex strings must be 3 or 6 characters")
   }
 
+
   function updateColor(id, colorHex) {
     const color = colorHex ? getColorStr(colorHex) : null
     const $id = $(id)
@@ -85,22 +190,6 @@
       .css({ color: color, 'border-bottom-color': color })
   }
 
-
-  function updateSidebar(labCode) {
-    const setting = tempSettings[labCode]
-
-    $('#lab_code').html('#' + setting.lab.code)
-    $('#lab_text').val(setting.lab.text)
-    $('#ref_code').val(setting.ref.code).html('#' + setting.ref.code)
-    $('#ref_text').val(setting.ref.text)
-
-    $('#lab').find('.preview__text').html(setting.lab.text + '1')
-    $('#ref').find('.preview__text').html(setting.ref.text + '1')
-
-    updateColor('#lab', setting.lab.color)
-    updateColor('#ref', setting.ref.color)
-    updateStyle(setting)
-  }
 
 
   function updateStyle(setting) {
@@ -132,8 +221,8 @@
 
 
   function selectCategory(labCode) {
+    updateSidebar(labCode) // These rely on being in the right order, which indicates a design flaw.
     updateTempSettings()
-    updateSidebar(labCode)
 
     $('#delete-category').css('display', isDefault(labCode) ? 'none' : 'block')
     $('#lab-cover').css('display', labCode === 'fnote' ? 'block' : 'none')
@@ -143,39 +232,7 @@
   const getSelectedOptionText = $el => $.trim($el.children("option:selected").text())
 
 
-  function updateTempSettings() {
-    const idIsSelected = (id) => $(id).hasClass('style-button--selected') ? 'true' : 'null'
-    const getColorValue = (id) => $(id).data('val') != undefined ? getColorHex($(id).data('val')) : null
 
-    const labCode = $('#lab_code').html().substr(1)
-    const colorCodes = $('.details').find('.color-code')
-
-    tempSettings[labCode] = {
-      name: getSelectedOptionText($('#category-select')), // FIXME: this is overwriting the names of other options
-      lab: {
-        code: labCode,
-        text: $('#lab_text').val(),
-        isBold: idIsSelected('#lab_bold'),
-        isItalic: idIsSelected('#lab_italic'),
-        isUnderlined: idIsSelected('#lab_underline'),
-        color: getColorValue(colorCodes[0]),
-      },
-      ref: {
-        code: labCode.substr(0, 3),
-        text: $('#ref_text').val(),
-        isBold: idIsSelected('#ref_bold'),
-        isItalic: idIsSelected('#ref_italic'),
-        isUnderlined: idIsSelected('#ref_underline'),
-        color: getColorValue(colorCodes[1]),
-      }
-    }
-
-    // data property records the previous category
-    $('#category-select').data('val', $('#category-select').val())
-  }
-
-
-  // TODO: why?
   $('#category-select').on('focusin', function () {
     $(this).data('val', $(this).val())
   })
@@ -212,19 +269,6 @@
   })
 
 
-  $('#delete-category').on('click', function () {
-    const ref = $('#ref_code').html().substr(1)
-    const currentName = tempSettings[$('#category-select').val()].name
-
-    $(this).css('display', 'none')
-    google.script.run.withSuccessHandler(revertToFirstCategory).removePair(ref)
-    $('#category-select option:contains("' + currentName + '")').remove()
-
-    if (refCodes.includes(ref)) {
-      refCodes.splice(refCodes.indexOf(ref), 1)
-    }
-  })
-
 
   //
   // # Custom screen
@@ -254,22 +298,26 @@
   }
 
 
+  const refCodeIsTaken = code => refCodes.includes(code)
+
+
+  // TODO: these event listeners should be named functions
   $('#lab_code_entry').keyup(function () {
     const labCode = getCurrentLabCode()
     const refCode = labCode.substr(0, 3)
 
     $(this).val(labCode.toLowerCase())
 
-    if (refCodes.includes(refCode)) {
-      $('#taken').html('⚠ in use')
-        .css('color', '#9c3030')
-      $(this).attr('maxlength', '3')
+    let inputLimit = 5
+
+    if (refCodeIsTaken) {
+      $('#taken').html('⚠ in use').css('color', '#9c3030')
+      inputLimit = 3 // don't allow typing to continue
     } else {
-      $(this).attr('maxlength', '5')
-      $('#taken').html('5 letters min')
-        .css('color', 'gray')
+      $('#taken').html('5 letters min').css('color', 'gray')
     }
 
+    $(this).attr('maxlength', inputLimit)
     $('#lab_code').html('#' + labCode)
     $('#ref_code').html('#' + refCode)
   })
@@ -282,18 +330,18 @@
 
   //TODO: won't work at the moment due to name stuff
   $('#save-custom').on('click', function () {
-    const customName = $('#custom-category-name').val()
+    const customCode = $('#category-select').val()
     let customSettings
 
     $('#save-apply').prop('disabled', true)
     saveProperties('#save-apply')
 
-    customSettings = tempSettings[customName]
+    customSettings = tempSettings[customCode]
 
     google.script.run.storeCustom(customSettings)
 
-    $('#category-select option:last').after($('<option>', { text: customName }))
-    $('#category-select').val(customName)
+    $('#category-select option:last').after($('<option>', { text: customName })) // TODO: this is wrong
+    $('#category-select').val(customCode)
     revertCustomScreen()
     $('#delete-category').css('display', 'block')
   })
@@ -308,12 +356,10 @@
   // Disable saving a custom pairing while nameless or label code too short
   // TODO: more name debt
   document.onkeyup = function (e) {
-    const name_length = $('#custom-category-name').val().length,
-      lab_length = $('#lab_code_entry').val().length
+    const nameLength = $('#custom-category-name').val().length,
+      labLength = $('#lab_code_entry').val().length
 
-    const disabled = (name_length > 0 && lab_length === 5) ? false : true
-
-    $('#save-custom').prop('disabled', disabled)
+    $('#save-custom').prop('disabled', nameLength === 0 || labLength !== 5)
   }
 
 
@@ -345,9 +391,8 @@
   $('.style-button').on('click', function () {
     $(this).toggleClass('style-button--selected')
 
-    const id = this.id
-    const cssValueName = id.substr(4, this.length)
-    const category = '#' + id.substr(0, 3)
+    const category = '#' + this.id.slice(0, 3)
+    const cssValueName = this.id.slice(4)
 
     const cssProps = {
       'bold': 'font-weight',
@@ -355,7 +400,7 @@
       'underline': 'text-decoration'
     }
 
-    const cssValue = ($(this).hasClass('style-button--selected')) ? cssValueName : 'initial'
+    const cssValue = $(this).hasClass('style-button--selected') ? cssValueName : 'initial'
 
     $(category).find('.preview__text').css(cssProps[cssValueName], cssValue)
   })
@@ -369,7 +414,7 @@
     const $colorPane = button.parent()
     const $colorText = $colorPane.prev().children('div')
     const $colorCode = $colorPane.children('.color-code')
-    const colorStr = $colorCode.val() || '000'
+    const colorStr = $colorCode.val() || null
     const colorHex = getColorHex(colorStr)
 
     $colorCode.data('val', colorStr).val(colorStr)
@@ -397,19 +442,16 @@
 
 
   $('.color-code').on('keydown', function (e) {
-    if (e.keyCode == 13) {
-      confirmColor($(this))
-    }
-    if (e.keyCode == 27) {
-      cancelColor($(this))
+    switch (e.keyCode) {
+      case 13:
+        confirmColor($(this))
+      case 27:
+        cancelColor($(this))
     }
   })
 
 
-  $('.clone-color').on('click', function () {
-    const type = $(this).closest('.main-section').attr('id')
-    google.script.run.withSuccessHandler(updateColorCode(type)).cloneColor(type)
-  })
+
 
 
   $('.confirm-color').on('click', function () {
@@ -424,7 +466,7 @@
 
 
   // Hide color pane when anything else clicked
-  $(document).on("click", function (e) {
+  $(document).on('click', function (e) {
     if ($(e.target).is('.color-pane, .color-pane *, .color-button')) return
     $('.color-hide').hide()
   })
@@ -434,29 +476,11 @@
   //
 
 
-  // Save the current sidebar settings as document settings
-  function saveProperties(button) {
-    updateTempSettings()
-    google.script.run.withSuccessHandler(enableButton).updateProps(tempSettings)
-  }
-
-
   function enableButton(button) {
     $(button).prop('disabled', false)
   }
 
 
-  $('#save-defaults').on('click', function () {
-    $(this).prop('disabled', true)
-    updateTempSettings()
-    google.script.run.withSuccessHandler(enableButton).storeDefault(tempSettings)
-  })
-
-
-  $('#restore-defaults').on('click', function () {
-    $('#category-select').find('option').remove().end()
-    google.script.run.withSuccessHandler(initialiseSidebar).restoreDefault()
-  })
 
 
   $('#save-apply').on('click', function () {
