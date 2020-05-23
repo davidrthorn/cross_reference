@@ -1,4 +1,13 @@
 <script>
+
+  // TODO: menu bar wrong order
+  // TODO: formatting options are not correctly initialised in sidebar (text works fine)
+
+
+
+
+
+
   let tempSettings = {}
   let refCodes = []
 
@@ -62,20 +71,29 @@
   // # Update the sidebar
   //
 
-  const byProp = (getProp, asc=true) => (a, b) => {
+
+  const typeFlexible = (a, b) => {
+    switch (typeof x === 'string') {
+      case 'string':              return x < y ? -1 : y > x ? 1 : 0
+      case 'number': case 'bool': return x - y
+      default:                    return 0
+    }
+  }
+
+  // byProp can be used to sort by different types. It takes a function that will
+  // retrieve the relevant sort target from something. The default function does
+  // not modify the sort target
+  const byProp = (getProp=a=>a, asc=true) => (a, b) => {
     const x = asc ? getProp(a) : getProp(b)
     const y = asc ? getProp(b) : getProp(a)
-
-    return typeof x === 'string'
-      ? x < y ? -1 : y > x ? 1 : 0
-      : x - y
+    return typeFlexible(x, y)
   }
 
 
   function initialiseSidebar(settings) {
     tempSettings = { ...settings }
 
-    const nameLowercase = entry => a[1].name.toLowerCase()
+    const nameLowercase = entry => entry[1].name.toLowerCase()
 
     const byNameAsc = byProp(nameLowercase)
 
@@ -120,7 +138,7 @@
 
 
   function updateTempSettings() {
-    const idIsSelected = (id) => $(id).hasClass('style-button--selected') ? 'true' : 'null'
+    const idIsSelected = (id) => $(id).hasClass('style-button--selected') ? true : null
     const getColorValue = (id) => $(id).data('val') != undefined ? getColorHex($(id).data('val')) : null
 
     const labCode = $('#lab_code').html().substr(1)
@@ -177,7 +195,7 @@
   }
 
 
-  function updateColor(id, colorHex) {
+  function updateColor(id, colorHex) { // FIXME: does not update when sidebar initialises
     const color = colorHex ? getColorStr(colorHex) : null
     const $id = $(id)
 
@@ -196,17 +214,23 @@
     // gives the css property and the value we want
     // when the corresponding setting (the key here) is true
     const cssProps = {
-      isBold: ['font-weight', 'bold'],
-      isItalic: ['font-style', 'italic'],
+      isBold:       ['font-weight',     'bold'],
+      isItalic:     ['font-style',      'italic'],
       isUnderlined: ['text-decoration', 'underline'],
     }
     const selected = 'style-button--selected'
 
-    for (const typeCode in ['lab', 'ref']) {
-      for (const key in setting[typeCode]) {
-        const [cssProp, cssValue] = cssProps[key]
-        const btn = $('#' + css[1]) // css style values (e.g. 'bold') happen to be the same as the button id
-
+    for (const typeCode of ['lab', 'ref']) {
+      const subSetting = setting[typeCode]
+      
+      for (const key in subSetting) {
+        if (!(key in cssProps)) {
+        continue
+        }
+        
+        let [cssProp, cssValue] = cssProps[key]
+        const btn = $('#' + typeCode + '_' + cssValue)
+       
         if (subSetting[key]) {
           btn.addClass(selected)
         } else {
@@ -214,7 +238,7 @@
           btn.removeClass(selected)
         }
 
-        $('#' + code).find('.preview__text').css(...css)
+        $('#' + typeCode).find('.preview__text').css(cssProp, cssValue)
       }
     }
   }
