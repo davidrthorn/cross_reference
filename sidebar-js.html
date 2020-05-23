@@ -195,17 +195,17 @@
   }
 
 
-  function updateColor(id, colorHex) { // FIXME: does not update when sidebar initialises
-    const color = colorHex ? getColorStr(colorHex) : null
+  function updateColor(id, colorHex) {
+    const colorStr = colorHex ? getColorStr(colorHex) : null
     const $id = $(id)
 
     $id.find('.preview__text')
-      .css('color', color)
+      .css('color', colorHex)
     $id.find('.color-code')
-      .val(color)
-      .data('val', color)
+      .val(colorStr)
+      .data('val', colorStr)
     $id.find('.color-icon')
-      .css({ color: color, 'border-bottom-color': color })
+      .css({ color: colorHex, 'border-bottom-color': colorHex })
   }
 
 
