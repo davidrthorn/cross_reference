@@ -13,39 +13,34 @@
 
   const isValidColor = color => /[#|^]([0-9A-f]{3}|[0-9A-f]{6})$/.test(color)
 
-  function getColorHex(hexStr) {
-    if (hexStr == null) return null
-    if (!isValidColor(hexStr)) return new Error("invalid hex color")
-
-    return hexStr.length === 6
-      ? '#' + hexStr
-      : hexStr.length === 3
-        ? hexStr.split().reduce((acc, cur) => acc + cur + cur, '#')
-        : new Error("hex strings must be 3 or 6 characters")
-  }
-
+  const doubleEach = (acc, cur) => acc + cur + cur
 
   const arrayMinus = (arr, item) => arr.filter(a => a !== item)
 
-  const htmlEncode = str => String(str).replace(
-    /[^\w. ]/gi,
-    match => '&#' + match.charCodeAt(0) + ''
-    ) 
+  const htmlEncode = str => String(str).replace(/[^\w. ]/gi, match => '&#' + match.charCodeAt(0) + '')
 
   const isDefault = labCode => ['equat', 'figur', 'table', 'fnote'].includes(labCode)
 
+  const getColorHex = hexStr => {
+    if (hexStr == null) return null
+    if (!isValidColor(hexStr)) return new Error('invalid hex color')
+    if (hexStr.length === 6) return '#' + hexStr
+    if (hexStr.length === 3) return hexStr.split().reduce(doubleEach, '#')
+    return new Error('hex strings must be 3 or 6 characters')
+  }
+
   const typeFlexibleCompare = (a, b) => {
     switch (typeof x === 'string') {
-      case 'string':              return x < y ? -1 : y > x ? 1 : 0
+      case 'string': return x < y ? -1 : y > x ? 1 : 0
       case 'number': case 'bool': return x - y
-      default:                    return 0
+      default: return 0
     }
   }
 
   // byProp can be used to sort by different types. It takes a function that will
   // retrieve the relevant sort target from something. The default function does
   // not modify the sort target
-  const byProp = (getProp=a=>a, asc=true) => (a, b) => {
+  const byProp = (getProp = a => a, asc = true) => (a, b) => {
     const x = asc ? getProp(a) : getProp(b)
     const y = asc ? getProp(b) : getProp(a)
     return typeFlexibleCompare(x, y)
@@ -115,13 +110,13 @@
 
     inNameOrder.forEach(entry => {
       const data = entry[1]
- 
+
       refCodes.push(data.ref.code)
 
       $('#category-select').append($('<option>', {
-        text:   data.name,
-        value:  data.lab.code,
-        data:   data.lab.code,
+        text: data.name,
+        value: data.lab.code,
+        data: data.lab.code,
       }))
     })
 
@@ -150,14 +145,14 @@
     updateStyle(setting)
   }
 
+  const idIsSelected = id => $(id).hasClass('style-button--selected') || null
+  const getColorValue = id => $(id).data('val') != undefined ? getColorHex($(id).data('val')) : null
 
   function updateTempSettings() {
-    const idIsSelected = (id) => $(id).hasClass('style-button--selected') ? true : null
-    const getColorValue = (id) => $(id).data('val') != undefined ? getColorHex($(id).data('val')) : null
 
     const labCode = $('#lab_code').html().substr(1)
     const colorCodes = $('.details').find('.color-code')
-    
+
     tempSettings[labCode] = {
       name: getSelectedOptionText($('#category-select')),
       lab: {
@@ -201,23 +196,21 @@
     // gives the css property and the value we want
     // when the corresponding setting (the key here) is true
     const cssProps = {
-      isBold:       ['font-weight',     'bold'],
-      isItalic:     ['font-style',      'italic'],
+      isBold: ['font-weight', 'bold'],
+      isItalic: ['font-style', 'italic'],
       isUnderlined: ['text-decoration', 'underline'],
     }
     const selected = 'style-button--selected'
 
     for (const typeCode of ['lab', 'ref']) {
       const subSetting = setting[typeCode]
-      
+
       for (const key in subSetting) {
-        if (!(key in cssProps)) {
-        continue
-        }
-        
+        if (!(key in cssProps)) continue
+
         let [cssProp, cssValue] = cssProps[key]
         const btn = $('#' + typeCode + '_' + cssValue)
-       
+
         if (subSetting[key]) {
           btn.addClass(selected)
         } else {
@@ -238,8 +231,8 @@
     $('#delete-category').css('display', isDefault(labCode) ? 'none' : 'block')
     $('#lab-cover').css('display', labCode === 'fnote' ? 'block' : 'none')
   }
-  
-  
+
+
   const getSelectedOptionText = $el => $.trim($el.children("option:selected").text())
 
 
@@ -256,34 +249,73 @@
   /** FIXME: BELOW BE BROKEN **/
 
 
-  function hideCustomCategoryControls() {}
-  function showCustomCategoryControls() {}
+  function hideCustomCategoryControls() {
+    const toHide = [
+      '#custom-category-name',
+      '#cs_lab_code',
+      '.actions__row:last-child'
+    ]
+    const toShow = [
+      '#category-select',
+      '#lab_code',
+      '.actions__row:not(:last-child)'
+    ]
 
-  function clearSidebar() {}
+    $all(toHide).css('display', 'none')
+    $all(toShow).css('display', 'block')
+    $('#add-category').css('display', 'block')
+    $('#set_defaults').prop('disabled', false)
+  }
+
+  const all$ = elems => $(elems.join(','))
+
+  function showCustomCategoryControls() {
+    const hide = [
+      '.category__button',
+      '#category-select',
+      '#lab_code',
+      '.actions__row:not(:last-child)'
+    ]
+    const show = [
+      '#custom-category-name',
+      '#cs_lab_code',
+      '.actions__row:last-child'
+    ]
+    all$(hide).css('display', 'none')
+    all$(show).css('display', 'block')
+  }
 
 
-  // TODO: name this function: what are we doing when we add category?
-  $('#add-category').on('click', function () {
+  function clearSidebar() {
+    const toClear = [
+      '#custom-category-name',
+      '#lab_code',
+      '#lab_code_entry',
+      '#lab_text',
+      '#ref_code',
+      '#ref_text',
+    ]
+    $all(toClear).val('')
 
-    const toHide = '.category__button, #category-select, #lab_code, .actions__row:not(:last-child)'
-    const toShow = '#custom-category-name, #cs_lab_code, .actions__row:last-child'
-    const toClear = '#custom-category-name, #lab_code, #lab_code_entry, #lab_text, #ref_code, #ref_text'
-
-    $(toHide).css('display', 'none')
-    $(toShow).css('display', 'block')
-    $(toClear).val('')
     $('#ref_code').html('#')
-    $('.preview__text').css({ // TODO: clearSidebar
-      'color':            'unset',
-      'font-weight':      'unset',
-      'font-style':       'unset',
-      'text-decoration':  'unset'
+    $('.preview__text').css({
+      'color': 'unset',
+      'font-weight': 'unset',
+      'font-style': 'unset',
+      'text-decoration': 'unset'
     }).html('&ltelement&gt')
 
     $('.color-button, .color-button *').css({ 'color': 'unset', 'border-bottom-color': 'unset' })
     $('.color-code').val(null).data('val', null)
 
     $('.style-button--selected').removeClass('style-button--selected')
+  }
+
+
+  // TODO: name this function: what are we doing when we add category?
+  $('#add-category').on('click', function () {
+    showCustomCategoryControls()
+    clearSidebar()
   })
 
 
@@ -293,18 +325,6 @@
   //
 
   const getCurrentLabCode = () => ('#lab_code_entry').val()
-
-  function revertCustomScreen() { // TODO: i.e. hideCustomControls
-
-    const toHide = '#custom-category-name, #cs_lab_code, .actions__row:last-child'
-    const toShow = '#category-select, #lab_code, .actions__row:not(:last-child)'
-
-    $(toHide).css('display', 'none')
-    $(toShow).css('display', 'block')
-    $('#add-category').css('display', 'block')
-    $('#set_defaults').prop('disabled', false)
-  }
-
 
   function revertToFirstCategory() {
     const firstCode = $('#category-select option:first').val()
@@ -361,7 +381,7 @@
     $('#category-select option:last').after($('<option>', { text: customName })) // TODO: this is wrong
     $('#category-select').val(customCode)
 
-    revertCustomScreen()
+    hideCustomCategoryControls()
 
     $('#delete-category').css('display', 'block')
   })
@@ -369,15 +389,15 @@
 
   $('#cancel-custom').on('click', function () {
     revertToFirstCategory()
-    revertCustomScreen()
+    hideCustomCategoryControls()
   })
 
 
   // Disable saving a custom pairing while nameless or label code too short
   // TODO: more name debt
   document.onkeyup = function (e) {
-    const nameLength = $('#custom-category-name').val().length,
-      labLength = $('#lab_code_entry').val().length
+    const nameLength = $('#custom-category-name').val().length
+    const labLength = $('#lab_code_entry').val().length
 
     $('#save-custom').prop('disabled', nameLength === 0 || labLength !== 5)
   }
