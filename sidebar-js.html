@@ -11,7 +11,7 @@
 
   const getColorStr = colorHex => colorHex.slice(1)
 
-  const isValidColor = color => /[#|^]([0-9A-f]{3}|[0-9A-f]{6})$/.test(color)
+  const isValidColor = color => /(#|^)([0-9A-f]{3}|[0-9A-f]{6})$/.test(color)
 
   const doubleEach = (acc, cur) => acc + cur + cur
 
@@ -20,6 +20,8 @@
   const htmlEncode = str => String(str).replace(/[^\w. ]/gi, match => '&#' + match.charCodeAt(0) + '')
 
   const isDefault = labCode => ['equat', 'figur', 'table', 'fnote'].includes(labCode)
+
+  const all$ = elems => $(elems.join(','))
 
   const getColorHex = hexStr => {
     if (hexStr == null) return null
@@ -261,13 +263,12 @@
       '.actions__row:not(:last-child)'
     ]
 
-    $all(toHide).css('display', 'none')
-    $all(toShow).css('display', 'block')
+    all$(toHide).css('display', 'none')
+    all$(toShow).css('display', 'block')
     $('#add-category').css('display', 'block')
     $('#set_defaults').prop('disabled', false)
   }
 
-  const all$ = elems => $(elems.join(','))
 
   function showCustomCategoryControls() {
     const hide = [
@@ -295,7 +296,7 @@
       '#ref_code',
       '#ref_text',
     ]
-    $all(toClear).val('')
+    all$(toClear).val('')
 
     $('#ref_code').html('#')
     $('.preview__text').css({
@@ -324,7 +325,7 @@
   // # Custom screen
   //
 
-  const getCurrentLabCode = () => ('#lab_code_entry').val()
+  const getCurrentLabCode = () => $('#lab_code_entry').val()
 
   function revertToFirstCategory() {
     const firstCode = $('#category-select option:first').val()
@@ -341,18 +342,20 @@
 
   // TODO: these event listeners should be named functions
   $('#lab_code_entry').keyup(function () {
-    const labCode = getCurrentLabCode()
+    const labCode = $(this).val()
     const refCode = labCode.substr(0, 3)
 
     $(this).val(labCode.toLowerCase())
 
     let inputLimit = 5
 
-    if (refCodeIsTaken) {
+    if (refCodeIsTaken(refCode)) {
       $('#taken').html('⚠ in use').css('color', '#9c3030')
       inputLimit = 3 // don't allow typing to continue
-    } else {
+    } else if (labCode.length < 5) {
       $('#taken').html('5 letters min').css('color', 'gray')
+    } else {
+      $('#taken').html('')
     }
 
     $(this).attr('maxlength', inputLimit)
@@ -368,17 +371,16 @@
 
   //TODO: won't work at the moment due to name stuff
   $('#save-custom').on('click', function () {
-    const customCode = $('#category-select').val()
-    let customSettings
+    const $select = $('#category-select')
+    const customCode = $select.val()
+    const customName = $select.text()
 
     $('#save-apply').prop('disabled', true)
     saveProperties('#save-apply')
 
-    customSettings = tempSettings[customCode]
+    google.script.run.storeCustom(tempSettings[customCode])
 
-    google.script.run.storeCustom(customSettings)
-
-    $('#category-select option:last').after($('<option>', { text: customName })) // TODO: this is wrong
+    $('#category-select option:last').after($('<option>', { text: customName }))
     $('#category-select').val(customCode)
 
     hideCustomCategoryControls()
@@ -492,7 +494,7 @@
 
 
   $('.confirm-color').on('click', function () {
-    confirmColor($(this))
+    confirmColorSelection($(this))
   })
 
 

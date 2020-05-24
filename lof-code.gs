@@ -77,9 +77,10 @@ function findLoF() {
 function insertDummyLoF(labCount, labText, position) {
   const doc = DocumentApp.getActiveDocument()
   const lofCells = []
-  const labText = toCap(labText)
   const placeholder = '...'
   const range = doc.newRange()
+
+  labText = toCap(labText)
   
   doc.getNamedRanges('lofTable').forEach(r => r.remove())
   
@@ -89,7 +90,7 @@ function insertDummyLoF(labCount, labText, position) {
   for (let i = 1; i <= labCount['fig']; i++) {
     const figName = labText + i
     const figDesc = splitDescs && splitDescs[i].length ? ': ' + splitDescs[i] : ''
-    lofCells.push([figName + figDesc, placeholder)
+    lofCells.push([figName + figDesc, placeholder])
   }
   
   const lofTable = doc.getBody().insertTable(position, lofCells)
@@ -111,7 +112,8 @@ function styleLoF(lofTable) {
     'FONT_SIZE': null
   }
   
-  for (let i = lofTable.getNumRows(); i--) {
+  let i = lofTable.getNumRows()
+  while (i--) {
     const row = lofTable.getRow(i)
     
     lofTable.setAttributes(styleAttributes).setColumnWidth(1, 64)
@@ -147,17 +149,16 @@ function insertLoFNumbers(pg_nums) {
 function restoreLabels() {
   const paras = DocumentApp.getActiveDocument().getBody().getParagraphs()
   
-  for (let i = 0; i < paras.length; i++) {
+  for (let i = 0, len = paras.length; i < len; i++) {
     const text = paras[i].editAsText()
-    const locs = getCrossLinks(text, 5)
-    const starts = locs[0]
+    const locs = getCrossLinks(text, 5) // TODO: this is no longer the right signature
+    const starts = locs[0] // TODO: thus also wrong
     const urls = locs[2]
     
-    if (!starts.length) continue
-    
-    for (let k = starts.length; k--) {
-      const start = starts[k]
-      if (urls[k].substr(0, 4) === '#fig') {
+    let j = starts.length
+    while (j--) {
+      const start = starts[j]
+      if (urls[j].substr(0, 4) === '#fig') {
         text.deleteText(start - 1, start)
       }
     }
