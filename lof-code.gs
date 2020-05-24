@@ -1,171 +1,167 @@
 function createLoF() {
 
-  var cursor = getCursorIndex();
-  var labSettings = PropertiesService.getDocumentProperties().getProperty( 'cross_fig' );
-  var labText = labSettings ?  toCap( labSettings.split( '_' )[ 2 ] ) : 'Figure ';
+  const cursor = getCursorIndex()
+  const labSettings = PropertiesService.getDocumentProperties().getProperty('cross_fig')
+  const labText = labSettings ? toCap(labSettings.split('_')[2]) : 'Figure '
 
-  if ( updateDoc() === 'error' ) return;
+  if (updateDoc() === 'error') return // TODO: need to check error type
   
-  var labCount = encodeLabel();
-  var position = deleteLoF() || cursor;
+  const labCount = encodeLabel()
+  const position = deleteLoF() || cursor
   
-  insertDummyLoF( labCount, labText, position );
+  insertDummyLoF(labCount, labText, position)
   
-  var html = HtmlService.createTemplateFromFile( 'lof' ).evaluate();
-  html.setWidth( 250 ).setHeight( 90 );
-  DocumentApp.getUi().showModalDialog( html, 'Generating list of figures...' );
+  const html = HtmlService.createTemplateFromFile('lof').evaluate()
+  html.setWidth(250).setHeight(90)
+  DocumentApp.getUi().showModalDialog(html, 'Generating list of figures...')
 }
 
 function getCursorIndex() {
-  var cursor = DocumentApp.getActiveDocument().getCursor();
-  if ( !cursor ) return 0;
+  const cursor = DocumentApp.getActiveDocument().getCursor()
+  if (!cursor ) return 0
   
-  var element = cursor.getElement();
+  const element = cursor.getElement()
   
-  return element.getParent().getChildIndex(element);
+  return element.getParent().getChildIndex(element)
 }
 
 
+// encodeLabel replaces the beginning of a label with
+// very rarely used UTF-8 characters that will be used
+// to identify labels when we process the PDF file
 function encodeLabel() {
-  var doc = DocumentApp.getActiveDocument();
-  var paragraphs = doc.getBody().getParagraphs();
-  var labCount = { 'fig': 0 };
-  var figDescs = '';
+  const doc = DocumentApp.getActiveDocument()
+  const paragraphs = doc.getBody().getParagraphs()
+  const labCount = { 'fig': 0 }
+  const figDescs = ''
   
-  for ( var i = 0; i < paragraphs.length; i++ ) {
-    var text = paragraphs[ i ].editAsText();
-    var locs = getCrossLinks( text, 5 );
-    var start = locs[ 0 ][ 0 ];
-    var url = locs[ 2 ][ 0 ];
+  for (let i = 0; i < paragraphs.length; i++) {
+    const text = paragraphs[i].editAsText()
+    const locs = getCrossLinks(text, 5)
+    const start = locs[0][0]
+    const url = locs[2][0]
 
-    if ( !locs[ 0 ].length ) continue;
+    if (!locs[0].length) continue
     
-    if ( url.substr( 0, 4 ) === '#fig' ) {
+    if (url.substr(0, 4) === '#fig') {
 
       figDescs += 'ഛಎ' + text.getText().match(/([ ]\d[^\w]*)([^\.]*)/)[2]
     
-      text.deleteText( start, start + 1 )
-        .insertText( start, '☙' );
-      labCount[ 'fig' ]++;
+      text.deleteText(start, start + 1).insertText(start, '☙')
+      labCount['fig']++
     }
   }
   
   PropertiesService.getDocumentProperties().setProperty('fig_descs', figDescs)
-  return labCount;
+  return labCount
 }
 
 
 function deleteLoF() {
-  var lofTable = findLoF();
-  if ( !lofTable ) return;
+  const lofTable = findLoF()
+  if (!lofTable) return
   
-  var lofIndex = lofTable.getParent().getChildIndex( lofTable );
-  lofTable.removeFromParent();
+  const lofIndex = lofTable.getParent().getChildIndex(lofTable)
+  lofTable.removeFromParent()
   
   return lofIndex
 }
 
 
 function findLoF() {
-  var lof = DocumentApp.getActiveDocument().getNamedRanges( 'lofTable' )[ 0 ];
-  
-  return lof ? lof.getRange().getRangeElements()[ 0 ].getElement().asTable() : null;
+  const lof = DocumentApp.getActiveDocument().getNamedRanges('lofTable')[0]
+  return lof.getRange().getRangeElements()[0].getElement().asTable() || null
 }
 
 
-function insertDummyLoF( labCount, labText, position ) {
-  var doc = DocumentApp.getActiveDocument();
-  var lofCells = [];
-  var labText = toCap( labText );
-  var placeholder = '...';
-  var range = doc.newRange();
+function insertDummyLoF(labCount, labText, position) {
+  const doc = DocumentApp.getActiveDocument()
+  const lofCells = []
+  const labText = toCap(labText)
+  const placeholder = '...'
+  const range = doc.newRange()
   
-  doc.getNamedRanges( 'lofTable' ).forEach( function( r ) {
-    r.remove()
-  });
+  doc.getNamedRanges('lofTable').forEach(r => r.remove())
   
-  var figDescs = PropertiesService.getDocumentProperties().getProperty('fig_descs');
-  var splitDescs = figDescs ? figDescs.split('ഛಎ') : null;
+  const figDescs = PropertiesService.getDocumentProperties().getProperty('fig_descs')
+  const splitDescs = figDescs ? figDescs.split('ഛಎ') : null
   
-  for ( var i = 1; i <= labCount[ 'fig' ]; i++ ) {
-    var figName = labText + i;
-    var figDesc = splitDescs && splitDescs[i].length ? ': ' + splitDescs[i] : '';
-    var row = [ figName + figDesc, placeholder ];
-    lofCells.push( row );
+  for (let i = 1; i <= labCount['fig']; i++) {
+    const figName = labText + i
+    const figDesc = splitDescs && splitDescs[i].length ? ': ' + splitDescs[i] : ''
+    lofCells.push([figName + figDesc, placeholder)
   }
   
-  var lofTable = doc.getBody().insertTable( position, lofCells )
-  styleLoF( lofTable );
+  const lofTable = doc.getBody().insertTable(position, lofCells)
+  styleLoF(lofTable)
   
-  range.addElement( lofTable );
-  doc.addNamedRange('lofTable', range.build() )
+  range.addElement(lofTable)
+  doc.addNamedRange('lofTable', range.build())
 }
 
 
-function styleLoF( lofTable ) {
+function styleLoF(lofTable) {
   
-  lofTable.setBorderWidth( 0 );
+  lofTable.setBorderWidth(0)
   
   var styleAttributes = {
     'BOLD': null,
     'ITALIC': null,
     'UNDERLINE': null,
     'FONT_SIZE': null
-  };
+  }
   
-  for ( var i = lofTable.getNumRows(); i--; ) {
-    var row = lofTable.getRow( i );
+  for (let i = lofTable.getNumRows(); i--) {
+    const row = lofTable.getRow(i)
     
-    lofTable.setAttributes( styleAttributes ).setColumnWidth( 1, 64 );
-    row.getCell( 0 ).setPaddingLeft( 0 );
-    row.getCell( 1 ).setPaddingRight( 0 )
-      .getChild( 0 ).asParagraph().setAlignment( DocumentApp.HorizontalAlignment.RIGHT );
+    lofTable.setAttributes(styleAttributes).setColumnWidth(1, 64)
+    row.getCell(0).setPaddingLeft(0)
+    row.getCell(1).setPaddingRight(0)
+      .getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.RIGHT)
   }
 }
 
 
-function getDocAsPDF() {
-   return DocumentApp.getActiveDocument().getBlob().getBytes();
-}
+const getDocAsPDF = () => DocumentApp.getActiveDocument().getBlob().getBytes() 
 
 
-function insertLoFNumbers( pg_nums ) {
+function insertLoFNumbers(pg_nums) {
   
-  var lofTable = findLoF();
-  var currentRow = 0;
+  const lofTable = findLoF()
+  const currentRow = 0
   
-  for ( var i = 0; i < pg_nums.length; i++ ) {
-    var labCount = pg_nums[ i ];
-    if ( !labCount ) continue;
+  for (let i = 0; i < pg_nums.length; i++) {
+    const labCount = pg_nums[i]
+    if (!labCount) continue
 
-    for ( var j = currentRow; j < lofTable.getNumRows(); j++ ) {
-      lofTable.getCell( j, 1 )
+    for (let j = currentRow; j < lofTable.getNumRows(); j++) {
+      lofTable.getCell(j, 1)
         .clear()
-        .getChild( 0 ).asParagraph().appendText( i + 1 );
+        .getChild(0).asParagraph().appendText(i + 1)
     }
-    var currentRow = currentRow + labCount;
+    currentRow += labCount
   }
 }
 
 
 function restoreLabels() {
-  var doc = DocumentApp.getActiveDocument();
-  var paras = doc.getBody().getParagraphs();
+  const paras = DocumentApp.getActiveDocument().getBody().getParagraphs()
   
-  for ( var i = 0; i < paras.length; i++ ) {
-    var text = paras[ i ].editAsText();
-    var locs = getCrossLinks( text, 5 );
-    var starts = locs[ 0 ];
-    var urls = locs[ 2 ];
+  for (let i = 0; i < paras.length; i++) {
+    const text = paras[i].editAsText()
+    const locs = getCrossLinks(text, 5)
+    const starts = locs[0]
+    const urls = locs[2]
     
-    if ( !starts.length ) continue;
+    if (!starts.length) continue
     
-    for ( var k = starts.length; k--; ) {
-      var start = starts[ k ];
-      var url = urls[ k ];
-      if (url.substr( 0, 4 ) === '#fig') text.deleteText( start - 1, start );
+    for (let k = starts.length; k--) {
+      const start = starts[k]
+      if (urls[k].substr(0, 4) === '#fig') {
+        text.deleteText(start - 1, start)
+      }
     }
   }
   
-  updateDoc();
+  updateDoc()
 }
