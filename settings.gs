@@ -19,7 +19,6 @@ function encodeSettings(settings) {
     const setting = settings[key]
     result[getPropKey(setting.lab.code)] = encodeSetting(setting)
   }
-  console.log(result)
   return result
 }
 
@@ -71,6 +70,7 @@ function updateDocProps() {
   PropertiesService.getDocumentProperties().setProperties(encoded)
 }
 
+const isDefault = code => ['equ', 'fig', 'fno', 'tab'].includes(code.substr(0, 3))
 
 function getDefaultSettings() {
   return {

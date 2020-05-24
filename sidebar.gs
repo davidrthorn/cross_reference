@@ -15,7 +15,7 @@ function getSettings() {
   const docProps = PropertiesService.getDocumentProperties().getProperties()
   const userProps = PropertiesService.getUserProperties().getProperties()
 
-  settings = getDefaultSettings()
+  let settings = getDefaultSettings()
 
   settings = patchSettings(settings, userProps)
   settings = patchSettings(settings, docProps)
@@ -26,16 +26,16 @@ function getSettings() {
 
 function storeDefault(tempSettings) {
   const userProps = PropertiesService.getUserProperties()
-  for (const labName in tempSettings) {
-    const settings = tempSettings[labName]
-    storePairing(userProps, settings) // TODO: this doesn't exist anymore
+  for (const labCode in tempSettings) {
+    const setting = tempSettings[labName]
+    userProps.setProperty(getPropKey(labCode), encodeSetting(setting))
     Utilities.sleep(200) // TODO: why?
   }
   return '#save-defaults'
 }
 
 
-const storeCustom = customSettings => storePairing(PropertiesService.getUserProperties(), customSettings)
+const storeCustom = setting => PropertiesService.getUserProperties().setProperty(getPropKey(setting.lab.code), encodeSetting(setting))
 
 
 // TODO: rename
@@ -55,6 +55,8 @@ function restoreDefault() {
 
 // Remove a custom category from user prop stores
 function removePair(code) {
+  if (isDefault(code)) return new Error('cannot delete default code')
+
   PropertiesService.getUserProperties().deleteProperty("cross_" + code)
   PropertiesService.getDocumentProperties().deleteProperty("cross_" + code)
 }

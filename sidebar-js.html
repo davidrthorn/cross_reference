@@ -1,4 +1,5 @@
 <script>
+  // TODO: switching between categories loses the information in a category
   /** GLOBAL STATE **/
   /* =============================================*/
 
@@ -21,21 +22,23 @@
 
   const isDefault = labCode => ['equat', 'figur', 'table', 'fnote'].includes(labCode)
 
+  const getSelectedOptionText = $el => $.trim($el.children('option:selected').text())
+
   const all$ = elems => $(elems.join(','))
 
   const getColorHex = hexStr => {
-    if (hexStr == null) return null
-    if (!isValidColor(hexStr)) return new Error('invalid hex color')
-    if (hexStr.length === 6) return '#' + hexStr
-    if (hexStr.length === 3) return hexStr.split().reduce(doubleEach, '#')
+    if (hexStr == null)         return null
+    if (!isValidColor(hexStr))  return new Error('invalid hex color')
+    if (hexStr.length === 6)    return '#' + hexStr
+    if (hexStr.length === 3)    return hexStr.split().reduce(doubleEach, '#')
     return new Error('hex strings must be 3 or 6 characters')
   }
 
   const typeFlexibleCompare = (a, b) => {
     switch (typeof x === 'string') {
-      case 'string': return x < y ? -1 : y > x ? 1 : 0
+      case 'string':              return x < y ? -1 : y > x ? 1 : 0
       case 'number': case 'bool': return x - y
-      default: return 0
+      default:                    return 0
     }
   }
 
@@ -98,6 +101,28 @@
   })
 
 
+  $('#save-custom').on('click', function () {
+    const $select = $('#category-select')
+    const labCode = getCurrentLabCode()
+    const name = $('#custom-category-name').val()
+
+    addTempEntry(labCode, name)
+
+    $('#save-apply').prop('disabled', true)
+    saveProperties('#save-apply')
+
+    google.script.run.storeCustom(tempSettings[labCode])
+
+    $('#category-select option:last').after($('<option>', { text: name }))
+    $('#category-select').val(labCode)
+
+    hideCustomCategoryControls()
+
+    $('#delete-category').css('display', 'block')
+  })
+
+
+
   /* UPDATING SIDEBAR */
   /* =============================================*/
 
@@ -149,30 +174,30 @@
 
   const idIsSelected = id => $(id).hasClass('style-button--selected') || null
   const getColorValue = id => $(id).data('val') != undefined ? getColorHex($(id).data('val')) : null
+  const getCurrentLabCode = () => $('#lab_code').html().substr(1)
+
+  const addTempEntry = (labCode, name) => tempSettings[labCode] = { name, lab: {}, ref: {} }
 
   function updateTempSettings() {
 
-    const labCode = $('#lab_code').html().substr(1)
+    const labCode = getCurrentLabCode()
     const colorCodes = $('.details').find('.color-code')
 
-    tempSettings[labCode] = {
-      name: getSelectedOptionText($('#category-select')),
-      lab: {
-        code: labCode,
-        text: $('#lab_text').val(),
-        isBold: idIsSelected('#lab_bold'),
-        isItalic: idIsSelected('#lab_italic'),
-        isUnderlined: idIsSelected('#lab_underline'),
-        color: getColorValue(colorCodes[0]),
-      },
-      ref: {
-        code: labCode.substr(0, 3),
-        text: $('#ref_text').val(),
-        isBold: idIsSelected('#ref_bold'),
-        isItalic: idIsSelected('#ref_italic'),
-        isUnderlined: idIsSelected('#ref_underline'),
-        color: getColorValue(colorCodes[1]),
-      }
+    tempSettings[labCode].lab = {
+      code: labCode,
+      text: $('#lab_text').val(),
+      isBold: idIsSelected('#lab_bold'),
+      isItalic: idIsSelected('#lab_italic'),
+      isUnderlined: idIsSelected('#lab_underline'),
+      color: getColorValue(colorCodes[0]),
+    }
+    tempSettings[labCode].ref = {
+      code: labCode.substr(0, 3),
+      text: $('#ref_text').val(),
+      isBold: idIsSelected('#ref_bold'),
+      isItalic: idIsSelected('#ref_italic'),
+      isUnderlined: idIsSelected('#ref_underline'),
+      color: getColorValue(colorCodes[1]),
     }
 
     // data property records the previous category
@@ -227,15 +252,13 @@
 
 
   function selectCategory(labCode) {
-    updateSidebar(labCode) // These rely on being in the right order, which indicates a design flaw.
     updateTempSettings()
+    updateSidebar(labCode) // These rely on being in the right order, which indicates a design flaw.
 
     $('#delete-category').css('display', isDefault(labCode) ? 'none' : 'block')
     $('#lab-cover').css('display', labCode === 'fnote' ? 'block' : 'none')
   }
 
-
-  const getSelectedOptionText = $el => $.trim($el.children("option:selected").text())
 
 
 
@@ -247,8 +270,6 @@
   $('#category-select').on('change', function () {
     selectCategory(this.value)
   })
-
-  /** FIXME: BELOW BE BROKEN **/
 
 
   function hideCustomCategoryControls() {
@@ -313,24 +334,16 @@
   }
 
 
-  // TODO: name this function: what are we doing when we add category?
   $('#add-category').on('click', function () {
     showCustomCategoryControls()
     clearSidebar()
   })
 
 
-
-  //
-  // # Custom screen
-  //
-
-  const getCurrentLabCode = () => $('#lab_code_entry').val()
-
   function revertToFirstCategory() {
     const firstCode = $('#category-select option:first').val()
 
-    $('#delete-category').css('display', (isDefault(firstCode)) ? 'block' : 'none') // TODO: does this not come under hideCustomControls?
+    $('#delete-category').css('display', (isDefault(firstCode)) ? 'block' : 'none')
     $('#category-select').val(firstCode)
 
     updateSidebar(firstCode)
@@ -369,25 +382,6 @@
   })
 
 
-  //TODO: won't work at the moment due to name stuff
-  $('#save-custom').on('click', function () {
-    const $select = $('#category-select')
-    const customCode = $select.val()
-    const customName = $select.text()
-
-    $('#save-apply').prop('disabled', true)
-    saveProperties('#save-apply')
-
-    google.script.run.storeCustom(tempSettings[customCode])
-
-    $('#category-select option:last').after($('<option>', { text: customName }))
-    $('#category-select').val(customCode)
-
-    hideCustomCategoryControls()
-
-    $('#delete-category').css('display', 'block')
-  })
-
 
   $('#cancel-custom').on('click', function () {
     revertToFirstCategory()
@@ -396,7 +390,6 @@
 
 
   // Disable saving a custom pairing while nameless or label code too short
-  // TODO: more name debt
   document.onkeyup = function (e) {
     const nameLength = $('#custom-category-name').val().length
     const labLength = $('#lab_code_entry').val().length
