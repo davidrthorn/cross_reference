@@ -1,5 +1,8 @@
 <script>
-  // TODO: switching between categories loses the information in a category
+  // TODO: creating a category and then switching back and forth is broken. Works if sidebar is closed and opened
+  // TODO: delete category does not hide delete button until more switching happens
+  // TODO: added custom option has no value
+
   /** GLOBAL STATE **/
   /* =============================================*/
 
@@ -20,7 +23,7 @@
 
   const htmlEncode = str => String(str).replace(/[^\w. ]/gi, match => '&#' + match.charCodeAt(0) + '')
 
-  const isDefault = labCode => ['equat', 'figur', 'table', 'fnote'].includes(labCode)
+  const isDefault = code => ['equ', 'fig', 'tab', 'fno'].includes(code.substr(0, 3))
 
   const getSelectedOptionText = $el => $.trim($el.children('option:selected').text())
 
@@ -113,7 +116,7 @@
 
     google.script.run.storeCustom(tempSettings[labCode])
 
-    $('#category-select option:last').after($('<option>', { text: name }))
+    $('#category-select option:last').after($('<option>', { value: labCode, text: name }))
     $('#category-select').val(labCode)
 
     hideCustomCategoryControls()
@@ -141,9 +144,9 @@
       refCodes.push(data.ref.code)
 
       $('#category-select').append($('<option>', {
-        text: data.name,
-        value: data.lab.code,
-        data: data.lab.code,
+        text:   data.name,
+        value:  data.lab.code,
+        data:   data.lab.code,
       }))
     })
 
@@ -340,11 +343,13 @@
   })
 
 
-  function revertToFirstCategory() {
+  function revertToFirstCategory(error) {
+    if (error) return console.log(error) 
+
     const firstCode = $('#category-select option:first').val()
 
-    $('#delete-category').css('display', (isDefault(firstCode)) ? 'block' : 'none')
     $('#category-select').val(firstCode)
+    $('#delete-category').css('display', isDefault(firstCode) ? 'none' : 'block')
 
     updateSidebar(firstCode)
   }
@@ -430,9 +435,9 @@
     const cssValueName = this.id.slice(4)
 
     const cssProps = {
-      'bold': 'font-weight',
-      'italic': 'font-style',
-      'underline': 'text-decoration'
+      'bold':       'font-weight',
+      'italic':     'font-style',
+      'underline':  'text-decoration'
     }
 
     const cssValue = $(this).hasClass('style-button--selected') ? cssValueName : 'initial'
