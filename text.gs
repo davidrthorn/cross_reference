@@ -6,25 +6,26 @@ function codeFromUrl(url) {
   return match ? match[1] : null
 }
 
-const getNumberHandler = (type, recordedNumbers, labelNameNumberMap) => //TODO: this is an ugly function
+const getNumberHandler = (type, numberForRefUrl, countByLabelType) => //TODO: this is an ugly function
   type === 'lab'
     ? url => {
       const code = codeFromUrl(url)
-      const refEquivalent = '#' + code + '_' + url.substr(5)
-      const num = labelNameNumberMap[code] + 1 || 1
+      const refEquivalent = '#' + code.substr(0, 3) + '_' + url.substr(7)
+      const num = countByLabelType[code] + 1 || 1
 
-      if (refEquivalent in recordedNumbers) return new Error('duplicate')
+      if (refEquivalent in numberForRefUrl) return new Error('duplicate')
 
-      recordedNumbers[refEquivalent] = num
-      labelNameNumberMap[code] = num
+      numberForRefUrl[refEquivalent] = num
+      countByLabelType[code] = num
 
       return num
     }
-    : url => recordedNumbers[url] || new Error('missref')
+    : url => numberForRefUrl[url] || new Error('missref')
 
 
 const updateText = CRUrls => handleCR => {
-  for (let i = CRUrls.length; i--;) { // iterate backwards because we're changing the underlying text length
+  let i = CRUrls.length 
+  while (i--) { // iterate backwards because we're changing the underlying text length
     const CRUrl = CRUrls[i]
 
     const result = handleCR(CRUrl)
@@ -83,7 +84,7 @@ const handleCRUrl = props => handleNumbering => text => CRUrl => {
   }
 
   replacementText += num
-
+  
   const style = getStyle(prop)
 
   replaceText(text, CRUrl, replacementText, style)

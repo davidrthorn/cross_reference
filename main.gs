@@ -1,3 +1,5 @@
+// FIXME: references don't work?!
+
 function onInstall(e) {
   onOpen(e)
 }

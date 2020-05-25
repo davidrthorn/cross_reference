@@ -79,17 +79,18 @@ function testLabelNumberHandler() {
     '#fig_first': 1,
   }
   let labelNameNumberMap = {
-    'fig': 1,
-    'tab': 2,
+    'figur': 1,
+    'table': 2,
   }
   let sut = getNumberHandler('lab', recordedNumbers, labelNameNumberMap)
 
-  let got = sut('#fig_somename')
+  let got = sut('#figur_somename')
 
   It('increments the existing entry in the label map',
-    labelNameNumberMap['fig'],
+    labelNameNumberMap['figur'],
     2
   )
+  
   It('records the url in the recorded numbers',
     recordedNumbers,
     {
@@ -97,6 +98,7 @@ function testLabelNumberHandler() {
       '#fig_somename': 2,
     }
   )
+
   It('returns the correct number',
     got,
     2
@@ -104,7 +106,7 @@ function testLabelNumberHandler() {
 
   got =
     It('returns duplicate error',
-      sut('#fig_first').message,
+      sut('#figur_first').message,
       'duplicate'
     )
 }
