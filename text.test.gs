@@ -82,7 +82,7 @@ function testLabelNumberHandler() {
     'figur': 1,
     'table': 2,
   }
-  let sut = getNumberHandler('lab', recordedNumbers, labelNameNumberMap)
+  let sut = handleLabNumber(recordedNumbers, labelNameNumberMap)
 
   let got = sut('#figur_somename')
 
@@ -117,7 +117,7 @@ function testRefNumberHandler() {
     '#fig_first': 1,
     '#fig_second': 2,
   }
-  let sut = getNumberHandler('ref', recordedNumbers, {})
+  let sut = handleRefNumber(recordedNumbers)
 
   let got = sut('#fig_second')
   It('returns correct number for url',

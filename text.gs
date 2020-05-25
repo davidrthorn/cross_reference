@@ -6,21 +6,24 @@ function codeFromUrl(url) {
   return match ? match[1] : null
 }
 
-const getNumberHandler = (type, numberForRefUrl, countByLabelType) => //TODO: this is an ugly function
-  type === 'lab'
-    ? url => {
-      const code = codeFromUrl(url)
-      const refEquivalent = '#' + code.substr(0, 3) + '_' + url.substr(7)
-      const num = countByLabelType[code] + 1 || 1
+// numberForRefUrl stores the number assigned to a particular label, but uses the ref_url format as its key (e.g. {#fig_bird: 1}).
+// It will be used when we process references.
+// countByLabelType stores the current count for a given label type (e.g. {fig: 3, tab: 4}).
+// We use this to number the current label.
+const handleLabNumber = numberForRefUrl => countByLabelType => url => {
+  const code = codeFromUrl(url)
+  const refEquivalent = '#' + code.substr(0, 3) + '_' + url.substr(7)
+  const num = countByLabelType[code] + 1 || 1
 
-      if (refEquivalent in numberForRefUrl) return new Error('duplicate')
+  if (refEquivalent in numberForRefUrl) return new Error('duplicate')
 
-      numberForRefUrl[refEquivalent] = num
-      countByLabelType[code] = num
+  numberForRefUrl[refEquivalent] = num
+  countByLabelType[code] = num
 
-      return num
-    }
-    : url => numberForRefUrl[url] || new Error('missref')
+  return num
+}
+
+const handleRefNumber = numberForRefUrl => url => numberForRefUrl[url] || new Error('missref')
 
 
 const updateText = CRUrls => handleCR => {
@@ -91,6 +94,20 @@ const handleCRUrl = props => handleNumbering => text => CRUrl => {
 }
 
 
+const handleFootnoteLabCRUrl = props => handleNumbering => text => CRUrl => {
+  const foundCode = codeFromUrl(CRUrl.url)
+  if (foundCode !== 'fnote') return
+  const prop = props[foundCode]
+
+  const num = handleNumbering(CRUrl.url)
+  if (num instanceof Error) {
+    return new CRError(text, CRUrl, num.message)
+  }
+
+  text.setAttributes(CRUrl.start, CRUrl.end, {'UNDERLINE': null, 'FOREGROUND_COLOR': '#000000'})
+}
+
+
 const getCRUrls = isCRUrl => text => {
   const textLength = text.getText().length
   const idxs = text.getTextAttributeIndices()
@@ -128,26 +145,3 @@ const capitalizeIfAppropriate = (text, start, replacementText) =>
   isCapitalized(replacementText) || !isCapitalized(text.substr(start, start + 1))
     ? replacementText
     : capitalize(replacementText)
-
-
-// TODO: footnotes
-function fnLabs(footnotes, fnProps, num_pairs) {
-  const isCRUrl = isCRUrl(5)
-  for (let i = 0; i < footnotes.length; i++) {
-    const paras = footnotes[i].getFootnoteContents().getParagraphs()
-    for (let j = 0; j < paras.length; j++) {
-      const text = paras[j].editAsText()
-      const { start, end, url } = getCRUrls(text, isCRUrl)
-
-      if (!start) continue
-      if (url.substr(0, 4) != '#fno') continue
-
-      const ref_equiv = url.substr(0, 4) + url.substr(6)
-      num_pairs[ref_equiv] = [i + 1]
-      text.setUnderline(start, end, null)
-        .setForegroundColor(start, end, null)
-    }
-  }
-
-  return num_pairs
-}
