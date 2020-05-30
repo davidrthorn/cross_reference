@@ -19,7 +19,7 @@ function include(filename) {
 
 
 function showSidebar() {
-  const sidebar = HtmlService.createTemplateFromFile('sidebar').evaluate()
+  const sidebar = HtmlService.createTemplateFromFile('sidebar-html').evaluate()
   sidebar.setTitle('Cross Reference')
   DocumentApp.getUi().showSidebar(sidebar)
 }

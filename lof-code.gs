@@ -106,10 +106,10 @@ function styleLoF(lofTable) {
   lofTable.setBorderWidth(0)
   
   var styleAttributes = {
-    'BOLD': null,
-    'ITALIC': null,
-    'UNDERLINE': null,
-    'FONT_SIZE': null
+    'BOLD':       null,
+    'ITALIC':     null,
+    'UNDERLINE':  null,
+    'FONT_SIZE':  null
   }
   
   let i = lofTable.getNumRows()
@@ -127,13 +127,13 @@ function styleLoF(lofTable) {
 const getDocAsPDF = () => DocumentApp.getActiveDocument().getBlob().getBytes() 
 
 
-function insertLoFNumbers(pg_nums) {
+function insertLoFNumbers(pageNumbers) {
   
   const lofTable = findLoF()
   const currentRow = 0
   
-  for (let i = 0; i < pg_nums.length; i++) {
-    const labCount = pg_nums[i]
+  for (let i = 0; i < pageNumbers.length; i++) {
+    const labCount = pageNumbers[i]
     if (!labCount) continue
 
     for (let j = currentRow; j < lofTable.getNumRows(); j++) {
