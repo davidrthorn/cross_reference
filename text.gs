@@ -66,9 +66,9 @@ const replaceText = (text, CRUrl, replacementText, style) => {
 
 
 const getStyle = prop => ({
-  'BOLD': prop.isBold,
-  'ITALIC': prop.isItalic,
-  'UNDERLINE': prop.isUnderlined,
+  'BOLD':             prop.isBold,
+  'ITALIC':           prop.isItalic,
+  'UNDERLINE':        prop.isUnderlined,
   'FOREGROUND_COLOR': prop.color,
 })
 

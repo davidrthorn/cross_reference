@@ -1,5 +1,3 @@
-// FIXME: references don't work?!
-
 function onInstall(e) {
   onOpen(e)
 }
@@ -31,9 +29,6 @@ function updateDoc() {
   let paragraphs = document.getBody().getParagraphs()
   const footnotes = document.getFootnotes()
 
-  // Add all footnote paragraphs to paragraphs array
-  paragraphs = footnotes.reduce((acc, footnote) => [...acc, ...footnote.getFootnoteContents().getParagraphs()], paragraphs)
-
   const settings = getSettings()
   updateDocProps(settings)
 
@@ -43,7 +38,8 @@ function updateDoc() {
   const labProps = getProps('lab')(settings)
 
   const getLabs = getCRUrls(isCRUrl(5))
-  const handleLabs = handleCRUrl(labProps)(handleLabNumber(recordedNumbers)(labelNameNumberMap))
+  const handleNumbering = handleLabNumber(recordedNumbers)(labelNameNumberMap)
+  const handleLabs = handleCRUrl(labProps)(handleNumbering)
   let result = updateParagraphs(paragraphs)(getLabs)(handleLabs)
 
   if (result instanceof CRError) {
@@ -53,7 +49,7 @@ function updateDoc() {
 
   for (let i = 0, len = footnotes.length; i < len; i++) {
     const footnoteParagraphs = footnotes[i].getFootnoteContents().getParagraphs()
-    const handleFNLabs = handleFootnoteLabCRUrl(labProps)(handleLabs)
+    const handleFNLabs = handleFootnoteLabCRUrl(labProps)(handleNumbering)
     const result = updateParagraphs(footnoteParagraphs)(getLabs)(handleFNLabs)
     if (result instanceof CRError) {
       handleErr(result)
