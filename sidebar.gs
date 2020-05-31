@@ -1,7 +1,9 @@
+// FIXME: saving settings from sidebar overwrites user properties
+
+
+
 function updateProps(tempSettings) {
   const docProps = PropertiesService.getDocumentProperties()
-  clearProps(docProps)
-
   for (const labCode in tempSettings) {
     docProps.setProperty(getPropKey(labCode), encodeSetting(tempSettings[labCode]))
   }
@@ -11,25 +13,12 @@ function updateProps(tempSettings) {
 }
 
 
-function getSettings() {
-  const docProps = PropertiesService.getDocumentProperties().getProperties()
-  const userProps = PropertiesService.getUserProperties().getProperties()
-
-  let settings = getDefaultSettings()
-
-  settings = patchSettings(settings, userProps)
-  settings = patchSettings(settings, docProps)
-
-  return settings
-}
-
-
 function storeDefault(tempSettings) {
   const userProps = PropertiesService.getUserProperties()
   for (const labCode in tempSettings) {
-    const setting = tempSettings[labName]
+    const setting = tempSettings[labCode]
     userProps.setProperty(getPropKey(labCode), encodeSetting(setting))
-    Utilities.sleep(200) // TODO: why?
+    // Utilities.sleep(200) // TODO: why?
   }
   return '#save-defaults'
 }

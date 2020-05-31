@@ -27,8 +27,9 @@ function encodeSettings(settings) {
 // settings (in that order of priority)
 function getSettings() {
   let settings = getDefaultSettings()
-  patchSettings(settings, PropertiesService.getUserProperties().getProperties())
-  patchSettings(settings, PropertiesService.getDocumentProperties().getProperties())
+  settings = patchSettings(settings, PropertiesService.getUserProperties().getProperties()) 
+  settings = patchSettings(settings, PropertiesService.getDocumentProperties().getProperties())
+
   return settings
 }
 
@@ -200,6 +201,6 @@ function clearProps() {
 }
 
 function viewProps() {
-  Logger.log(PropertiesService.getDocumentProperties().getProperties())
+  //Logger.log(PropertiesService.getDocumentProperties().getProperties())
   Logger.log(PropertiesService.getUserProperties().getProperties())
 }
