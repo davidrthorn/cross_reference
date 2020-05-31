@@ -301,15 +301,12 @@
 
 
   function clearSidebar() {
-    const toClear = [
+    all$([
       '#custom-category-name',
       '#lab_code',
-      '#lab_code_entry',
-      '#lab_text',
       '#ref_code',
-      '#ref_text',
-    ]
-    all$(toClear).val('')
+      '.input-text',
+    ]).val('')
 
     $('#ref_code').html('#')
     $('.preview__text').css({
@@ -317,7 +314,10 @@
       'font-weight':      'unset',
       'font-style':       'unset',
       'text-decoration':  'unset'
-    }).html('&ltelement&gt')
+    })
+
+    $('.preview__suffix').html('')
+    $('.preview__prefix').html('custom&nbsp;')
 
     $('.color-button, .color-button *').css({ 'color': 'unset', 'border-bottom-color': 'unset' })
     $('.color-code').val(null).data('val', null)
@@ -391,16 +391,6 @@
     $('#save-custom').prop('disabled', nameLength === 0 || labLength !== 5)
   }
 
-
-  //
-  // # Settings panes
-  //
-
-  //
-  // ## Text content
-  //
-
-
   $('#lab_text').keyup(function () {
     const val = htmlEncode($(this).val())
     $('#lab').find('.preview__prefix').html(val)
@@ -421,10 +411,6 @@
     $('#ref').find('.preview__suffix').html(val)
   })
 
-  //
-  // ## Text style
-  //
-
   $('.style-button').on('click', function () { // TODO: this should use the updateStyle function
     $(this).toggleClass('style-button--selected')
 
@@ -441,11 +427,6 @@
 
     $(category).find('.preview__text').css(cssProps[cssValueName], cssValue)
   })
-
-
-  //
-  // ## Color
-  //
 
   function confirmColorSelection(button) {
     const $colorPane = button.parent()
