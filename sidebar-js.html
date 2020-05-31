@@ -77,7 +77,7 @@
 
   $('#restore-defaults').on('click', function () {
     $('#category-select').find('option').remove().end()
-    google.script.run.withSuccessHandler(initialiseSidebar).restoreDefault()
+    google.script.run.withSuccessHandler(initialiseSidebar).getDefaults()
   })
 
 

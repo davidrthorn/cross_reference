@@ -18,7 +18,6 @@ function storeDefault(tempSettings) {
   for (const labCode in tempSettings) {
     const setting = tempSettings[labCode]
     userProps.setProperty(getPropKey(labCode), encodeSetting(setting))
-    // Utilities.sleep(200) // TODO: why?
   }
   return '#save-defaults'
 }
@@ -27,18 +26,10 @@ function storeDefault(tempSettings) {
 const storeCustom = setting => PropertiesService.getUserProperties().setProperty(getPropKey(setting.lab.code), encodeSetting(setting))
 
 
-// TODO: rename
-function restoreDefault() {
+function getDefaults() {
   const userProps = PropertiesService.getUserProperties().getProperties()
   const settings = getDefaultSettings()
-
-  for (const key in userProps) {
-    if (isCrossProp(key)) {
-      settings[key] = userProps[key]
-    }
-  }
-
-  return settings
+  return patchSettings(settings, userProps)
 }
 
 

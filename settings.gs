@@ -201,6 +201,6 @@ function clearProps() {
 }
 
 function viewProps() {
-  //Logger.log(PropertiesService.getDocumentProperties().getProperties())
+  Logger.log(PropertiesService.getDocumentProperties().getProperties())
   Logger.log(PropertiesService.getUserProperties().getProperties())
 }
