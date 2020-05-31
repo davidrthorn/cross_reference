@@ -17,7 +17,9 @@
 
   const arrayMinus = (arr, item) => arr.filter(a => a !== item)
 
-  const htmlEncode = str => String(str).replace(/[^\w. ]/gi, match => '&#' + match.charCodeAt(0) + '')
+  const htmlEncode = str => String(str)
+    .replace(/[^\w. ]/gi, match => '&#' + match.charCodeAt(0) + ';')
+    .replace(' ', '&nbsp;')
 
   const isDefault = code => ['equ', 'fig', 'tab', 'fno'].includes(code.substr(0, 3))
 
@@ -163,8 +165,11 @@
     $('#ref_code').val(setting.ref.code).html('#' + setting.ref.code)
     $('#ref_text').val(setting.ref.text)
 
-    $('#lab').find('.preview__text').html(setting.lab.text + '1')
-    $('#ref').find('.preview__text').html(setting.ref.text + '1')
+    // TODO: experimenting
+    $('#lab').find('.preview__prefix').html(htmlEncode(setting.lab.text))
+    $('#lab').find('.preview__suffix').html(htmlEncode(setting.lab.suffix))
+
+    $('#ref').find('.preview__text').html(setting.ref.text + '1') // FIXME: encode this bad boi
 
     updateColor('#lab', setting.lab.color)
     updateColor('#ref', setting.ref.color)
@@ -189,6 +194,7 @@
       isItalic: idIsSelected('#lab_italic'),
       isUnderlined: idIsSelected('#lab_underline'),
       color: getColorValue(colorCodes[0]),
+      suffix: $('#lab_suffix').val(), 
     }
     tempSettings[labCode].ref = {
       code: labCode.substr(0, 3),
@@ -410,7 +416,12 @@
 
   $('#lab_text').keyup(function () {
     const val = htmlEncode($(this).val())
-    $('#lab').find('.preview__text').html(val + '1')
+    $('#lab').find('.preview__prefix').html(val)
+  })
+
+  $('#lab_suffix').keyup(function () {
+    const val = htmlEncode($(this).val())
+    $('#lab').find('.preview__suffix').html(val)
   })
 
 

@@ -1,7 +1,3 @@
-// FIXME: saving settings from sidebar overwrites user properties
-
-
-
 function updateProps(tempSettings) {
   const docProps = PropertiesService.getDocumentProperties()
   for (const labCode in tempSettings) {

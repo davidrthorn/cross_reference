@@ -1,9 +1,3 @@
-<!--
-
-The html for the configuration sidebar.
-
--->
-
 <base target='_top'>
 <link rel='stylesheet' href='https://ssl.gstatic.com/docs/script/css/add-ons1.css'>
 <?!= include('sidebar-style'); ?>
@@ -41,7 +35,7 @@ The html for the configuration sidebar.
         </div>
         <div class='input-row__value'>
           <div class='hash-input'>
-            <div id='lab_code'></div>
+            <div id='lab_code' class='input-code'></div>
             <div id='cs_lab_code'>
               #&nbsp;<input id='lab_code_entry' maxlength='5' type='text' value=''> <span id='taken'></span>
             </div>
@@ -53,7 +47,8 @@ The html for the configuration sidebar.
           Text
         </div>
         <div class='input-row__value'>
-          <input id='lab_text' type='text'>
+          <input id='lab_text' class='input-text cr-text' type='text'>
+          <input id='lab_suffix' class='input-text cr-suffix' type='text'>
         </div>
       </div>
       <div class='input-row'>
@@ -81,16 +76,28 @@ The html for the configuration sidebar.
             <div class='preview__text--shaded'>
               Rendered
             </div>
-            <div class='preview__text'>
-              figure 1
+            <div class='preview__text preview__prefix'>
+              figure ( 
+            </div>
+            <div class='preview__text preview__number'>
+              1
+            </div>
+            <div class='preview__text preview__suffix'>
+              )
             </div>
             <div class='preview__text--shaded'>
               . Early human migration route out of Africa
             </div>
           </div>
           <div class='preview__line'>
-            <div class='preview__text'>
-              Figure 1
+            <div class='preview__text preview__prefix'>
+              Figure (
+            </div>
+            <div class='preview__text preview__number'>
+              1
+            </div>
+            <div class='preview__text preview__suffix'>
+              )
             </div>
             <div class='preview__text--shaded'>
               . Early human migration route out of Africa
@@ -107,7 +114,7 @@ The html for the configuration sidebar.
         <div class='input-row__name'>
           Code
         </div>
-        <div class='input-row__value' id='ref_code'>
+        <div class='input-row__value' id='ref_code' class='ref-code'>
           <em>#</em>
         </div>
       </div>
@@ -116,7 +123,7 @@ The html for the configuration sidebar.
           Text
         </div>
         <div class='input-row__value'>
-          <input id='ref_text' type='text'>
+          <input id='ref_text' class='input-text' type='text'>
         </div>
       </div>
       <div class='input-row'>

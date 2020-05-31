@@ -86,7 +86,7 @@ const handleCRUrl = props => handleNumbering => text => CRUrl => {
     return new CRError(text, CRUrl, num.message)
   }
 
-  replacementText += num
+  replacementText += num + prop.suffix
   
   const style = getStyle(prop)
 
