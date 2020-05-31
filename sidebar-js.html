@@ -23,9 +23,9 @@
 
   const isDefault = code => ['equ', 'fig', 'tab', 'fno'].includes(code.substr(0, 3))
 
-  const getSelectedOptionText = $el => $.trim($el.children('option:selected').text())
+  const getSelectedOptionText = $el => $.trim($el.children('option:selected').text()) // TODO: why bother passing in element
 
-  const all$ = elems => $(elems.join(','))
+  const all$ = els => $(els.join(','))
 
   const getColorHex = hexStr => {
     if (hexStr == null)         return null
@@ -36,9 +36,9 @@
   }
 
   const typeFlexibleCompare = (a, b) => {
-    switch (typeof x === 'string') {
-      case 'string':              return x < y ? -1 : y > x ? 1 : 0
-      case 'number': case 'bool': return x - y
+    switch (typeof a) {
+      case 'string':              return a < b ? -1 : b < a ? 1 : 0
+      case 'number': case 'bool': return a - b
       default:                    return 0
     }
   }
@@ -223,7 +223,6 @@
   }
 
 
-
   function updateStyle(setting) {
     // gives the css property and the value we want
     // when the corresponding setting (the key here) is true
@@ -324,10 +323,10 @@
 
     $('#ref_code').html('#')
     $('.preview__text').css({
-      'color': 'unset',
-      'font-weight': 'unset',
-      'font-style': 'unset',
-      'text-decoration': 'unset'
+      'color':            'unset',
+      'font-weight':      'unset',
+      'font-style':       'unset',
+      'text-decoration':  'unset'
     }).html('&ltelement&gt')
 
     $('.color-button, .color-button *').css({ 'color': 'unset', 'border-bottom-color': 'unset' })
