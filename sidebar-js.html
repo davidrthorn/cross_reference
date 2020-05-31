@@ -46,18 +46,16 @@
   // byProp can be used to sort by different types. It takes a function that will
   // retrieve the relevant sort target from something. The default function does
   // not modify the sort target
-  const byProp = (getProp = a => a, asc = true) => (a, b) => {
-    const x = asc ? getProp(a) : getProp(b)
-    const y = asc ? getProp(b) : getProp(a)
-    return typeFlexibleCompare(x, y)
-  }
-
-  // TODO: menu bar wrong order
+  const byProp = (getProp = a => a, asc = true) => (a, b) =>
+    asc
+      ? typeFlexibleCompare(getProp(a), getProp(b))
+      : typeFlexibleCompare(getProp(b), getProp(a))
 
 
   /* INTERACTIONS WITH GOOGLE SCRIPTS */
   /* =============================================*/
 
+  // Runs on open sidebar
   $(function () {
     google.script.run.withSuccessHandler(initialiseSidebar).getSettings()
   })
@@ -131,9 +129,7 @@
     tempSettings = { ...settings }
 
     const nameLowercase = entry => entry[1].name.toLowerCase()
-
     const byNameAsc = byProp(nameLowercase)
-
     const inNameOrder = Object.entries(settings).sort(byNameAsc)
 
     inNameOrder.forEach(entry => {
@@ -160,22 +156,20 @@
   function updateSidebar(labCode) {
     const setting = tempSettings[labCode]
 
-    $('#lab_code').html('#' + setting.lab.code)
-    $('#lab_text').val(setting.lab.text)
-    $('#lab_suffix').val(setting.lab.suffix)
-    $('#ref_code').val(setting.ref.code).html('#' + setting.ref.code)
-    $('#ref_text').val(setting.ref.text)
-    $('#ref_suffix').val(setting.ref.suffix)
+    ;['lab', 'ref'].forEach(type => {
+      const id = '#' + type
+      const s = setting[type]
 
-    $('#lab').find('.preview__prefix').html(htmlEncode(setting.lab.text))
-    $('#lab').find('.preview__suffix').html(htmlEncode(setting.lab.suffix))
+      $(id + '_code').html('#' + s.code)
+      $(id + '_text').val(s.text)
+      $(id + '_suffix').val(s.suffix)
 
-    $('#ref').find('.preview__prefix').html(htmlEncode(setting.ref.text))
-    $('#ref').find('.preview__suffix').html(htmlEncode(setting.ref.suffix))
+      $(id).find('.preview__prefix').html(htmlEncode(s.text))
+      $(id).find('.preview__suffix').html(htmlEncode(s.suffix))
 
-    updateColor('#lab', setting.lab.color)
-    updateColor('#ref', setting.ref.color)
-    updateStyle(setting)
+      updateColor(id, s.color)
+      updateStyle(id, s)
+    })
   }
 
   const idIsSelected = id => $(id).hasClass('style-button--selected') || null
@@ -223,7 +217,7 @@
   }
 
 
-  function updateStyle(setting) {
+  function updateStyle(id, setting) {
     // gives the css property and the value we want
     // when the corresponding setting (the key here) is true
     const cssProps = {
@@ -233,25 +227,21 @@
     }
     const selected = 'style-button--selected'
 
-    for (const typeCode of ['lab', 'ref']) {
-      const subSetting = setting[typeCode]
+    for (const key in setting) {
+      if (!(key in cssProps)) continue
 
-      for (const key in subSetting) {
-        if (!(key in cssProps)) continue
+      let [cssProp, cssValue] = cssProps[key]
+      const btn = $(id + '_' + cssValue)
 
-        let [cssProp, cssValue] = cssProps[key]
-        const btn = $('#' + typeCode + '_' + cssValue)
-
-        if (subSetting[key]) {
-          btn.addClass(selected)
-        } else {
-          cssValue = 'initial'
-          btn.removeClass(selected)
-        }
-
-        $('#' + typeCode).find('.preview__text').css(cssProp, cssValue)
+      if (setting[key]) {
+        btn.addClass(selected)
+      } else {
+        cssValue = 'initial'
+        btn.removeClass(selected)
       }
-    }
+
+        $(id).find('.preview__text').css(cssProp, cssValue)
+      }
   }
 
 
