@@ -154,11 +154,9 @@
 
 
   function updateSidebar(labCode) {
-    const setting = tempSettings[labCode]
-
-    ;['lab', 'ref'].forEach(type => {
+    ['lab', 'ref'].forEach(type => {
       const id = '#' + type
-      const s = setting[type]
+      const s = tempSettings[labCode][type]
 
       $(id + '_code').html('#' + s.code)
       $(id + '_text').val(s.text)
@@ -225,7 +223,6 @@
       isItalic:     ['font-style',      'italic'],
       isUnderlined: ['text-decoration', 'underline'],
     }
-    const selected = 'style-button--selected'
 
     for (const key in setting) {
       if (!(key in cssProps)) continue
@@ -234,10 +231,10 @@
       const btn = $(id + '_' + cssValue)
 
       if (setting[key]) {
-        btn.addClass(selected)
+        btn.addClass('style-button--selected')
       } else {
         cssValue = 'initial'
-        btn.removeClass(selected)
+        btn.removeClass('style-button--selected')
       }
 
         $(id).find('.preview__text').css(cssProp, cssValue)
@@ -265,38 +262,35 @@
 
 
   function hideCustomCategoryControls() {
-    const toHide = [
+    all$([
       '#custom-category-name',
       '#cs_lab_code',
       '.actions__row:last-child'
-    ]
-    const toShow = [
+    ]).css('display', 'none')
+
+    all$([
       '#category-select',
       '#lab_code',
-      '.actions__row:not(:last-child)'
-    ]
+      '.actions__row:not(:last-child)',
+      '#add-category',
+    ]).css('display', 'block')
 
-    all$(toHide).css('display', 'none')
-    all$(toShow).css('display', 'block')
-    $('#add-category').css('display', 'block')
     $('#set_defaults').prop('disabled', false)
   }
 
 
   function showCustomCategoryControls() {
-    const hide = [
+    all$([
       '.category__button',
       '#category-select',
       '#lab_code',
       '.actions__row:not(:last-child)'
-    ]
-    const show = [
+    ]).css('display', 'none')
+    all$([
       '#custom-category-name',
       '#cs_lab_code',
       '.actions__row:last-child'
-    ]
-    all$(hide).css('display', 'none')
-    all$(show).css('display', 'block')
+    ]).css('display', 'block')
   }
 
 
@@ -376,7 +370,6 @@
   })
 
 
-
   $('#cancel-custom').on('click', function () {
     revertToFirstCategory()
     hideCustomCategoryControls()
@@ -391,27 +384,17 @@
     $('#save-custom').prop('disabled', nameLength === 0 || labLength !== 5)
   }
 
-  $('#lab_text').keyup(function () {
-    const val = htmlEncode($(this).val())
-    $('#lab').find('.preview__prefix').html(val)
+  const setPreview = (el, id, cls) => {
+    const val = htmlEncode(el.val())
+    $('#' + id).find('.' + cls).html(val)
+  }
+
+  ;['lab', 'ref'].forEach(type => {
+    $('#' + type + '_text'  ).keyup(function () { setPreview($(this), type, 'preview__prefix') })
+    $('#' + type + '_suffix').keyup(function () { setPreview($(this), type, 'preview__suffix') })
   })
 
-  $('#lab_suffix').keyup(function () {
-    const val = htmlEncode($(this).val())
-    $('#lab').find('.preview__suffix').html(val)
-  })
-
-  $('#ref_text').keyup(function () {
-    const val = htmlEncode($(this).val())
-    $('#ref').find('.preview__prefix').html(val)
-  })
-
-  $('#ref_suffix').keyup(function () {
-    const val = htmlEncode($(this).val())
-    $('#ref').find('.preview__suffix').html(val)
-  })
-
-  $('.style-button').on('click', function () { // TODO: this should use the updateStyle function
+  $('.style-button').on('click', function () {
     $(this).toggleClass('style-button--selected')
 
     const category = '#' + this.id.slice(0, 3)
@@ -446,7 +429,7 @@
   const updateColorCode = type => colorHex => $('#' + type).find('.color-code').val(getColorStr(colorHex))
 
 
-  function cancelColorSelection(button) {
+  const cancelColorSelection = button => {
     const $code = button.siblings('.color-code').andSelf()
     $code.val($code.data('val'))
     button.parent().next().andSelf().hide()
