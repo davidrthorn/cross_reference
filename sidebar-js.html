@@ -162,14 +162,16 @@
 
     $('#lab_code').html('#' + setting.lab.code)
     $('#lab_text').val(setting.lab.text)
+    $('#lab_suffix').val(setting.lab.suffix)
     $('#ref_code').val(setting.ref.code).html('#' + setting.ref.code)
     $('#ref_text').val(setting.ref.text)
+    $('#ref_suffix').val(setting.ref.suffix)
 
-    // TODO: experimenting
     $('#lab').find('.preview__prefix').html(htmlEncode(setting.lab.text))
     $('#lab').find('.preview__suffix').html(htmlEncode(setting.lab.suffix))
 
-    $('#ref').find('.preview__text').html(setting.ref.text + '1') // FIXME: encode this bad boi
+    $('#ref').find('.preview__prefix').html(htmlEncode(setting.ref.text))
+    $('#ref').find('.preview__suffix').html(htmlEncode(setting.ref.suffix))
 
     updateColor('#lab', setting.lab.color)
     updateColor('#ref', setting.ref.color)
@@ -188,29 +190,27 @@
     const colorCodes = $('.details').find('.color-code')
 
     tempSettings[labCode].lab = {
-      code: labCode,
-      text: $('#lab_text').val(),
-      isBold: idIsSelected('#lab_bold'),
-      isItalic: idIsSelected('#lab_italic'),
+      code:         labCode,
+      text:         $('#lab_text').val(),
+      isBold:       idIsSelected('#lab_bold'),
+      isItalic:     idIsSelected('#lab_italic'),
       isUnderlined: idIsSelected('#lab_underline'),
-      color: getColorValue(colorCodes[0]),
-      suffix: $('#lab_suffix').val(), 
+      color:        getColorValue(colorCodes[0]),
+      suffix:       $('#lab_suffix').val(), 
     }
     tempSettings[labCode].ref = {
-      code: labCode.substr(0, 3),
-      text: $('#ref_text').val(),
-      isBold: idIsSelected('#ref_bold'),
-      isItalic: idIsSelected('#ref_italic'),
+      code:         labCode.substr(0, 3),
+      text:         $('#ref_text').val(),
+      isBold:       idIsSelected('#ref_bold'),
+      isItalic:     idIsSelected('#ref_italic'),
       isUnderlined: idIsSelected('#ref_underline'),
-      color: getColorValue(colorCodes[1]),
+      color:        getColorValue(colorCodes[1]),
+      suffix:       $('#ref_suffix').val(), 
     }
 
     // data property records the previous category
     $('#category-select').data('val', $('#category-select').val())
   }
-
-
-
 
 
   function updateColor(id, colorHex) {
@@ -228,8 +228,8 @@
     // gives the css property and the value we want
     // when the corresponding setting (the key here) is true
     const cssProps = {
-      isBold: ['font-weight', 'bold'],
-      isItalic: ['font-style', 'italic'],
+      isBold:       ['font-weight',     'bold'],
+      isItalic:     ['font-style',      'italic'],
       isUnderlined: ['text-decoration', 'underline'],
     }
     const selected = 'style-button--selected'
@@ -263,8 +263,6 @@
     $('#delete-category').css('display', isDefault(labCode) ? 'none' : 'block')
     $('#lab-cover').css('display', labCode === 'fnote' ? 'block' : 'none')
   }
-
-
 
 
   $('#category-select').on('focusin', function () {
@@ -424,12 +422,15 @@
     $('#lab').find('.preview__suffix').html(val)
   })
 
-
   $('#ref_text').keyup(function () {
     const val = htmlEncode($(this).val())
-    $('#ref').find('.preview__text').html(val + '1')
+    $('#ref').find('.preview__prefix').html(val)
   })
 
+  $('#ref_suffix').keyup(function () {
+    const val = htmlEncode($(this).val())
+    $('#ref').find('.preview__suffix').html(val)
+  })
 
   //
   // ## Text style
