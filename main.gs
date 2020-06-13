@@ -1,4 +1,3 @@
-// TODO: delete category blocks input until saves
 // TODO: color pop up does nothing when bad color
 // TODO: adding a custom category does not immediately prevent another custom category with same ref code
 
