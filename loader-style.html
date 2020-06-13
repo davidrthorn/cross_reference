@@ -1,0 +1,62 @@
+<style>
+  .loader span {
+    display: block;
+    margin: 0 auto;
+  }
+
+  .loader span[class*="l-"] {
+    height: 4px;
+    width: 4px;
+    background: #000;
+    display: inline-block;
+    margin: 12px 2px;
+
+    border-radius: 100%;
+    animation: loader 4s infinite;
+    animation-timing-function: cubic-bezier(0.030, 0.615, 0.995, 0.415);
+  }
+
+  .loader span.l-1 {
+    animation-delay: 0;
+  }
+
+  .loader span.l-2 {
+    animation-delay: 0.2s;
+  }
+
+  .loader span.l-3 {
+    animation-delay: 0.4s;
+  }
+
+  .loader span.l-4 {
+    animation-delay: 0.6s;
+  }
+
+  .loader span.l-5 {
+    animation-delay: 0.8s;
+  }
+
+  .loader span.l-6 {
+    animation-delay: 1s;
+  }
+
+  @keyframes loader {
+    0% {
+      transform: translateX(-30px);
+      opacity: 0;
+    }
+
+    25% {
+      opacity: 1;
+    }
+
+    50% {
+      transform: translateX(30px);
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 0;
+    }
+  }
+</style>
