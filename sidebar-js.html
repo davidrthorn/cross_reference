@@ -11,7 +11,7 @@
   /* LIBRARY FUNCTIONS */
   /* =============================================*/
 
-  const getColorStr = colorHex => colorHex.slice(1)
+  const getColorStr = colorHex => colorHex?.slice(1)
 
   const isValidColor = color => /(#|^)([0-9A-f]{3}|[0-9A-f]{6})$/.test(color)
 
@@ -418,8 +418,8 @@
     const $colorText = $colorPane.prev().children('div')
     const $colorCode = $colorPane.children('.color-code')
     const colorStr = $colorCode.val() || null
-    const colorHex = getColorHex(colorStr)
-
+    const colorHex = getColorHex(colorStr) || 'initial'
+    
     $colorCode.data('val', colorStr).val(colorStr)
     $colorText.css({ 'color': colorHex, 'border-bottom-color': colorHex })
 
