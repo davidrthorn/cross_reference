@@ -53,6 +53,8 @@
       ? typeFlexibleCompare(getProp(a), getProp(b))
       : typeFlexibleCompare(getProp(b), getProp(a))
 
+  const showLoader = () => $('.load-overlay').css('visibility', 'visible')
+  const hideLoader = () => $('.load-overlay').css('visibility', 'hidden')
 
   /* INTERACTIONS WITH GOOGLE SCRIPTS */
   /* =============================================*/
@@ -90,6 +92,7 @@
 
 
   $('#delete-category').on('click', function () {
+    showLoader()
     const ref = $('#ref_code').html().substr(1)
     const currentName = tempSettings[$('#category-select').val()].name
 
@@ -170,6 +173,7 @@
       updateColor(id, s.color)
       updateStyle(id, s)
     })
+    hideLoader()
   }
 
   const idIsSelected = id => $(id).hasClass('style-button--selected') || null
