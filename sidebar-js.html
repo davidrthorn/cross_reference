@@ -30,11 +30,10 @@
   const all$ = els => $(els.join(','))
 
   const getColorHex = hexStr => {
-    if (hexStr == null)         return null
-    if (!isValidColor(hexStr))  return new Error('invalid hex color')
+    if (!hexStr)                return null
     if (hexStr.length === 6)    return '#' + hexStr
     if (hexStr.length === 3)    return hexStr.split().reduce(doubleEach, '#')
-    return new Error('hex strings must be 3 or 6 characters')
+    return null
   }
 
   const typeFlexibleCompare = (a, b) => {
@@ -481,10 +480,10 @@
   }
 
 
-  $('#save-apply').on('click', function () {
-    $(this).prop('disabled', true)
+  function save() {
+    $('#save-apply').prop('disabled', true)
     saveProperties()
-  })
+  }
 
 
   $('#cancel').on('click', function () {
