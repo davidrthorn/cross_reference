@@ -1,7 +1,7 @@
 // TODO: delete category blocks input until saves
 // TODO: adding a custom category does not immediately prevent another custom category with same ref code
-// TODO: color of preview does not clear between categories
 // TODO: implement clone colour
+// TODO: sidebar disappears when returning from another window/tab
 
 function onInstall(e) {
   onOpen(e)

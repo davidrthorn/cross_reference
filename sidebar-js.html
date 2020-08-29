@@ -161,17 +161,17 @@
   function updateSidebar(labCode) {
     ['lab', 'ref'].forEach(type => {
       const id = '#' + type
-      const s = tempSettings[labCode][type]
+      const setting = tempSettings[labCode][type]
 
-      $(id + '_code').html('#' + s.code)
-      $(id + '_text').val(s.text)
-      $(id + '_suffix').val(s.suffix)
+      $(id + '_code').html('#' + setting.code)
+      $(id + '_text').val(setting.text)
+      $(id + '_suffix').val(setting.suffix)
 
-      $(id).find('.preview__prefix').html(htmlEncode(s.text))
-      $(id).find('.preview__suffix').html(htmlEncode(s.suffix))
+      $(id).find('.preview__prefix').html(htmlEncode(setting.text))
+      $(id).find('.preview__suffix').html(htmlEncode(setting.suffix))
 
-      updateColor(id, s.color)
-      updateStyle(id, s)
+      updateColor(id, setting.color)
+      updateStyle(id, setting)
     })
     hideLoader()
   }
@@ -215,7 +215,7 @@
     const colorStr = getColorStr(colorHex)
     const $id = $(id)
 
-    $id.find('.preview__text').css('color', colorHex)
+    $id.find('.preview__text').css('color', colorHex || 'initial')
     $id.find('.cr-color').val(colorStr)
   }
 
@@ -249,7 +249,7 @@
 
   function selectCategory(labCode) {
     updateTempSettings()
-    updateSidebar(labCode) // These rely on being in the right order, which indicates a design flaw.
+    updateSidebar(labCode)
 
     $('#delete-category').css('display', isDefault(labCode) ? 'none' : 'block')
     $('#lab-cover').css('display', labCode === 'fnote' ? 'block' : 'none')
