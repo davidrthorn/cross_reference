@@ -67,7 +67,6 @@
   // Save the current sidebar settings as document settings
   function saveProperties(button) {
     updateTempSettings()
-    console.log(tempSettings)
     google.script.run.withSuccessHandler(enableButton).updateProps(tempSettings)
   }
 
