@@ -11,7 +11,7 @@
   /* LIBRARY FUNCTIONS */
   /* =============================================*/
 
-  const getColorStr = colorHex => colorHex.slice(1)
+  const getColorStr = colorHex => colorHex?.slice(1)
 
   const isValidColor = color => /(#|^)([0-9A-f]{3}|[0-9A-f]{6})$/.test(color)
 
@@ -30,11 +30,10 @@
   const all$ = els => $(els.join(','))
 
   const getColorHex = hexStr => {
-    if (hexStr == null)         return null
-    if (!isValidColor(hexStr))  return new Error('invalid hex color')
+    if (!hexStr)                return null
     if (hexStr.length === 6)    return '#' + hexStr
     if (hexStr.length === 3)    return hexStr.split().reduce(doubleEach, '#')
-    return new Error('hex strings must be 3 or 6 characters')
+    return null
   }
 
   const typeFlexibleCompare = (a, b) => {
@@ -53,6 +52,8 @@
       ? typeFlexibleCompare(getProp(a), getProp(b))
       : typeFlexibleCompare(getProp(b), getProp(a))
 
+  const showLoader = () => $('.load-overlay').css('visibility', 'visible')
+  const hideLoader = () => $('.load-overlay').css('visibility', 'hidden')
 
   /* INTERACTIONS WITH GOOGLE SCRIPTS */
   /* =============================================*/
@@ -66,6 +67,7 @@
   // Save the current sidebar settings as document settings
   function saveProperties(button) {
     updateTempSettings()
+    console.log(tempSettings)
     google.script.run.withSuccessHandler(enableButton).updateProps(tempSettings)
   }
 
@@ -90,6 +92,7 @@
 
 
   $('#delete-category').on('click', function () {
+    showLoader()
     const ref = $('#ref_code').html().substr(1)
     const currentName = tempSettings[$('#category-select').val()].name
 
@@ -109,8 +112,8 @@
 
     addTempEntry(labCode, name)
 
-    $('#save-apply').prop('disabled', true)
-    saveProperties('#save-apply')
+    $('#save').prop('disabled', true)
+    saveProperties('#save')
 
     google.script.run.storeCustom(tempSettings[labCode])
 
@@ -170,10 +173,11 @@
       updateColor(id, s.color)
       updateStyle(id, s)
     })
+    hideLoader()
   }
 
   const idIsSelected = id => $(id).hasClass('style-button--selected') || null
-  const getColorValue = id => $(id).data('val') != undefined ? getColorHex($(id).data('val')) : null
+  const getColorValue = id => $(id).val() != undefined ? getColorHex($(id).val()) : null
   const getCurrentLabCode = () => $('#lab_code').html().substr(1)
 
   const addTempEntry = (labCode, name) => tempSettings[labCode] = { name, lab: {}, ref: {} }
@@ -181,7 +185,7 @@
   function updateTempSettings() {
 
     const labCode = getCurrentLabCode()
-    const colorCodes = $('.details').find('.color-code')
+    const colorCodes = $('.details').find('.cr-color')
 
     tempSettings[labCode].lab = {
       code:         labCode,
@@ -189,7 +193,7 @@
       isBold:       idIsSelected('#lab_bold'),
       isItalic:     idIsSelected('#lab_italic'),
       isUnderlined: idIsSelected('#lab_underline'),
-      color:        getColorValue(colorCodes[0]),
+      color:        getColorValue('#lab_color'),
       suffix:       $('#lab_suffix').val(), 
     }
     tempSettings[labCode].ref = {
@@ -198,7 +202,7 @@
       isBold:       idIsSelected('#ref_bold'),
       isItalic:     idIsSelected('#ref_italic'),
       isUnderlined: idIsSelected('#ref_underline'),
-      color:        getColorValue(colorCodes[1]),
+      color:        getColorValue('#ref_color'),
       suffix:       $('#ref_suffix').val(), 
     }
 
@@ -208,12 +212,11 @@
 
 
   function updateColor(id, colorHex) {
-    const colorStr = colorHex ? getColorStr(colorHex) : null
+    const colorStr = getColorStr(colorHex)
     const $id = $(id)
 
     $id.find('.preview__text').css('color', colorHex)
-    $id.find('.color-code').val(colorStr).data('val', colorStr)
-    $id.find('.color-icon').css({ color: colorHex, 'border-bottom-color': colorHex })
+    $id.find('.cr-color').val(colorStr)
   }
 
 
@@ -343,7 +346,6 @@
   const refCodeIsTaken = code => refCodes.includes(code)
 
 
-  // TODO: these event listeners should be named functions
   $('#lab_code_entry').keyup(function () {
     const labCode = $(this).val()
     const refCode = labCode.substr(0, 3)
@@ -412,73 +414,29 @@
 
     $(category).find('.preview__text').css(cssProps[cssValueName], cssValue)
   })
-
-  function confirmColorSelection(button) {
-    const $colorPane = button.parent()
-    const $colorText = $colorPane.prev().children('div')
-    const $colorCode = $colorPane.children('.color-code')
-    const colorStr = $colorCode.val() || null
-    const colorHex = getColorHex(colorStr)
-
-    $colorCode.data('val', colorStr).val(colorStr)
-    $colorText.css({ 'color': colorHex, 'border-bottom-color': colorHex })
-
-    $($colorPane.parentsUntil('.details').find('.preview__text')).css('color', colorHex)
-    $colorPane.next().andSelf().hide()
-  }
-
-
+  
+  
+  $('.cr-color').keyup(function () {
+    const color = $(this).val()
+    const colorVal = isValidColor(color) ? getColorHex(color) : 'initial'
+    const category = '#' + this.id.slice(0, 3)
+    $(category).find('.preview__text').css('color', colorVal)
+  })
+  
+  
   const updateColorCode = type => colorHex => $('#' + type).find('.color-code').val(getColorStr(colorHex))
-
-
-  const cancelColorSelection = button => {
-    const $code = button.siblings('.color-code').andSelf()
-    $code.val($code.data('val'))
-    button.parent().next().andSelf().hide()
-  }
-
-
-  $('.color-button').on('click', function () {
-    $(this).nextAll('.color-hide').slice(0, 2).toggle()
-    event.stopPropagation()
-  })
-
-
-  $('.color-code').on('keydown', function (e) {
-    switch (e.keyCode) {
-      case 13:
-        confirmColorSelection($(this))
-      case 27:
-        cancelColorSelection($(this))
-    }
-  })
-
-
-  $('.confirm-color').on('click', function () {
-    confirmColorSelection($(this))
-  })
-
-
-  $('.cancel-color').on('click', function () {
-    cancelColorSelection($(this))
-    event.stopPropagation()
-  })
-
-
-  // Hide color pane when anything else clicked
-  $(document).on('click', function (e) {
-    if ($(e.target).is('.color-pane, .color-pane *, .color-button')) return
-    $('.color-hide').hide()
-  })
-
+  
+  
 
   function enableButton(button) {
+    hideLoader()
     $(button).prop('disabled', false)
   }
 
-
-  $('#save-apply').on('click', function () {
-    $(this).prop('disabled', true)
+  $('#form__main').submit(function (e) {
+    e.preventDefault()
+    showLoader()
+    $('#save').prop('disabled', true)
     saveProperties()
   })
 
