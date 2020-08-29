@@ -2,8 +2,6 @@
   @import url('https://fonts.googleapis.com/css?family=Ledger');
 
   * {
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
   }
 
@@ -13,8 +11,9 @@
   }
 
   input {
-    height: 26px;
+    min-width: 0 !important;
   }
+  
 
   .main-wrapper {
     margin: 0 auto;
@@ -24,8 +23,6 @@
 
   #category-select,
   #custom-category-name {
-    -moz-appearance: none;
-    -webkit-appearance: none;
     background: url('https://ssl.gstatic.com/ui/v1/disclosure/grey-disclosure-arrow-up-down.png'), white;
     background-position: 95% 50%;
     background-repeat: no-repeat;
@@ -90,9 +87,8 @@
   }
 
   .main-section {
-    border-bottom: 1px solid gray;
     color: black;
-    padding: 28px 24px;
+    padding: 20px 24px;
   }
 
   #lab-cover {
@@ -129,125 +125,20 @@
 
   .style-button,
   .color-button {
-    width: 30px;
-    background: lightgray;
-    border-radius: 0;
-    box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.1);
-    border: none;
-    cursor: pointer;
-    float: left;
-    height: 30px;
-    margin: 4px 8px 4px 0;
-    min-width: 0;
-    font-family: "Ledger", serif;
-    font-size: 13px;
-    font-weight: normal;
-    text-align: center;
-  }
-
-  .style-button,
-  .style-button:hover {
-    box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.1);
-    color: black;
-  }
-
-  .style-button:hover {
-    background: #ddd;
-  }
-
-  .style-button:focus {
-    outline: 1px solid black;
+    width: 30px !important;
   }
 
   .style-button--selected,
   .style-button--selected:hover {
-    background: #C94C4C;
-    color: white;
-  }
-
-  .style-button.bold {
-    font-weight: 800;
+    background: PaleGreen !important;
   }
 
   .style-button.italic {
-    font-style: italic;
+    font-style: italic !important;
   }
 
-  .style-button.underline {
-    text-decoration: underline;
-  }
-
-  .color-button {
-    font-size: 11px;
-    padding-top: 5px;
-    padding-left: 1px;
-  }
-
-  .color-button div {
-    width: 19px;
-    height: 19px;
-    border-bottom: 3px solid black;
-    display: inline-block;
-  }
-
-  .color-hide {
-    display: none;
-  }
-
-  .color-pane {
-    position: absolute;
-    right: 30px;
-    height: 40px;
-    background: #abc9d4;
-    border-radius: 3px;
-    box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.7);
-    padding: 6px;
-  }
-
-  .color-pane * {
-    float: left;
-    margin-left: 8px;
-    padding-top: 4px;
-  }
-
-  #lab .color-pane {
-    top: 98px;
-  }
-
-  #ref .color-pane {
-    top: 395px;
-  }
-
-  .color-triangle {
-    position: absolute;
-    right: 70px;
-    font-size: 24px;
-    text-shadow: 2px 2px rgba(0, 0, 0, 0.7);
-    color: #abc9d4;
-  }
-
-  #lab .color-triangle {
-    top: 134px;
-  }
-
-  #ref .color-triangle {
-    top: 431px;
-  }
-
-  .color-code {
-    width: 60px;
-    padding: 4px;
-  }
-
-  .clone-color,
-  .confirm-color,
-  .cancel-color {
-    cursor: pointer;
-    font-size: 15px;
-  }
-
-  .clone-color {
-    transform: scale(-1, 1);
+  .style-button.underline, .style-button.underline:hover {
+    text-decoration: underline !important;
   }
 
   #cs_lab_code {
@@ -261,10 +152,9 @@
   .input-code {
     width: 4rem;
   }
-  
+
   .input-text {
     padding-left: 5px;
-    height: 26px;
   }
 
   .cr-text {
@@ -272,6 +162,10 @@
   }
 
   .cr-suffix {
+    width: 3rem;
+  }
+  
+  .cr-color {
     width: 3rem;
   }
 
@@ -284,16 +178,16 @@
     border-radius: 5px;
     border: 1px solid gray;
     box-shadow: inset 1px 1px 1px 1px rgba(0, 0, 0, 0.2);
-    height: 70px;
+    height: 35px;
     margin-top: 10px;
     width: 100%;
   }
 
   .preview__internal {
-    height: 60px;
+    height: 30px;
     margin: auto;
     overflow: hidden;
-    padding-top: 15px;
+    padding-top: 8px;
     width: 85%;
   }
 
@@ -320,8 +214,6 @@
 
   .hash {
     box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     float: left;
     height: 26px;
     padding: 4px;
@@ -336,7 +228,7 @@
   .actions {
     padding: 24px;
     position: absolute;
-    top: 660px;
+    top: 620px;
     width: 100%;
   }
 
@@ -344,11 +236,18 @@
     height: 50px;
   }
 
-  .actions__row:last-child {
-    display: none;
-  }
-
   .actions__button:last-child {
     float: right;
+  }
+
+  .load-overlay {
+    visibility: visible;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:rgba(245, 245, 245, 0.8);
   }
 </style>
