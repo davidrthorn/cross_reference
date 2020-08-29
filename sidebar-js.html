@@ -401,7 +401,7 @@
   $('.style-button').on('click', function () {
     $(this).toggleClass('style-button--selected')
 
-    const category = '#' + this.id.slice(0, 3)
+    const type = '#' + this.id.slice(0, 3)
     const cssValueName = this.id.slice(4)
 
     const cssProps = {
@@ -412,20 +412,19 @@
 
     const cssValue = $(this).hasClass('style-button--selected') ? cssValueName : 'initial'
 
-    $(category).find('.preview__text').css(cssProps[cssValueName], cssValue)
+    $(type).find('.preview__text').css(cssProps[cssValueName], cssValue)
   })
   
   
   $('.cr-color').keyup(function () {
     const color = $(this).val()
     const colorVal = isValidColor(color) ? getColorHex(color) : 'initial'
-    const category = '#' + this.id.slice(0, 3)
-    $(category).find('.preview__text').css('color', colorVal)
+    const type = '#' + this.id.slice(0, 3)
+    $(type).find('.preview__text').css('color', colorVal)
   })
   
   
-  const updateColorCode = type => colorHex => $('#' + type).find('.color-code').val(getColorStr(colorHex))
-  
+  const updateColorCode = type => colorHex => $('#' + type).find('.cr-color').val(getColorStr(colorHex)).keyup()
   
 
   function enableButton(button) {
