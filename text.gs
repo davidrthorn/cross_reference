@@ -87,6 +87,7 @@ const handleCRUrl = props => handleNumbering => text => CRUrl => {
   }
 
   replacementText += num + prop.suffix
+  replacementText = replacementText.replace(' ', '\xA0')
   
   const style = getStyle(prop)
 
