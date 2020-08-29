@@ -423,7 +423,10 @@
   })
   
   
-  const updateColorCode = type => colorHex => $('#' + type).find('.cr-color').val(getColorStr(colorHex)).keyup()
+  const updateColorCode = type => colorHex =>
+    $('#' + type).find('.cr-color')
+      .val(getColorStr(colorHex) || '000000')
+      .keyup()
   
 
   function enableButton(button) {
