@@ -1,9 +1,7 @@
-// TODO: since capitalisation is now user directed, preview need not show two lines
-// TODO: distinguish between null style and auto. Requires some care.
-// TODO: Can't set color to auto
 // TODO: delete category blocks input until saves
-// TODO: color pop up does nothing when bad color
 // TODO: adding a custom category does not immediately prevent another custom category with same ref code
+// TODO: color of preview does not clear between categories
+// TODO: implement clone colour
 
 function onInstall(e) {
   onOpen(e)
