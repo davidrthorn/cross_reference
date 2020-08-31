@@ -48,7 +48,7 @@
 * [x] Updating lab code automatically populates ref code
 
 
-# Adding custom
+## Adding custom
 
 * [x] Is preserved through closing and opening sidebar
 * [x] Works with updating document through menu
@@ -58,13 +58,13 @@
   * [ ] Ref code becomes available
 * [x] Cannot create duplicate ref codes
 
-# Deleting custom
+## Deleting custom
 
 * [x] Not present in top menu
 * [x] Not present in temp settings
 * [x] Not present in doc props
 
-# Defaults
+## Defaults
 
 * [x] Saved defaults can be restored after changes in sidebar
 * [ ] Custom categories are restored (ADD IN NEXT RELEASE)
@@ -77,6 +77,13 @@
 
 # Errors
 
-* [ ] Duplicate labels produce error on update
+* [x] Duplicate labels produce error on update
 * [x] Unrecognised labels produce error on update
-* [ ] Dangling references are produce error on update
+* [x] Dangling references are produce error on update
+
+# List of Figures
+
+* [ ] All figures included
+* [ ] Numbers match
+* [ ] Pages match
+* [ ] Positioned at top of document
