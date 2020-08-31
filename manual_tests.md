@@ -7,17 +7,18 @@
   * [x] Style is correct
 * [x] References are formatted correctly
   * [x] Style is correct
-* [ ] All of the above for footnotes
+* [x] Capitalisation is preserved
+* [x] All of the above for footnotes
 
 
 # Sidebar
 
 ## Main dropdown
 
-* [ ] Default categories do not have delete option
-* [ ] Custom categories do have delete option
-* [ ] All categories have add option
-* [ ] Category names match displayed data
+* [x] Default categories do not have delete option
+* [x] Custom categories do have delete option
+* [x] All categories have add option
+* [x] Category names match displayed data
 * [ ] Options are ordered alphabetically, even when custom is added
 
 ## Style panels

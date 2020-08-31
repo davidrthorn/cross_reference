@@ -44,23 +44,23 @@
         <div class='input-row'>
           <div class='input-row__name'>Text</div>
           <div class='input-row__value'>
-            <input type='text' name='lab_text' id='lab_text' autocomplete='off' data-lpignore=true  class='input-text cr-text'>
-            <input type='text' name='lab_suffix' id='lab_suffix' autocomplete='off' data-lpignore=true  class='input-text cr-suffix'>
+            <input title='Text' type='text' name='lab_text' id='lab_text' autocomplete='off' data-lpignore=true  class='input-text cr-text'>
+            <input title='Suffix text' type='text' name='lab_suffix' id='lab_suffix' autocomplete='off' data-lpignore=true  class='input-text cr-suffix'>
           </div>
         </div>
         <div class='input-row'>
           <div class='input-row__name'>Style</div>
           <div class='input-row__value'>
-            <input type='button' name='lab_bold' class='style-button bold' id='lab_bold' value='B'>
-            <input type='button' name='lab_italic' class='style-button italic' id='lab_italic' value='I'>
-            <input type='button' name='lab_underline' class='style-button underline' id='lab_underline' value='U'>
+            <input title='Bold' type='button' name='lab_bold' class='style-button bold' id='lab_bold' value='B'>
+            <input title='Italic' type='button' name='lab_italic' class='style-button italic' id='lab_italic' value='I'>
+            <input title='Underline' type='button' name='lab_underline' class='style-button underline' id='lab_underline' value='U'>
           </div>
         </div>
         <div class='input-row'>
           <div class='input-row__name'>Colour</div>
           <div class='input-row__value'>
-            <input id='lab_color' autocomplete='off' data-lpignore=true maxlength=6 placeholder='hex...' pattern='([A-f0-9]{3}|[A-f0-9]{6})' oninvalid='setCustomValidity("Invalid Hex code")' class='input-text cr-color' type='text'>
-            <button class='clone-color'>↷</button>
+            <input title='Colour (HEX format)' id='lab_color' autocomplete='off' data-lpignore=true maxlength=6 placeholder='hex...' pattern='([A-f0-9]{3}|[A-f0-9]{6})' oninvalid='setCustomValidity("Invalid Hex code")' class='input-text cr-color' type='text'>
+            <button title='Clone colour from selected text' class='clone-color'>↷</button>
           </div>
         </div>
         <div class='preview'>
@@ -84,23 +84,23 @@
         <div class='input-row'>
           <div class='input-row__name'>Text</div>
           <div class='input-row__value'>
-            <input id='ref_text' autocomplete='off' data-lpignore=true  class='input-text cr-text' type='text'>
-            <input id='ref_suffix' autocomplete='off' data-lpignore=true  class='input-text cr-suffix' type='text'>
+            <input title='Text' id='ref_text' autocomplete='off' data-lpignore=true  class='input-text cr-text' type='text'>
+            <input title='Suffix text' id='ref_suffix' autocomplete='off' data-lpignore=true  class='input-text cr-suffix' type='text'>
           </div>
         </div>
         <div class='input-row'>
           <div class='input-row__name'>Style</div>
           <div class='input-row__value'>
-            <input type='button' name='lab_bold' class='style-button bold' id='ref_bold' value='B'>
-            <input type='button' name='lab_italic' class='style-button italic' id='ref_italic' value='I'>
-            <input type='button' name='lab_underline' class='style-button underline' id='ref_underline' value='U'>
+            <input title='Bold' type='button' name='lab_bold' class='style-button bold' id='ref_bold' value='B'>
+            <input title='Italic' type='button' name='lab_italic' class='style-button italic' id='ref_italic' value='I'>
+            <input title='Underline' type='button' name='lab_underline' class='style-button underline' id='ref_underline' value='U'>
           </div>
         </div>
         <div class='input-row'>
           <div class='input-row__name'>Colour</div>
           <div class='input-row__value'>
-            <input type='text' autocomplete='off' data-lpignore=true id='ref_color' placeholder='hex...' pattern='([A-f0-9]{3}|[A-f0-9]{6})' oninvalid='setCustomValidity("Invalid Hex code")' autocomplete='off' data-lpignore=true  maxlength=6 class='input-text cr-color'>
-            <button class='clone-color'>↷</button>
+            <input type='text' title='Colour (HEX format)' autocomplete='off' data-lpignore=true id='ref_color' placeholder='hex...' pattern='([A-f0-9]{3}|[A-f0-9]{6})' oninvalid='setCustomValidity("Invalid Hex code")' autocomplete='off' data-lpignore=true  maxlength=6 class='input-text cr-color'>
+            <button title='Clone colour from selected text' class='clone-color'>↷</button>
           </div>
         </div>
         <div class='preview'>
