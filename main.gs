@@ -1,4 +1,4 @@
-// TODO: delete category blocks input until saves
+// TODO: delete category does not work unless save is clicked
 // TODO: adding a custom category does not immediately prevent another custom category with same ref code
 // TODO: sidebar disappears when returning from another window/tab
 

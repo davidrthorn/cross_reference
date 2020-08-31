@@ -18,6 +18,8 @@
   const doubleEach = (acc, cur) => acc + cur + cur
 
   const arrayMinus = (arr, item) => arr.filter(a => a !== item)
+  
+  const isCustomScreen = () => $('#cs_lab_code').css('display') !== 'none'
 
   const htmlEncode = str => String(str)
     .replace(/[^\w. ]/gi, match => '&#' + match.charCodeAt(0) + ';')
@@ -25,7 +27,7 @@
 
   const isDefault = code => ['equ', 'fig', 'tab', 'fno'].includes(code.substr(0, 3))
 
-  const getSelectedOptionText = $el => $.trim($el.children('option:selected').text()) // TODO: why bother passing in element
+  const getSelectedOptionText = $el => $.trim($el.children('option:selected').text())
 
   const all$ = els => $(els.join(','))
 
@@ -65,9 +67,28 @@
 
 
   // Save the current sidebar settings as document settings
-  function saveProperties(button) {
+  function saveProperties() {
     updateTempSettings()
     google.script.run.withSuccessHandler(enableButton).updateProps(tempSettings)
+  }
+  
+  function saveCustom() {
+    const $select = $('#category-select')
+    const labCode = getCurrentLabCode()
+    const name = $('#custom-category-name').val()
+
+    addTempEntry(labCode, name)
+    updateTempSettings()
+
+    google.script.run.storeCustom(tempSettings[labCode])
+    google.script.run.withSuccessHandler(enableButton).updateProps(tempSettings)
+
+    $('#category-select option:last').after($('<option>', { value: labCode, text: name }))
+    $('#category-select').val(labCode)
+    
+    hideCustomCategoryControls()
+
+    $('#delete-category').css('display', 'block')
   }
 
 
@@ -104,25 +125,7 @@
   })
 
 
-  $('#save-custom').on('click', function () {
-    const $select = $('#category-select')
-    const labCode = getCurrentLabCode()
-    const name = $('#custom-category-name').val()
 
-    addTempEntry(labCode, name)
-
-    $('#save').prop('disabled', true)
-    saveProperties('#save')
-
-    google.script.run.storeCustom(tempSettings[labCode])
-
-    $('#category-select option:last').after($('<option>', { value: labCode, text: name }))
-    $('#category-select').val(labCode)
-
-    hideCustomCategoryControls()
-
-    $('#delete-category').css('display', 'block')
-  })
 
 
 
@@ -269,7 +272,6 @@
     all$([
       '#custom-category-name',
       '#cs_lab_code',
-      '.actions__row:last-child'
     ]).css('display', 'none')
 
     all$([
@@ -423,10 +425,7 @@
   })
   
   
-  const updateColorCode = type => colorHex =>
-    $('#' + type).find('.cr-color')
-      .val(getColorStr(colorHex) || '000000')
-      .keyup()
+  const updateColorCode = type => colorHex => $('#' + type).find('.cr-color').val(getColorStr(colorHex) || '000000').keyup()
   
 
   function enableButton(button) {
@@ -437,8 +436,10 @@
   $('#form__main').submit(function (e) {
     e.preventDefault()
     showLoader()
+    
     $('#save').prop('disabled', true)
-    saveProperties()
+    
+    isCustomScreen() ? saveCustom() : saveProperties()
   })
 
 

@@ -50,7 +50,19 @@
 
 # Adding custom
 
+* [ ] Is preserved through closing and opening sidebar
+* [ ] Works with updating document through menu
+* [ ] Shows delete option in menu bar
+* [ ] Can be cancelled
+  * [ ] Nothing saved in menu
+  * [ ] Ref code becomes available
+* [ ] Cannot create duplicate ref codes
+
 # Deleting custom
+
+* [ ] Not present in top menu
+* [ ] Not present in temp settings
+* [ ] Not present in doc props
 
 # Defaults
 
