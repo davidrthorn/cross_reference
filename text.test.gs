@@ -75,22 +75,21 @@ function testIsCapitalized() {
 }
 
 function testLabelNumberHandler() {
-  let recordedNumbers = {
+  const recordedNumbers = {
     '#fig_first': 1,
   }
-  let labelNameNumberMap = {
+  const countByLabelType = {
     'figur': 1,
     'table': 2,
   }
-  let sut = handleLabNumber(recordedNumbers, labelNameNumberMap)
+  let sut = handleLabNumber(recordedNumbers)(countByLabelType)
 
   let got = sut('#figur_somename')
-
+    
   It('increments the existing entry in the label map',
-    labelNameNumberMap['figur'],
+    countByLabelType['figur'],
     2
   )
-  
   It('records the url in the recorded numbers',
     recordedNumbers,
     {
@@ -98,16 +97,15 @@ function testLabelNumberHandler() {
       '#fig_somename': 2,
     }
   )
-
   It('returns the correct number',
     got,
     2
   )
 
-  got =
-    It('returns duplicate error',
-      sut('#figur_first').message,
-      'duplicate'
+  got = sut('#figur_first')
+  It('returns duplicate error',
+     sut('#figur_first').message,
+     'duplicate'
     )
 }
 
