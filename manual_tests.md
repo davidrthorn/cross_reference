@@ -78,5 +78,5 @@
 # Errors
 
 * [ ] Duplicate labels produce error on update
-* [ ] Unrecognised labels produce error on update
+* [x] Unrecognised labels produce error on update
 * [ ] Dangling references are produce error on update
