@@ -28,7 +28,7 @@ function CRError(containingText, CRUrl, error) {
     missref: 'There is a reference with nothing to refer to.' +
         '\nIt might contain a typo or the corresponding label might be missing.' +
         errorBoilerplate,
-    unrecognised: "The label with code: '" + url.substr(1, 5) + "' was not recognised." +
+    unrecognised: 'A label or reference code was not recognised.' +
         '\n\nIt might be a typo or it might be a custom label you' +
         '\nhave not yet added in the configuration sidebar.' +
         errorBoilerplate,
