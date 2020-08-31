@@ -1,16 +1,11 @@
 function handleErr(err) {
-  const CRUrl = err.CRUrls[0]
-  const url = CRUrl.url
-
+  addFlag(err.text, err.CRUrl)
   DocumentApp.getUi().alert(err.message)
-
-  addFlag(err.text, CRUrl)
 }
 
 
 function addFlag(text, CRUrl) {
-  const [start, end, url] = CRUrl
-  if (Number.NaN(start) || Number.NaN(end) || typeof url !== 'string') return
+  if (Number.isNaN(CRUrl.start) || Number.isNaN(CRUrl.end)) return
 
   const doc = DocumentApp.getActiveDocument();
   const position = doc.newPosition(text, CRUrl.start);
@@ -26,18 +21,22 @@ function CRError(containingText, CRUrl, error) {
     duplicate: 'There are at least 2 labels with the code ' + url + '.' +
         "\n\nLabel codes must be 5 letters and label names (e.g. '" +
         url.substr(7) + "') must be unique.",
-    missref: 'The reference highlighted in red has nothing to refer to.' +
+    missref: 'There is a reference with nothing to refer to.' +
         '\nIt might contain a typo or the corresponding label might be missing.' +
-        '\n\nUpdating the document when this has been fixed will automatically' +
-        '\nrestore the correct colour.',
-    unrecognised: 'The label with code ' + url.substr(1, 6) + ' was not recognised.' +
-        '\nIt might be a typo or it might be a custom label you' +
-        '\nhave not yet added in the configuration sidebar.',
+        "\n\nClick 'OK' to see the reference highlighted. Updating the " +
+        'document when this has been fixed will automatically' +
+        '\nremove this highlighting.',
+    unrecognised: "The label with code: '" + url.substr(1, 5) + "' was not recognised." +
+        '\n\nIt might be a typo or it might be a custom label you' +
+        '\nhave not yet added in the configuration sidebar.' +
+        "\n\nClick 'OK' to see the label highlighted. Updating the " +
+        '\ndocument when this has been fixed will automatically' +
+        '\nremove this highlighting.',
   }
   
   return {
     text: containingText,
-    CRUrls: CRUrl,
+    CRUrl: CRUrl,
     error: error,
     message: messages[error],
   }

@@ -13,6 +13,7 @@ function codeFromUrl(url) {
 const handleLabNumber = numberForRefUrl => countByLabelType => url => {
   const code = codeFromUrl(url)
   const refEquivalent = '#' + code.substr(0, 3) + '_' + url.substr(7)
+  
   const num = countByLabelType[code] + 1 || 1
 
   if (refEquivalent in numberForRefUrl) return new Error('duplicate')
@@ -31,9 +32,9 @@ const updateText = CRUrls => handleCR => {
   while (i--) { // iterate backwards because we're changing the underlying text length
     const CRUrl = CRUrls[i]
 
-    const result = handleCR(CRUrl)
-    if (result instanceof CRError) {
-      return result
+    const error = handleCR(CRUrl)
+    if (error) {
+      return error
     }
   }
 }
@@ -47,9 +48,9 @@ const updateParagraphs = paragraphs => getCRs => handleText => {
     if (!CRUrls.length) continue
 
     const handleCR = handleText(text)
-    const result = updateText(CRUrls)(handleCR)
-    if (result instanceof CRError) {
-      return result
+    const error = updateText(CRUrls)(handleCR)
+    if (error) {
+      return error
     }
   }
 }
@@ -75,6 +76,7 @@ const getStyle = prop => ({
 
 const handleCRUrl = props => handleNumbering => text => CRUrl => {
   const foundCode = codeFromUrl(CRUrl.url)
+  
   const prop = props[foundCode]
   if (!prop) {
     return new CRError(text, CRUrl, 'unrecognised')

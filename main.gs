@@ -40,19 +40,19 @@ function updateDoc() {
   const getLabs = getCRUrls(isCRUrl(5))
   const handleNumbering = handleLabNumber(recordedNumbers)(labelNameNumberMap)
   const handleLabs = handleCRUrl(labProps)(handleNumbering)
-  let result = updateParagraphs(paragraphs)(getLabs)(handleLabs)
-
-  if (result instanceof CRError) {
-    handleErr(result)
+  let error = updateParagraphs(paragraphs)(getLabs)(handleLabs)
+  if (error) {
+    console.log(error)
+    handleErr(error)
     return 'error'
   }
 
   for (let i = 0, len = footnotes.length; i < len; i++) {
     const footnoteParagraphs = footnotes[i].getFootnoteContents().getParagraphs()
     const handleFNLabs = handleFootnoteLabCRUrl(labProps)(handleNumbering)
-    const result = updateParagraphs(footnoteParagraphs)(getLabs)(handleFNLabs)
-    if (result instanceof CRError) {
-      handleErr(result)
+    const error = updateParagraphs(footnoteParagraphs)(getLabs)(handleFNLabs)
+    if (error) {
+      handleErr(error)
       return 'error'
     }
   }
@@ -61,10 +61,9 @@ function updateDoc() {
 
   const getRefs = getCRUrls(isCRUrl(3))
   const handleRefs = handleCRUrl(refProps)(handleRefNumber(recordedNumbers))
-  result = updateParagraphs(paragraphs)(getRefs)(handleRefs)
-
-  if (result instanceof CRError) {
-    handleErr(result)
+  error = updateParagraphs(paragraphs)(getRefs)(handleRefs)
+  if (error) {
+    handleErr(error)
     return 'error'
   }
 }

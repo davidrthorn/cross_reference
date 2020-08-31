@@ -71,11 +71,12 @@
 
 # Properties
 
-* [ ] Legacy properties are correctly applied to document (requires setting props manually)
-* [ ] Legacy properties are correctly reflected in sidebar
-* [ ] Legacy properties are replaced with correct new format properties
+* [x] Legacy properties are correctly applied to document (requires setting props manually)
+* [x] Legacy properties are correctly reflected in sidebar
+* [x] Legacy properties are replaced with correct new format properties
 
 # Errors
 
 * [ ] Duplicate labels produce error on update
 * [ ] Unrecognised labels produce error on update
+* [ ] Dangling references are produce error on update
