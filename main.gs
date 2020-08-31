@@ -1,6 +1,3 @@
-// TODO: delete category does not work AT ALL (seems to have vanished!)
-// TODO: sidebar disappears when returning from another window/tab
-
 function onInstall(e) {
   onOpen(e)
 }

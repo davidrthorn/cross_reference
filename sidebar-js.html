@@ -1,5 +1,4 @@
 <script>
-  // FIXME: setting color to auto does not clear color
 
   /** GLOBAL STATE **/
   /* =============================================*/
@@ -118,11 +117,13 @@
     showLoader()
     const ref = $('#ref_code').html().substr(1)
     const currentName = tempSettings[$('#category-select').val()].name
+    const labCode = getCurrentLabCode()
+    
+    delete tempSettings[labCode]
 
     $(this).css('display', 'none')
     google.script.run.withSuccessHandler(revertToFirstCategory).removePair(ref)
     $('#category-select option:contains("' + currentName + '")').remove()
-
 
     refCodes = arrayMinus(refCodes, ref)
   })
