@@ -52,7 +52,7 @@
 
 * [x] Is preserved through closing and opening sidebar
 * [x] Works with updating document through menu
-* [ ] Shows delete option in menu bar
+* [x] Shows delete option in menu bar
 * [ ] Can be cancelled
   * [ ] Nothing saved in menu
   * [ ] Ref code becomes available
@@ -61,12 +61,13 @@
 # Deleting custom
 
 * [x] Not present in top menu
-* [ ] Not present in temp settings
-* [ ] Not present in doc props
+* [x] Not present in temp settings
+* [x] Not present in doc props
 
 # Defaults
 
-// TODO: fill in
+* [x] Saved defaults can be restored after changes in sidebar
+* [ ] Custom categories are restored (ADD IN NEXT RELEASE)
 
 # Properties
 

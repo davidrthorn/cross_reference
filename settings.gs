@@ -4,11 +4,11 @@ const isCrossProp = propKey =>  propKey.substr(0, 6) === 'cross_'
 // getPropKey returns a key to be used in the gDocs property stores
 const getPropKey = labCode => 'cross_' + labCode.substr(0, 3)
 
-const refCodeFromLabCode = labCode => labCode.substr(0, 3)
+const refCodeFrom = labCode => labCode.substr(0, 3)
 
 const encodeSetting = s => JSON.stringify(s)
 
-const decodeSetting = s => isLegacy(s) ? decodeLegacy(s) : JSON.parse(s)
+const decodeSetting = s => JSON.parse(s)
 
 
 // encodeSettings returns an object where key is the key to be used
@@ -27,19 +27,31 @@ function encodeSettings(settings) {
 // settings (in that order of priority)
 function getSettings() {
   let settings = getDefaultSettings()
-  settings = patchSettings(settings, PropertiesService.getUserProperties().getProperties()) 
-  settings = patchSettings(settings, PropertiesService.getDocumentProperties().getProperties())
+  settings = patchSettings(settings, PropertiesService.getUserProperties()) 
+  settings = patchSettings(settings, PropertiesService.getDocumentProperties())
 
   return settings
 }
 
 
 // patchSettings overwrites settings with those from a given gDocs property store
-function patchSettings(settings, storedProps) {
-  for (const key in storedProps) {
+function patchSettings(settings, propStore) {
+  const props = propStore.getProperties()
+  
+  for (const key in props) {
     if (!isCrossProp(key)) continue
-    const setting = decodeSetting(storedProps[key])
-    settings[setting.lab.code] = setting
+    
+    const encoded = props[key]
+
+    let s = null
+    if (isLegacy(encoded)) {
+      s = decodeLegacy(encoded)
+      propStore.setProperty(key, encodeSetting(s)) // update legacy props
+    } else {
+      s = decodeSetting(encoded)
+    }
+    
+    settings[s.lab.code] = s
   }
   return settings
 }
@@ -183,7 +195,7 @@ const decodeLegacy = encoded => {
       suffix: '',
     },
     ref: {
-      code: refCodeFromLabCode(asArr[0]),
+      code: refCodeFrom(asArr[0]),
       text: asArr[6],
       isBold: bool(asArr[7]),
       isItalic: bool(asArr[8]),
@@ -194,7 +206,23 @@ const decodeLegacy = encoded => {
   }
 }
 
+/*
+Legacy properties example:
+
+*/
+
 /** For debugging purposes */
+
+function setLegacyDocProps() {
+  clearProps()
+  PropertiesService.getDocumentProperties().setProperties({
+    cross_tab: 'table_Table_table _null_null_null_table _null_null_null_null_null',
+    cross_tes: 'testi_Testing_testing _null_null_null_testing _null_null_null_null_null',
+    cross_fig: 'figur_Figure_figFIGFIG _null_null_null_figure _null_null_null_null_null',
+    cross_equ: 'equat_Equation_equation _null_null_null_equation _null_null_null_null_null',
+    cross_fno: 'fnote_Footnote__null_null_null_fn. _null_null_null_null_null'
+  })
+}
 
 function clearProps() {
   PropertiesService.getDocumentProperties().deleteAllProperties()
