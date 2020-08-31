@@ -27,44 +27,46 @@
 
 ### Lab
 
-* [ ] Text matches what is displayed in preview
-* [ ] All style options match preview
-* [ ] Changes are reflected in preview
-* [ ] Clone color works
-* [ ] Clone color defaults to 000000 when cloning uncolored
+* [x] Text matches what is displayed in preview
+* [x] All style options match preview
+* [x] Changes are reflected in preview
+* [x] Clone color works
+* [x] Clone color defaults to 000000 when cloning uncolored
 
 ### Ref
 
-* [ ] Text matches what is displayed in preview
-* [ ] All style options match preview
-* [ ] Changes are reflected in preview
-* [ ] Clone color works
-* [ ] Clone color defaults to 000000 when cloning uncolored
+* [x] Text matches what is displayed in preview
+* [x] All style options match preview
+* [x] Changes are reflected in preview
+* [x] Clone color works
+* [x] Clone color defaults to 000000 when cloning uncolored
 
 ### Additional for custom screen
 
-* [ ] Ref codes already taken are flagged and entry is prohibited
-* [ ] Ref codes less than 5 chars are flagged and save is disabled
-* [ ] Updating lab code automatically populates ref code
+* [x] Ref codes already taken are flagged and entry is prohibited
+* [x] Ref codes less than 5 chars are flagged and save is disabled
+* [x] Updating lab code automatically populates ref code
 
 
 # Adding custom
 
-* [ ] Is preserved through closing and opening sidebar
-* [ ] Works with updating document through menu
+* [x] Is preserved through closing and opening sidebar
+* [x] Works with updating document through menu
 * [ ] Shows delete option in menu bar
 * [ ] Can be cancelled
   * [ ] Nothing saved in menu
   * [ ] Ref code becomes available
-* [ ] Cannot create duplicate ref codes
+* [x] Cannot create duplicate ref codes
 
 # Deleting custom
 
-* [ ] Not present in top menu
+* [x] Not present in top menu
 * [ ] Not present in temp settings
 * [ ] Not present in doc props
 
 # Defaults
+
+// TODO: fill in
 
 # Properties
 
