@@ -5,7 +5,7 @@ function updateProps(tempSettings) {
   }
 
   updateDoc()
-  return '#save-apply'
+  return '#save'
 }
 
 

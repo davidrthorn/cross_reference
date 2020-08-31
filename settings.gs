@@ -66,6 +66,7 @@ function clearPropStore(store) {
 }
 
 
+
 function updateDocProps() {
   const encoded = encodeSettings(getSettings())
   PropertiesService.getDocumentProperties().setProperties(encoded)

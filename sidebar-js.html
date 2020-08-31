@@ -16,6 +16,8 @@
   const isValidColor = color => /(#|^)([0-9A-f]{3}|[0-9A-f]{6})$/.test(color)
 
   const doubleEach = (acc, cur) => acc + cur + cur
+  
+  const refCodeFrom = labCode => labCode.substr(0, 3)
 
   const arrayMinus = (arr, item) => arr.filter(a => a !== item)
   
@@ -86,6 +88,7 @@
     $('#category-select option:last').after($('<option>', { value: labCode, text: name }))
     $('#category-select').val(labCode)
     
+    refCodes.push(refCodeFrom(labCode))
     hideCustomCategoryControls()
 
     $('#delete-category').css('display', 'block')
@@ -123,8 +126,6 @@
 
     refCodes = arrayMinus(refCodes, ref)
   })
-
-
 
 
 

@@ -75,4 +75,4 @@
 # Errors
 
 * [ ] Duplicate labels produce error on update
-* [ ] Missing labels produce error on update
+* [ ] Unrecognised labels produce error on update
