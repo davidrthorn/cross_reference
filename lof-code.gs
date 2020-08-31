@@ -1,15 +1,14 @@
 function createLoF() {
 
   const cursor = getCursorIndex()
-  const labSettings = PropertiesService.getDocumentProperties().getProperty('cross_fig')
-  const labText = labSettings ? toCap(labSettings.split('_')[2]) : 'Figure '
+  const settings = getSettings()['figur']
 
   if (updateDoc() === 'error') return // TODO: need to check error type
   
   const labCount = encodeLabel()
   const position = deleteLoF() || cursor
   
-  insertDummyLoF(labCount, labText, position)
+  insertDummyLoF(labCount, settings.lab.text, position)
   
   const html = HtmlService.createTemplateFromFile('lof').evaluate()
   html.setWidth(250).setHeight(90)
@@ -80,8 +79,6 @@ function insertDummyLoF(labCount, labText, position) {
   const placeholder = '...'
   const range = doc.newRange()
 
-  labText = toCap(labText)
-  
   doc.getNamedRanges('lofTable').forEach(r => r.remove())
   
   const figDescs = PropertiesService.getDocumentProperties().getProperty('fig_descs')
