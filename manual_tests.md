@@ -19,11 +19,11 @@
 * [x] Custom categories do have delete option
 * [x] All categories have add option
 * [x] Category names match displayed data
-* [ ] Options are ordered alphabetically, even when custom is added
+* [x] Options are ordered alphabetically on reopen config, even when custom is added
 
 ## Style panels
 
-* [ ] Values reset when switching categories
+* [x] Values reset when switching categories
 
 ### Lab
 
