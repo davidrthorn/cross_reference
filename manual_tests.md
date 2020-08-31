@@ -1,14 +1,13 @@
 # In text
 
-* [ ] Default entities are numbered sequentially
-* [ ] Custom entities are numbered sequentially
-* [ ] Reference numbering aligns with labels
-* [ ] Labels are formatted correctly
-  * [ ] Style is correct
-  * [ ] If style is not set explicitly, it changes with surrounding style
-* [ ] References are formatted correctly
-  * [ ] Style is correct
-  * [ ] If style is not set explicitly, it changes with surrounding style
+* [x] Default entities are numbered sequentially
+* [x] Custom entities are numbered sequentially
+* [x] Reference numbering aligns with labels
+* [x] Labels are formatted correctly
+  * [x] Style is correct
+* [x] References are formatted correctly
+  * [x] Style is correct
+* [ ] All of the above for footnotes
 
 
 # Sidebar
