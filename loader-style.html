@@ -1,7 +1,15 @@
 <style>
+  body {
+    font-size: 14px;
+    font-family: 'Lucida Grande', Helvetica, Arial, sans-serif;
+    color: #333;
+    text-align: center;
+    margin-top: 10px;
+  }
   .loader span {
     display: block;
     margin: 0 auto;
+    
   }
 
   .loader span[class*="l-"] {
@@ -14,6 +22,7 @@
     border-radius: 100%;
     animation: loader 2s infinite;
     animation-timing-function: cubic-bezier(0.030, 0.615, 0.995, 0.415);
+    opacity: 0;
   }
 
   .loader span.l-1 {

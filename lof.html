@@ -1,4 +1,3 @@
-<?!= include('lof-loader'); ?>
 <?!= include('loader-style'); ?>
 
 <script src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.81/pdf.js'>
@@ -17,45 +16,39 @@
 <script>
 
   PDFJS.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.81/pdf.worker.js'
-  page_labs = [];
+  page_labs = []
 
   window.onload = google.script.run.withSuccessHandler(countFigures).getDocAsPDF();
 
   function logIt(blob) {
-    const pdf = PDFJS.getDocument({ data: blob });
-    return pdf.then(function (pdf) {
-      const max_pages = pdf.pdfInfo.numPages,
-        promise_count = [];
-      for (let i = 1; i <= max_pages; i++) {
-        const page = pdf.getPage(i);
-        promise_count.push(page.then(function (page) {
-          const text_content = page.getTextContent();
-          return text_content.then(function (page) {
-            return text_content
-          });
-        }));
+    const pdf = PDFJS.getDocument({ data: blob })
+    return pdf.then(pdf => {
+      const maxPages = pdf.pdfInfo.numPages
+      const pages = []
+      for (let i = 1; i <= maxPages; i++) {
+        const page = pdf.getPage(i)
+        pages.push(page.then(page => 
+         page.getTextContent().then(pageText => pageText)
+        ))
       }
-
-      // Wait for all pages and sum counts
-
-      return Promise.all(promise_count).then(counts => counts.map(foundCount));
-    });
+      return Promise.all(pages).then(counts => counts.map(foundCount))
+    })
   }
 
   const foundCount = c => JSON.stringify(c).split('☙').length - 1
 
   function countFigures(blob) {
-    logIt(blob).then(function (count) {
-      google.script.run.withSuccessHandler(restoreLabels).insertLoFNumbers(count);
-    });
+    logIt(blob).then(count => {
+      google.script.run.withSuccessHandler(restoreLabels).insertLoFNumbers(count)
+    })
   }
 
 
   function restoreLabels() {
-    google.script.run.withSuccessHandler(closeDialog).restoreLabels();
+    google.script.run.withSuccessHandler(closeDialog).restoreLabels()
   }
 
   function closeDialog() {
-    google.script.host.close();
+    google.script.host.close()
   }
 </script>
