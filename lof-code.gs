@@ -1,14 +1,13 @@
 function createLoF() {
 
   const cursor = getCursorIndex()
-  const settings = getSettings()['figur']
 
   if (updateDoc() === 'error') return // TODO: need to check error type
   
-  const labCount = encodeLabel()
+  const {labCount, figDescs} = encodeLabel()
   const position = deleteLoF() || cursor
   
-  insertDummyLoF(labCount, settings.lab.text, position)
+  insertDummyLoF(labCount, figDescs, position)
   
   const html = HtmlService.createTemplateFromFile('lof').evaluate()
   html.setWidth(250).setHeight(90)
@@ -17,7 +16,7 @@ function createLoF() {
 
 function getCursorIndex() {
   const cursor = DocumentApp.getActiveDocument().getCursor()
-  if (!cursor ) return 0
+  if (!cursor) return 0
   
   const element = cursor.getElement()
   
@@ -32,27 +31,20 @@ function encodeLabel() {
   const doc = DocumentApp.getActiveDocument()
   const paragraphs = doc.getBody().getParagraphs()
   const labCount = { 'fig': 0 }
-  const figDescs = ''
+  let figDescs = ''
+
+  const getLabs = getCRUrls(isCRUrl(5))
   
-  for (let i = 0; i < paragraphs.length; i++) {
-    const text = paragraphs[i].editAsText()
-    const locs = getCrossLinks(text, 5)
-    const start = locs[0][0]
-    const url = locs[2][0]
-
-    if (!locs[0].length) continue
-    
-    if (url.substr(0, 4) === '#fig') {
-
-      figDescs += 'ഛಎ' + text.getText().match(/([ ]\d[^\w]*)([^\.]*)/)[2]
-    
-      text.deleteText(start, start + 1).insertText(start, '☙')
-      labCount['fig']++
-    }
+  const handleText = text => CRUrl => {
+    figDescs += 'ഛಎ' + text.getText()
+    const start = CRUrl.start
+    text.deleteText(start, start + 1).insertText(start, '☙')
+    labCount['fig']++
   }
   
-  PropertiesService.getDocumentProperties().setProperty('fig_descs', figDescs)
-  return labCount
+  const error = updateParagraphs(paragraphs)(getLabs)(handleText)
+  
+  return {figDescs, labCount}
 }
 
 
@@ -69,25 +61,22 @@ function deleteLoF() {
 
 function findLoF() {
   const lof = DocumentApp.getActiveDocument().getNamedRanges('lofTable')[0]
-  return lof.getRange().getRangeElements()[0].getElement().asTable() || null
+  return lof ? lof.getRange().getRangeElements()[0].getElement().asTable() : null
 }
 
 
-function insertDummyLoF(labCount, labText, position) {
+function insertDummyLoF(labCount, figDescs, position) {
   const doc = DocumentApp.getActiveDocument()
   const lofCells = []
   const placeholder = '...'
   const range = doc.newRange()
 
   doc.getNamedRanges('lofTable').forEach(r => r.remove())
-  
-  const figDescs = PropertiesService.getDocumentProperties().getProperty('fig_descs')
   const splitDescs = figDescs ? figDescs.split('ഛಎ') : null
   
-  for (let i = 1; i <= labCount['fig']; i++) {
-    const figName = labText + i
-    const figDesc = splitDescs && splitDescs[i].length ? ': ' + splitDescs[i] : ''
-    lofCells.push([figName + figDesc, placeholder])
+  for (let i = 1, len = labCount['fig']; i <= len ; i++) {
+    let figDesc = splitDescs[i].replace(/^[\t\r\n]/, '').replace(/^(\w)/, (_, l) => l.toUpperCase())
+    lofCells.push([figDesc, placeholder])
   }
   
   const lofTable = doc.getBody().insertTable(position, lofCells)
@@ -123,20 +112,24 @@ function styleLoF(lofTable) {
 
 const getDocAsPDF = () => DocumentApp.getActiveDocument().getBlob().getBytes() 
 
-
+/*
+@var pageNumbers : [1,0,2...] -- members correspond to count of labels on a page (in order)
+*/
 function insertLoFNumbers(pageNumbers) {
-  
   const lofTable = findLoF()
-  const currentRow = 0
+  let currentRow = 0
   
   for (let i = 0; i < pageNumbers.length; i++) {
     const labCount = pageNumbers[i]
     if (!labCount) continue
-
+    
+    const pageNumber = (i + 1).toString()
+    
     for (let j = currentRow; j < lofTable.getNumRows(); j++) {
       lofTable.getCell(j, 1)
         .clear()
-        .getChild(0).asParagraph().appendText(i + 1)
+        .getChild(0).asParagraph()
+        .appendText(pageNumber)
     }
     currentRow += labCount
   }
@@ -144,22 +137,15 @@ function insertLoFNumbers(pageNumbers) {
 
 
 function restoreLabels() {
-  const paras = DocumentApp.getActiveDocument().getBody().getParagraphs()
+  const paragraphs = DocumentApp.getActiveDocument().getBody().getParagraphs()
   
-  for (let i = 0, len = paras.length; i < len; i++) {
-    const text = paras[i].editAsText()
-    const locs = getCrossLinks(text, 5) // TODO: this is no longer the right signature
-    const starts = locs[0] // TODO: thus also wrong
-    const urls = locs[2]
-    
-    let j = starts.length
-    while (j--) {
-      const start = starts[j]
-      if (urls[j].substr(0, 4) === '#fig') {
-        text.deleteText(start - 1, start)
-      }
-    }
+  const getLabs = getCRUrls(isCRUrl(5))
+  const handleText = text => CRUrl => {
+    const start = CRUrl.start
+    text.deleteText(start - 1, start)
   }
+  
+  const error = updateParagraphs(paragraphs)(getLabs)(handleText)
   
   updateDoc()
 }
