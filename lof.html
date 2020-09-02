@@ -14,10 +14,7 @@
 <span>Long, complex documents can<br />take minutes to process</span>
 
 <script>
-
   PDFJS.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.81/pdf.worker.js'
-  page_labs = []
-
   window.onload = google.script.run.withSuccessHandler(countFigures).getDocAsPDF();
 
   function logIt(blob) {
@@ -27,8 +24,8 @@
       const pages = []
       for (let i = 1; i <= maxPages; i++) {
         const page = pdf.getPage(i)
-        pages.push(page.then(page => 
-         page.getTextContent().then(pageText => pageText)
+        pages.push(page.then(page =>
+          page.getTextContent().then(pageText => pageText)
         ))
       }
       return Promise.all(pages).then(counts => counts.map(foundCount))
