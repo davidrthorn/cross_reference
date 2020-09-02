@@ -17,26 +17,23 @@
   PDFJS.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.81/pdf.worker.js'
   window.onload = google.script.run.withSuccessHandler(countFigures).getDocAsPDF();
 
-  function logIt(blob) {
+  function getAllPageTexts(blob) {
     const pdf = PDFJS.getDocument({ data: blob })
     return pdf.then(pdf => {
       const maxPages = pdf.pdfInfo.numPages
-      const pages = []
+      const pageTexts = []
       for (let i = 1; i <= maxPages; i++) {
-        const page = pdf.getPage(i)
-        pages.push(page.then(page =>
-          page.getTextContent().then(pageText => pageText)
-        ))
+        pageTexts.push(pdf.getPage(i).then(page => page.getTextContent()))
       }
-      return Promise.all(pages).then(counts => counts.map(foundCount))
+      return Promise.all(pageTexts)
     })
   }
 
-  const foundCount = c => JSON.stringify(c).split('☙').length - 1
+  const countLabels = pageText => JSON.stringify(pageText).split('☙').length - 1
 
   function countFigures(blob) {
-    logIt(blob).then(count => {
-      google.script.run.withSuccessHandler(restoreLabels).insertLoFNumbers(count)
+    getAllPageTexts(blob).then(pageTexts => {
+      google.script.run.withSuccessHandler(restoreLabels).insertLoFNumbers(pageTexts.map(countLabels))
     })
   }
 
