@@ -53,9 +53,6 @@
 * [x] Is preserved through closing and opening sidebar
 * [x] Works with updating document through menu
 * [x] Shows delete option in menu bar
-* [ ] Can be cancelled
-  * [ ] Nothing saved in menu
-  * [ ] Ref code becomes available
 * [x] Cannot create duplicate ref codes
 
 ## Deleting custom
@@ -67,7 +64,6 @@
 ## Defaults
 
 * [x] Saved defaults can be restored after changes in sidebar
-* [ ] Custom categories are restored (ADD IN NEXT RELEASE)
 
 # Properties
 
@@ -83,7 +79,7 @@
 
 # List of Figures
 
-* [ ] All figures included
-* [ ] Numbers match
-* [ ] Pages match
-* [ ] Positioned at top of document
+* [x] All figures included
+* [x] Numbers match
+* [x] Pages match
+* [x] Positioned at top of document

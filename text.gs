@@ -39,7 +39,11 @@ const updateText = CRUrls => handleCR => {
   }
 }
 
-
+/*
+@var paragraphs : [paragraphs]
+@var getCRs : text -> [{start, end, url}]
+@var handleText : text -> [{start, end, url}] -> ?error
+*/
 const updateParagraphs = paragraphs => getCRs => handleText => {
   for (let i = 0, len = paragraphs.length; i < len; i++) {
     const text = paragraphs[i].editAsText()

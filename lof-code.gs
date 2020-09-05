@@ -33,7 +33,8 @@ function encodeLabel() {
   const labCount = { 'fig': 0 }
   let figDescs = ''
 
-  const getLabs = getCRUrls(isCRUrl(5))
+  const isFigLab = url => /^#figur_/.test(url)
+  const getLabs = getCRUrls(isFigLab)
   
   const handleText = text => CRUrl => {
     figDescs += 'ഛಎ' + text.getText()
