@@ -74,10 +74,13 @@ const updateParagraphs = paragraphs => getCRs => handleText => {
 const replaceText = (text, CRUrl, replacementText, style) => {
   const { start, end, url } = CRUrl
   const replacementEnd = start + replacementText.length - 1
+  const size = text.getFontSize(start)
+  
   text.deleteText(start, end)
     .insertText(start, replacementText)
     .setLinkUrl(start, replacementEnd, url)
     .setAttributes(start, replacementEnd, style)
+    .setFontSize(start, replacementEnd, size)
 }
 
 
