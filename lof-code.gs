@@ -90,7 +90,6 @@ function insertDummyLoF(labCount={}, figDescs=[], position) {
 
 
 function styleLoF(lofTable) {
-  
   lofTable.setBorderWidth(0)
   
   var styleAttributes = {
@@ -105,8 +104,8 @@ function styleLoF(lofTable) {
     const row = lofTable.getRow(i)
     
     lofTable.setAttributes(styleAttributes).setColumnWidth(1, 64)
-    row.getCell(0).setPaddingLeft(0)
-    row.getCell(1).setPaddingRight(0)
+    row.getCell(0).setPaddingLeft(0).setVerticalAlignment(DocumentApp.VerticalAlignment.BOTTOM)
+    row.getCell(1).setPaddingRight(0).setVerticalAlignment(DocumentApp.VerticalAlignment.BOTTOM)
       .getChild(0).asParagraph().setAlignment(DocumentApp.HorizontalAlignment.RIGHT)
   }
 }
