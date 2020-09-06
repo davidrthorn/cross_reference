@@ -12,11 +12,9 @@ function onOpen(e) {
     .addToUi()
 }
 
-
 function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent()
 }
-
 
 function showSidebar() {
   const sidebar = HtmlService.createTemplateFromFile('sidebar-html').evaluate()
@@ -26,7 +24,7 @@ function showSidebar() {
 
 function updateDoc() {
   const document = DocumentApp.getActiveDocument()
-  let paragraphs = document.getBody().getParagraphs()
+  const paragraphs = document.getBody().getParagraphs()
   const footnotes = document.getFootnotes()
 
   const settings = getSettings()
@@ -42,7 +40,6 @@ function updateDoc() {
   const handleLabs = handleCRUrl(labProps)(handleNumbering)
   let error = updateParagraphs(paragraphs)(getLabs)(handleLabs)
   if (error) {
-    console.log(error)
     handleErr(error)
     return 'error'
   }
@@ -67,7 +64,6 @@ function updateDoc() {
     return 'error'
   }
 }
-
 
 /** ALL TESTS */
 
