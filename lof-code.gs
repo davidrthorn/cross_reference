@@ -1,7 +1,14 @@
+const isFigLab = url => /^#figur_/.test(url)
+
+const getDocAsPDF = () => DocumentApp.getActiveDocument().getBlob().getBytes()
+
+
 function createLoF() {
   if (updateDoc() === 'error') return
   
   const {figDescs, labCount} = encodeLabel()
+  if (figDescs.length === 0) return
+  
   const position = deleteLoF() || getCursorParagraphIndex()
   
   insertDummyLoF(labCount, figDescs, position)
@@ -11,12 +18,14 @@ function createLoF() {
   DocumentApp.getUi().showModalDialog(html, 'Generating list of figures...')
 }
 
+
 function getCursorParagraphIndex() {
   const cursor = DocumentApp.getActiveDocument().getCursor()
   if (!cursor) return 0
   const paragraph = getContainingParagraph(cursor.getElement())
   return paragraph.getParent().getChildIndex(paragraph)
 }
+
 
 function getContainingParagraph(el) {
   if (!el || typeof el.getType !== 'function') return
@@ -27,7 +36,6 @@ function getContainingParagraph(el) {
   return getContainingParagraph(el.getParent())
 }
 
-const isFigLab = url => /^#figur_/.test(url)
 
 // encodeLabel replaces the beginning of a label with
 // a rare UTF-8 characters that will be used
@@ -62,6 +70,7 @@ function deleteLoF() {
   return lofIndex
 }
 
+
 function findLoF() {
   const lof = DocumentApp.getActiveDocument().getNamedRanges('lofTable')[0]
   if (!lof ) return
@@ -69,6 +78,7 @@ function findLoF() {
   const el = lof.getRange().getRangeElements()[0].getElement()
   return el.getType() === DocumentApp.ElementType.TABLE ? el.asTable() : null
 }
+
 
 function insertDummyLoF(labCount={}, figDescs=[], position) {
   const doc = DocumentApp.getActiveDocument()
@@ -82,6 +92,7 @@ function insertDummyLoF(labCount={}, figDescs=[], position) {
   range.addElement(lofTable)
   doc.addNamedRange('lofTable', range.build())
 }
+
 
 function styleLoF(lofTable) {
   const styleAttributes = {
@@ -110,8 +121,7 @@ function styleLoF(lofTable) {
   }
 }
 
-const getDocAsPDF = () => DocumentApp.getActiveDocument().getBlob().getBytes() 
-
+ 
 /*
 @var pageNumbers : [1,0,2...] -- members correspond to count of labels on a page (in order)
 */
@@ -134,6 +144,7 @@ function insertLoFNumbers(pageNumbers) {
     currentRow += labCount
   }
 }
+
 
 function restoreLabels() {
   const paragraphs = DocumentApp.getActiveDocument().getBody().getParagraphs()
