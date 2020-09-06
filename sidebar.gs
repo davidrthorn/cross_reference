@@ -3,7 +3,6 @@ function updateProps(tempSettings) {
   for (const labCode in tempSettings) {
     docProps.setProperty(getPropKey(labCode), encodeSetting(tempSettings[labCode]))
   }
-
   updateDoc()
   return '#save'
 }

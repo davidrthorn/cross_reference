@@ -10,6 +10,8 @@ const encodeSetting = s => JSON.stringify(s)
 
 const decodeSetting = s => JSON.parse(s)
 
+const isDefault = code => ['equ', 'fig', 'fno', 'tab'].includes(code.substr(0, 3))
+
 
 // encodeSettings returns an object where key is the key to be used
 // in the gDocs prop stores and value is the settings encoded as a string
@@ -78,13 +80,11 @@ function clearPropStore(store) {
 }
 
 
-
 function updateDocProps() {
   const encoded = encodeSettings(getSettings())
   PropertiesService.getDocumentProperties().setProperties(encoded)
 }
 
-const isDefault = code => ['equ', 'fig', 'fno', 'tab'].includes(code.substr(0, 3))
 
 function getDefaultSettings() {
   return {
