@@ -1,15 +1,25 @@
 const isCRUrl = codeLength => url => (new RegExp('^#[^_]{' + codeLength + '}_')).test(url)
 
+const handleRefNumber = numberForRefUrl => url => numberForRefUrl[url] || new Error('missref')
+
+const isCapitalized = str => str !== '' && str.charAt(0) === str.charAt(0).toUpperCase()
+
+const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1)
+
+
 function codeFromUrl(url) {
-  if (!url) return null
+  if (!url) return
   const match = url.match(/^#([^_]{3}|[^_]{5})_/)
   return match ? match[1] : null
 }
 
-// numberForRefUrl stores the number assigned to a particular label, but uses the ref_url format as its key (e.g. {#fig_bird: 1}).
-// It will be used when we process references.
-// countByLabelType stores the current count for a given label type (e.g. {fig: 3, tab: 4}).
-// We use this to number the current label.
+
+/*
+@var numForRefUrl : {} -- map of `ref url` to `number for the corresponding label`
+@var countByLabelType : {} -- map of `label code` to `count of code in document`
+@var url : string -- the current url
+@return int | error -- the number for the current label
+*/
 const handleLabNumber = numberForRefUrl => countByLabelType => url => {
   const code = codeFromUrl(url)
   const refEquivalent = '#' + code.substr(0, 3) + '_' + url.substr(7)
@@ -24,15 +34,15 @@ const handleLabNumber = numberForRefUrl => countByLabelType => url => {
   return num
 }
 
-const handleRefNumber = numberForRefUrl => url => numberForRefUrl[url] || new Error('missref')
 
-
+/*
+@var CRUrls : [{start, end, url}]
+@var handleCR : {start, end, url} -> ?error
+*/
 const updateText = CRUrls => handleCR => {
-  let i = CRUrls.length 
+  let i = CRUrls.length
   while (i--) { // iterate backwards because we're changing the underlying text length
-    const CRUrl = CRUrls[i]
-
-    const error = handleCR(CRUrl)
+    const error = handleCR(CRUrls[i])
     if (error) {
       return error
     }
@@ -43,6 +53,7 @@ const updateText = CRUrls => handleCR => {
 @var paragraphs : [paragraphs]
 @var getCRs : text -> [{start, end, url}]
 @var handleText : text -> [{start, end, url}] -> ?error
+@return ?error
 */
 const updateParagraphs = paragraphs => getCRs => handleText => {
   for (let i = 0, len = paragraphs.length; i < len; i++) {
@@ -77,7 +88,13 @@ const getStyle = prop => ({
   'FOREGROUND_COLOR': prop.color,
 })
 
-
+/*
+@var props : {} -- map of `code` to `properties`
+@var handleNumbering : {start, end, url} -> int
+@var text : Text
+@var CRUrl : {start, end, url}
+@return ?error
+*/
 const handleCRUrl = props => handleNumbering => text => CRUrl => {
   const foundCode = codeFromUrl(CRUrl.url)
   
@@ -101,10 +118,16 @@ const handleCRUrl = props => handleNumbering => text => CRUrl => {
 }
 
 
+/*
+@var props : {} -- map of `code` to `properties`
+@var handleNumbering : {start, end, url} -> int
+@var text : Text
+@var CRUrl : {start, end, url}
+@return ?error
+*/
 const handleFootnoteLabCRUrl = props => handleNumbering => text => CRUrl => {
   const foundCode = codeFromUrl(CRUrl.url)
   if (foundCode !== 'fnote') return
-  const prop = props[foundCode]
 
   const num = handleNumbering(CRUrl.url)
   if (num instanceof Error) {
@@ -115,6 +138,11 @@ const handleFootnoteLabCRUrl = props => handleNumbering => text => CRUrl => {
 }
 
 
+/*
+@var isCRUrl : string -> bool
+@var text : Text
+@return [{start, end, url}]
+*/
 const getCRUrls = isCRUrl => text => {
   const textLength = text.getText().length
   const idxs = text.getTextAttributeIndices()
@@ -140,12 +168,6 @@ const getCRUrls = isCRUrl => text => {
   }
   return CRUrls
 }
-
-
-const isCapitalized = str => str !== '' && str.charAt(0) === str.charAt(0).toUpperCase()
-
-
-const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1)
 
 
 const capitalizeIfAppropriate = (text, start, replacementText) =>

@@ -161,3 +161,24 @@ function testGetCRUrls() {
   )
 
 }
+
+
+function testUpdateText() {
+  const results = []
+  let got = updateText([1, 2, 3])(cr => {results.push(cr)})
+
+  It('calls mock handler for each cr in reverse order',
+    results,
+    [3, 2, 1]
+  )
+  It('returns undefined if no error',
+    got,
+    undefined
+  )
+
+  got = updateText([1, 2, 3])(cr => new Error('hello'))
+  It('returns error if there is one',
+    typeof got.message,
+    'string'
+  )
+}
