@@ -1,54 +1,48 @@
-<?!= include('lof-loader'); ?>
+<?!= include('loader-style'); ?>
+
 <script src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.81/pdf.js'>
 </script>
-  
+
+<div class="loader">
+  <span class="l-1"></span>
+  <span class="l-2"></span>
+  <span class="l-3"></span>
+  <span class="l-4"></span>
+  <span class="l-5"></span>
+  <span class="l-6"></span>
+</div>
+<span>Long, complex documents can<br />take minutes to process</span>
+
 <script>
+  PDFJS.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.81/pdf.worker.js'
+  window.onload = google.script.run.withSuccessHandler(countFigures).getDocAsPDF();
 
-PDFJS.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.81/pdf.worker.js'
-page_labs = [];
-
-window.onload = google.script.run.withSuccessHandler(countFigures).getDocAsPDF();
-
-function logIt(blob) {
-  var pdf = PDFJS.getDocument({data: blob});
-  return pdf.then(function(pdf) {
-    var max_pages = pdf.pdfInfo.numPages,
-        promise_count = [];
-    for (var i = 1; i <= max_pages; i++) {
-      var page = pdf.getPage(i);
-      promise_count.push(page.then(function(page) {
-        var text_content = page.getTextContent();
-        return text_content.then(function(page){
-          return text_content
-        });
-      }));
-    }
-  
-    // Wait for all pages and sum counts
-  
-    return Promise.all(promise_count).then(function (page_counts) {
-      var final_page_count = [];
-      for (var j = 0; j < page_counts.length; j++) {
-        var page_as_string = JSON.stringify(page_counts[j]);
-        final_page_count.push(page_as_string.split('☙').length - 1)
+  function getAllPageTexts(blob) {
+    const pdf = PDFJS.getDocument({ data: blob })
+    return pdf.then(pdf => {
+      const maxPages = pdf.pdfInfo.numPages
+      const pageTexts = []
+      for (let i = 1; i <= maxPages; i++) {
+        pageTexts.push(pdf.getPage(i).then(page => page.getTextContent()))
       }
-      return final_page_count;
-    });
-  });
-}
+      return Promise.all(pageTexts)
+    })
+  }
 
-function countFigures(blob) {
-  logIt(blob).then(function (count) {
-    google.script.run.withSuccessHandler(restoreLabels).insertLoFNumbers(count);   
-  });
-}
+  const countLabels = pageText => JSON.stringify(pageText).split('☙').length - 1
+
+  function countFigures(blob) {
+    getAllPageTexts(blob).then(pageTexts => {
+      google.script.run.withSuccessHandler(restoreLabels).insertLoFNumbers(pageTexts.map(countLabels))
+    })
+  }
 
 
-function restoreLabels() {
-  google.script.run.withSuccessHandler(closeDialog).restoreLabels();
-}
+  function restoreLabels() {
+    google.script.run.withSuccessHandler(closeDialog).restoreLabels()
+  }
 
-function closeDialog() {
-  google.script.host.close();
-}
+  function closeDialog() {
+    google.script.host.close()
+  }
 </script>

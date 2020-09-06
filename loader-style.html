@@ -1,0 +1,75 @@
+<style>
+  body {
+    font-size: 14px;
+    font-family: 'Lucida Grande', Helvetica, Arial, sans-serif;
+    color: #333;
+    margin-top: 10px;
+  }
+  
+  .loader {
+    text-align: center;
+  }
+  
+  .loader span {
+    display: block;
+    margin: 0 auto;
+    
+  }
+
+  .loader span[class*="l-"] {
+    height: 4px;
+    width: 4px;
+    background: #000;
+    display: inline-block;
+    margin: 12px 2px;
+
+    border-radius: 100%;
+    animation: loader 2s infinite;
+    animation-timing-function: cubic-bezier(0.030, 0.615, 0.995, 0.415);
+    opacity: 0;
+  }
+
+  .loader span.l-1 {
+    animation-delay: 0;
+  }
+
+  .loader span.l-2 {
+    animation-delay: 0.1s;
+  }
+
+  .loader span.l-3 {
+    animation-delay: 0.2s;
+  }
+
+  .loader span.l-4 {
+    animation-delay: 0.3s;
+  }
+
+  .loader span.l-5 {
+    animation-delay: 0.4s;
+  }
+
+  .loader span.l-6 {
+    animation-delay: 0.5s;
+  }
+
+  @keyframes loader {
+    0% {
+      transform: translateX(-30px);
+      opacity: 0;
+    }
+
+    25% {
+      opacity: 1;
+    }
+
+    50% {
+      transform: translateX(30px);
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 0;
+    }
+  }
+</style>

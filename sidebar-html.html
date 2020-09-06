@@ -1,0 +1,134 @@
+<base target='_top'>
+<link rel='stylesheet' href='https://ssl.gstatic.com/docs/script/css/add-ons1.css'>
+<?!= include('sidebar-style'); ?>
+<?!= include('loader-style'); ?>
+
+<div class='main-wrapper'>
+
+  <article class='category'>
+    <div class='category__button' id='delete-category'>+</div>
+    <div class='category__button' id='add-category'>+</div>
+    <select id='category-select'></select>
+    <input id='custom-category-name' maxlength='20' placeholder='Custom name'>
+  </article>
+
+  <form id='form__main'>
+    <article class='details'>
+      <div class='load-overlay'>
+        <div class='loader'>
+          <span class='l-1'></span>
+          <span class='l-2'></span>
+          <span class='l-3'></span>
+          <span class='l-4'></span>
+          <span class='l-5'></span>
+          <span class='l-6'></span>
+        </div>
+      </div>
+
+      <div id='lab-cover'>
+        <p>Add footnote label to any word<br />within a footnote.</p>
+        <p>No footnote text is replaced<br />or styled.</p>
+      </div>
+      <div class='main-section' id='lab'>
+        <div class='input-row'><h2>Labels</h2></div>
+        <div class='input-row'>
+          <div class='input-row__name'>Code</div>
+          <div class='input-row__value'>
+              <div id='lab_code' class='input-code'></div>
+              <div id='cs_lab_code'>
+                #&nbsp;<input id='lab_code_entry' class='input-text' autocomplete='off' data-lpignore=true pattern='\w{5}' maxlength='5' type='text' value=''>
+                <span id='taken'></span>
+              </div>
+          </div>
+        </div>
+        <div class='input-row'>
+          <div class='input-row__name'>Text</div>
+          <div class='input-row__value'>
+            <input title='Text' type='text' name='lab_text' id='lab_text' autocomplete='off' data-lpignore=true  class='input-text cr-text'>
+            <input title='Suffix text' type='text' name='lab_suffix' id='lab_suffix' autocomplete='off' data-lpignore=true  class='input-text cr-suffix'>
+          </div>
+        </div>
+        <div class='input-row'>
+          <div class='input-row__name'>Style</div>
+          <div class='input-row__value'>
+            <input title='Bold' type='button' name='lab_bold' class='style-button bold' id='lab_bold' value='B'>
+            <input title='Italic' type='button' name='lab_italic' class='style-button italic' id='lab_italic' value='I'>
+            <input title='Underline' type='button' name='lab_underline' class='style-button underline' id='lab_underline' value='U'>
+          </div>
+        </div>
+        <div class='input-row'>
+          <div class='input-row__name'>Colour</div>
+          <div class='input-row__value'>
+            <input title='Colour (HEX format)' id='lab_color' autocomplete='off' data-lpignore=true maxlength=6 placeholder='hex...' pattern='([A-f0-9]{3}|[A-f0-9]{6})' oninvalid='setCustomValidity("Invalid Hex code")' class='input-text cr-color' type='text'>
+            <button title='Clone colour from selected text' class='clone-color'>↷</button>
+          </div>
+        </div>
+        <div class='preview'>
+          <div class='preview__internal'>
+            <div class='preview__line'>
+              <div class='preview__text preview__prefix'>Figure</div>
+              <div class='preview__text preview__number'>1</div>
+              <div class='preview__text preview__suffix'></div>
+              <div class='preview__text--shaded'>&nbsp;Early human migration route out of Africa</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class='main-section' id='ref'>
+        <div class='input-row'><h2>References</h2></div>
+        <div class='input-row'>
+          <div class='input-row__name'>Code</div>
+          <div class='input-row__value' id='ref_code' class='ref-code'><em>#</em></div>
+        </div>
+        <div class='input-row'>
+          <div class='input-row__name'>Text</div>
+          <div class='input-row__value'>
+            <input title='Text' id='ref_text' autocomplete='off' data-lpignore=true  class='input-text cr-text' type='text'>
+            <input title='Suffix text' id='ref_suffix' autocomplete='off' data-lpignore=true  class='input-text cr-suffix' type='text'>
+          </div>
+        </div>
+        <div class='input-row'>
+          <div class='input-row__name'>Style</div>
+          <div class='input-row__value'>
+            <input title='Bold' type='button' name='lab_bold' class='style-button bold' id='ref_bold' value='B'>
+            <input title='Italic' type='button' name='lab_italic' class='style-button italic' id='ref_italic' value='I'>
+            <input title='Underline' type='button' name='lab_underline' class='style-button underline' id='ref_underline' value='U'>
+          </div>
+        </div>
+        <div class='input-row'>
+          <div class='input-row__name'>Colour</div>
+          <div class='input-row__value'>
+            <input type='text' title='Colour (HEX format)' autocomplete='off' data-lpignore=true id='ref_color' placeholder='hex...' pattern='([A-f0-9]{3}|[A-f0-9]{6})' oninvalid='setCustomValidity("Invalid Hex code")' autocomplete='off' data-lpignore=true  maxlength=6 class='input-text cr-color'>
+            <button title='Clone colour from selected text' class='clone-color'>↷</button>
+          </div>
+        </div>
+        <div class='preview'>
+          <div class='preview__internal'>
+            <div class='preview__line'>
+              <div class='preview__text--shaded'>the line in</div>
+              <div class='preview__text preview__prefix'>figure</div>
+              <div class='preview__text preview__number'>1</div>
+              <div class='preview__text preview__suffix'></div>
+              <div class='preview__text--shaded'>&nbsp;represents the path of human</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+    <article class='actions'>
+      <div class='actions__row'>
+        <input type='button' name='save-defaults' class='actions__button' id='save-defaults' value='Save defaults'>
+        <input type='button' name='restore-defaults' class='actions__button' id='restore-defaults' value='Restore defaults'>
+      </div>
+      <div class='actions__row'>
+        <input type='submit' name='save' class='actions__button blue' id='save' value='Save and apply'>
+        <input type='button' name='cancel' class='actions__button' id='cancel' value='Cancel'>
+      </div>
+    </article>
+  </form>
+
+</div>
+<script src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'>
+</script>
+<?!= include('sidebar-js'); ?>
