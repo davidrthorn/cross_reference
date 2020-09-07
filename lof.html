@@ -28,12 +28,15 @@
       return Promise.all(pageTexts)
     })
   }
-
-  const countLabels = pageText => JSON.stringify(pageText).split('☙').length - 1
+  
+  const countLabels = sign => pageText => (JSON.stringify(pageText).match(new RegExp(sign, 'g')) || []).length
 
   function countFigures(blob) {
     getAllPageTexts(blob).then(pageTexts => {
-      google.script.run.withSuccessHandler(restoreLabels).insertLoFNumbers(pageTexts.map(countLabels))
+      google.script.run.withSuccessHandler(restoreLabels).insertLoFNumbers({
+      'fig': pageTexts.map(countLabels('☙')),
+      'tab': pageTexts.map(countLabels('❆')),
+      })
     })
   }
 

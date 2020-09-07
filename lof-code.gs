@@ -10,8 +10,8 @@ function createLoF() {
   if (descriptions['fig'].length === 0) return
   
   for (const code in descriptions) {
-    if (descriptions[code].length === 0) continue
     const position = deleteLoF(code) || getCursorParagraphIndex()
+    if (descriptions[code].length === 0) continue
     insertDummyLoF(code, descriptions[code], position) 
   }
   
@@ -140,9 +140,9 @@ function insertLoFNumbers(pageNumbers) {
     const lofTable = findLoF(code)
     if (!lofTable) continue
     let currentRow = 0
-    
-    for (let i = 0; i < pageNumbers.length; i++) {
-      const labCount = pageNumbers[i]
+   
+    for (let i = 0; i < pageNumbers[code].length; i++) {
+      const labCount = pageNumbers[code][i]
       if (!labCount) continue
       
       const pageNumber = (i + 1).toString()
