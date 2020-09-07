@@ -6,12 +6,14 @@ const getDocAsPDF = () => DocumentApp.getActiveDocument().getBlob().getBytes()
 function createLoF() {
   if (updateDoc() === 'error') return
   
-  const {figDescs, labCount} = encodeLabel()
-  if (figDescs.length === 0) return
+  const descriptions = encodeLabel()
+  if (descriptions['fig'].length === 0) return
   
-  const position = deleteLoF() || getCursorParagraphIndex()
-  
-  insertDummyLoF(labCount, figDescs, position)
+  for (const code in descriptions) {
+    if (descriptions[code].length === 0) continue
+    const position = deleteLoF(code) || getCursorParagraphIndex()
+    insertDummyLoF(code, descriptions[code], position) 
+  }
   
   const html = HtmlService.createTemplateFromFile('lof').evaluate()
   html.setWidth(250).setHeight(90)
@@ -43,25 +45,33 @@ function getContainingParagraph(el) {
 function encodeLabel() {
   const doc = DocumentApp.getActiveDocument()
   const paragraphs = doc.getBody().getParagraphs()
-  const labCount = {'fig': 0}
-  const figDescs = []
+  const descriptions = {'fig': [], 'tab':[]}
   
-  const getLabs = getCRUrls(isFigLab)
+  const getCRs = getCRUrls(isCRUrl(5))
   const handleText = text => CRUrl => {
-    figDescs.push(text.getText())
+    const code = CRUrl.url.substr(1, 3)
+    let identifier = ''
+    
+    if (code === 'fig') {
+      identifier = '☙'
+    } else if (code === 'tab') {
+      identifier = '❆'
+    } else {
+      return
+    }
+    descriptions[code].push(text.getText())    
     const start = CRUrl.start
-    text.deleteText(start + 1, start + 2).insertText(start + 1, '☙')
-    labCount['fig']++
+    text.deleteText(start + 1, start + 2).insertText(start + 1, identifier)
   }
   
-  const error = updateParagraphs(paragraphs)(getLabs)(handleText)
+  const error = updateParagraphs(paragraphs)(getCRs)(handleText)
   
-  return {figDescs, labCount}
+  return descriptions
 }
 
 
-function deleteLoF() {
-  const lofTable = findLoF()
+function deleteLoF(code) {
+  const lofTable = findLoF(code)
   if (!lofTable) return
   
   const lofIndex = lofTable.getParent().getChildIndex(lofTable)
@@ -71,8 +81,8 @@ function deleteLoF() {
 }
 
 
-function findLoF() {
-  const lof = DocumentApp.getActiveDocument().getNamedRanges('lofTable')[0]
+function findLoF(code) {
+  const lof = DocumentApp.getActiveDocument().getNamedRanges('lofTable_' + code)[0]
   if (!lof ) return
 
   const el = lof.getRange().getRangeElements()[0].getElement()
@@ -80,17 +90,17 @@ function findLoF() {
 }
 
 
-function insertDummyLoF(labCount={}, figDescs=[], position) {
+function insertDummyLoF(code, descriptions=[], position) {
   const doc = DocumentApp.getActiveDocument()
   const placeholder = '...'
-  const lofCells = figDescs.map(fd => [fd.replace(/^[\t\r\n]/, ''), placeholder])
+  const lofCells = descriptions.map(fd => [fd.replace(/^[\t\r\n]/, ''), placeholder])
   
   const lofTable = doc.getBody().insertTable(position, lofCells)
   styleLoF(lofTable)
   
   const range = doc.newRange()
   range.addElement(lofTable)
-  doc.addNamedRange('lofTable', range.build())
+  doc.addNamedRange('lofTable_' + code, range.build())
 }
 
 
@@ -126,22 +136,25 @@ function styleLoF(lofTable) {
 @var pageNumbers : [1,0,2...] -- members correspond to count of labels on a page (in order)
 */
 function insertLoFNumbers(pageNumbers) {
-  const lofTable = findLoF()
-  let currentRow = 0
-  
-  for (let i = 0; i < pageNumbers.length; i++) {
-    const labCount = pageNumbers[i]
-    if (!labCount) continue
+  for (const code of ['fig', 'tab']) {
+    const lofTable = findLoF(code)
+    if (!lofTable) continue
+    let currentRow = 0
     
-    const pageNumber = (i + 1).toString()
-    
-    for (let j = currentRow; j < lofTable.getNumRows(); j++) {
-      lofTable.getCell(j, 1)
-        .clear()
-        .getChild(0).asParagraph()
-        .appendText(pageNumber)
+    for (let i = 0; i < pageNumbers.length; i++) {
+      const labCount = pageNumbers[i]
+      if (!labCount) continue
+      
+      const pageNumber = (i + 1).toString()
+      
+      for (let j = currentRow; j < lofTable.getNumRows(); j++) {
+        lofTable.getCell(j, 1)
+          .clear()
+          .getChild(0).asParagraph()
+          .appendText(pageNumber)
+      }
+      currentRow += labCount
     }
-    currentRow += labCount
   }
 }
 
