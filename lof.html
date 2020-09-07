@@ -29,7 +29,7 @@
     })
   }
   
-  const countLabels = sign => pageText => (JSON.stringify(pageText).match(new RegExp(sign, 'g')) || []).length
+  const countLabels = sign => pageText => JSON.stringify(pageText).split(sign).length - 1
 
   function countFigures(blob) {
     getAllPageTexts(blob).then(pageTexts => {
