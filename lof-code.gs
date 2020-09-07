@@ -2,6 +2,10 @@ const isFigLab = url => /^#figur_/.test(url)
 
 const getDocAsPDF = () => DocumentApp.getActiveDocument().getBlob().getBytes()
 
+const saveLofConfig = settings => PropertiesService.getDocumentProperties().setProperty('entityTablesSettings', JSON.stringify(settings))
+
+const getLofConfig = () => JSON.parse(PropertiesService.getDocumentProperties().getProperty('entityTablesSettings'))
+
 
 function createLoF() {
   if (updateDoc() === 'error') return
