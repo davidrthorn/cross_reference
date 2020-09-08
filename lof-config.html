@@ -6,24 +6,38 @@
   <body>
     <form id='form__main'>
       <div class='row'>
-        <div>List of figures</div>
-          <input name='fig-enabled' type='checkbox'>
-          <input name='fig-order' type='number'>
+        <div id='fig'>List of figures</div>
+          <input class='enabled' name='fig-enabled' type='checkbox'>
+          <input class='order' name='fig-order' type='number'>
       </div>
       <div class='row'>
-        <div>List of tables</div>
-          <input name='tab-enabled' type='checkbox'>
-          <input name='tab-order' type='number'>
+        <div id='tab'>List of tables</div>
+          <input class='enabled' name='tab-enabled' type='checkbox'>
+          <input class='order' name='tab-order' type='number'>
       </div>
       <input type='submit' name='save' class='actions__button' id='save' value='Save'>
-      <input type='button' name='cancel' class='actions__button' id='save' value='Cancel'>
+      <input type='button' name='cancel' class='actions__button' id='cancel' value='Cancel'>
     </form>
   </body>
+  <script src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script>
   <script>
   $('#form__main').submit(function (e) {
     e.preventDefault()
-    google.script.run.withSuccessHandler(google.script.host.close).saveLofConfig()
+    
+    const values = {}
+    
+    for (const code of ['fig', 'tab']) {
+      const $code = $('#' + code)
+      if ($code.find('.enabled').attr('checked')) continue
+      values[code] = {'order': $code.find('.order').val()}
+    }
+    
+    google.script.run.withSuccessHandler(close).saveLofConfig(values)
   })
+  
+  function close() {
+  google.script.host.close()
+  }
   
   </script>
 </html>

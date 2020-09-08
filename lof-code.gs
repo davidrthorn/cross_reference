@@ -10,14 +10,23 @@ const getLofConfig = () => JSON.parse(PropertiesService.getDocumentProperties().
 function createLoF() {
   if (updateDoc() === 'error') return
   
-  const descriptions = encodeLabel()
-  if (descriptions['fig'].length === 0) return
+  const settings = getLofConfig() || {'fig': {'order': 0}, 'tab': {'order': 1}}
+  const signs = {'fig': '☙', 'tab': '❆'}
+ 
+  const descriptions = encodeLabel(signs)
   
-  for (const code in descriptions) {
-    const position = deleteLoF(code) || getCursorParagraphIndex()
+  const sorted = Object.keys(settings).sort((a, b) => settings[a].order || 0 - settings[b].order || 0)
+  
+  let labels = false
+  const cursor = getCursorParagraphIndex()
+  for (const code of sorted) {
+    const position = deleteLoF(code) || cursor
     if (descriptions[code].length === 0) continue
+    labels = true
     insertDummyLoF(code, descriptions[code], position) 
   }
+  
+  if (!labels) return
   
   const html = HtmlService.createTemplateFromFile('lof').evaluate()
   html.setWidth(250).setHeight(90)
@@ -46,7 +55,7 @@ function getContainingParagraph(el) {
 // encodeLabel replaces the beginning of a label with
 // a rare UTF-8 characters that will be used
 // to identify labels when we process the PDF file
-function encodeLabel() {
+function encodeLabel(signMap) {
   const doc = DocumentApp.getActiveDocument()
   const paragraphs = doc.getBody().getParagraphs()
   const descriptions = {'fig': [], 'tab':[]}
@@ -54,18 +63,12 @@ function encodeLabel() {
   const getCRs = getCRUrls(isCRUrl(5))
   const handleText = text => CRUrl => {
     const code = CRUrl.url.substr(1, 3)
-    let identifier = ''
-    
-    if (code === 'fig') {
-      identifier = '☙'
-    } else if (code === 'tab') {
-      identifier = '❆'
-    } else {
-      return
-    }
+    let sign = signMap[code]
+    if (!sign) return
+
     descriptions[code].push(text.getText())    
     const start = CRUrl.start
-    text.deleteText(start + 1, start + 2).insertText(start + 1, identifier)
+    text.deleteText(start + 1, start + 2).insertText(start + 1, sign)
   }
   
   const error = updateParagraphs(paragraphs)(getCRs)(handleText)
