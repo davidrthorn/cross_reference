@@ -11,19 +11,23 @@ function createLoF() {
   if (updateDoc() === 'error') return
   
   const settings = getLofConfig() || {'fig': {'order': 0}, 'tab': {'order': 1}}
-  const signs = {'fig': '☙', 'tab': '❆'}
- 
-  const descriptions = encodeLabel(signs)
+  settingKeys = Object.keys(settings)
+  let position = getPosition(settings)
   
-  const sorted = Object.keys(settings).sort((a, b) => settings[a].order || 0 - settings[b].order || 0)
+  const signs = filterObjectByKeys({
+    'fig': '☙', 'tab': '❆'
+  }, settingKeys)
+  
+  
+  const descriptions = encodeLabel(signs)
+  const sorted = settingKeys.sort((a, b) => settings[a].order || 0 - settings[b].order || 0)
   
   let labels = false
-  const cursor = getCursorParagraphIndex()
+  
   for (const code of sorted) {
-    const position = deleteLoF(code) || cursor
     if (descriptions[code].length === 0) continue
     labels = true
-    insertDummyLoF(code, descriptions[code], position) 
+    insertDummyLoF(code, descriptions[code], position++) 
   }
   
   if (!labels) return
@@ -31,6 +35,28 @@ function createLoF() {
   const html = HtmlService.createTemplateFromFile('lof').evaluate()
   html.setWidth(250).setHeight(90)
   DocumentApp.getUi().showModalDialog(html, 'Generating list of figures...')
+}
+
+
+function getPosition(settings) {
+  const cursor = getCursorParagraphIndex() // must assign this to variable before deleting LoFs
+  
+  const positionFig = deleteLoF('fig')
+  const positionTab = deleteLoF('tab')
+
+  return positionFig && positionTab
+    ? Math.min(positionFig, positionTab)
+    : positionFig || positionTab || cursor || 0
+}
+
+function filterObjectByKeys(object, keys) {
+  const result = {}
+  for (const k in object) {
+    if (keys.includes(k)) {
+      result[k] = object[k]
+    }
+  }
+  return result
 }
 
 
@@ -90,10 +116,11 @@ function deleteLoF(code) {
 
 function findLoF(code) {
   const lof = DocumentApp.getActiveDocument().getNamedRanges('lofTable_' + code)[0]
-  if (!lof ) return
-
-  const el = lof.getRange().getRangeElements()[0].getElement()
-  return el.getType() === DocumentApp.ElementType.TABLE ? el.asTable() : null
+  if (!lof) return
+  const el = lof.getRange().getRangeElements()[0]
+  if (!el) return
+  const element = el.getElement()
+  return element.getType() === DocumentApp.ElementType.TABLE ? element.asTable() : null
 }
 
 
