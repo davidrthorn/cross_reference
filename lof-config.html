@@ -7,13 +7,13 @@
     <form id='form__main'>
       <div class='row'>
         <div id='fig'>List of figures</div>
-          <input class='enabled' name='fig-enabled' type='checkbox'>
-          <input class='order' name='fig-order' type='number'>
+          <input id='fig-enabled' name='fig-enabled' type='checkbox'>
+          <input id='fig-order' name='fig-order' type='number'>
       </div>
       <div class='row'>
         <div id='tab'>List of tables</div>
-          <input class='enabled' name='tab-enabled' type='checkbox'>
-          <input class='order' name='tab-order' type='number'>
+          <input id='tab-enabled' name='tab-enabled' type='checkbox'>
+          <input id='tab-order' name='tab-order' type='number'>
       </div>
       <input type='submit' name='save' class='actions__button' id='save' value='Save'>
       <input type='button' name='cancel' class='actions__button' id='cancel' value='Cancel'>
@@ -25,18 +25,16 @@
     e.preventDefault()
     
     const values = {}
-    
     for (const code of ['fig', 'tab']) {
-      const $code = $('#' + code)
-      if ($code.find('.enabled').attr('checked')) continue
-      values[code] = {'order': $code.find('.order').val()}
+      if (!$('#' + code + '-enabled').prop('checked')) continue
+      values[code] = {'order': parseInt($('#' + code + '-order').val())}
     }
-    
     google.script.run.withSuccessHandler(close).saveLofConfig(values)
-  })
+  }) 
+  
   
   function close() {
-  google.script.host.close()
+    google.script.host.close()
   }
   
   </script>
