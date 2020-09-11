@@ -7,27 +7,32 @@ const saveLofConfig = settings => PropertiesService.getDocumentProperties().setP
 const getLofConfig = () => JSON.parse(PropertiesService.getDocumentProperties().getProperty('entityTablesSettings'))
 
 
+//TODO:
+// 1. incrementing position breaks when there is a heading separating lists (which there will usually be). We need to position of each LoF.
+// 2. Switching from 1 back to 2 LoFs is not respected
+
 function createLoF() {
   if (updateDoc() === 'error') return
   
   const settings = getLofConfig() || {'fig': {'order': 0}, 'tab': {'order': 1}}
   settingKeys = Object.keys(settings)
-  let position = getPosition(settings)
   
   const signs = filterObjectByKeys({
     'fig': '☙', 'tab': '❆'
   }, settingKeys)
   
+  const positions = getPositions()
   
   const descriptions = encodeLabel(signs)
   const sorted = settingKeys.sort((a, b) => settings[a].order || 0 - settings[b].order || 0)
   
   let labels = false
   
+  let fallbackPosition = getCursorParagraphIndex() || 0 // must assign this to variable before deleting LoFs
   for (const code of sorted) {
     if (descriptions[code].length === 0) continue
     labels = true
-    insertDummyLoF(code, descriptions[code], position++) 
+    insertDummyLoF(code, descriptions[code], positions[code] || fallbackPosition++) 
   }
   
   if (!labels) return
@@ -38,15 +43,26 @@ function createLoF() {
 }
 
 
-function getPosition(settings) {
-  const cursor = getCursorParagraphIndex() // must assign this to variable before deleting LoFs
-  
-  const positionFig = deleteLoF('fig')
-  const positionTab = deleteLoF('tab')
+const getElementIndex = el => el.getParent().getChildIndex(el)
 
-  return positionFig && positionTab
-    ? Math.min(positionFig, positionTab)
-    : positionFig || positionTab || cursor || 0
+
+function getPositions() {  
+  const figTable = findLoF('fig')
+  const tabTable = findLoF('tab')
+  
+  const result = {}
+  if (figTable) {
+    result.fig = getElementIndex(figTable)
+  }
+  
+  if (tabTable) {
+    result.tab = getElementIndex(tabTable)
+  }
+  
+  figTable && figTable.removeFromParent()
+  tabTable && tabTable.removeFromParent()
+
+  return result
 }
 
 function filterObjectByKeys(object, keys) {
@@ -105,10 +121,11 @@ function encodeLabel(signMap) {
 
 function deleteLoF(code) {
   const lofTable = findLoF(code)
+  
   if (!lofTable) return
   
   const lofIndex = lofTable.getParent().getChildIndex(lofTable)
-  lofTable.removeFromParent()
+  // lofTable.removeFromParent()
   
   return lofIndex
 }
