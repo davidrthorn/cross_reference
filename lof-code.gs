@@ -15,21 +15,20 @@ function createLoF() {
   if (updateDoc() === 'error') return
   
   const settings = getLofConfig() || {'fig': {'order': 0}, 'tab': {'order': 1}}
-  settingKeys = Object.keys(settings)
+  const codes = Object.keys(settings).sort((a, b) => settings[a].order || 0 - settings[b].order || 0)
   
   const signs = filterObjectByKeys({
     'fig': '☙', 'tab': '❆'
-  }, settingKeys)
+  }, codes)
   
   const positions = getPositions()
   
   const descriptions = encodeLabel(signs)
-  const sorted = settingKeys.sort((a, b) => settings[a].order || 0 - settings[b].order || 0)
   
   if (!descriptions.fig.length && !descriptions.tab.length) return
   
   let fallbackPosition = getCursorParagraphIndex() || 0 // must assign this to variable before deleting LoFs
-  for (const code of sorted) {
+  for (const code of codes) {
     if (descriptions[code].length === 0) continue
     insertDummyLoF(code, descriptions[code], positions[code] || fallbackPosition++) 
   }
