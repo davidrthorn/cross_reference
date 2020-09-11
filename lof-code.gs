@@ -26,16 +26,13 @@ function createLoF() {
   const descriptions = encodeLabel(signs)
   const sorted = settingKeys.sort((a, b) => settings[a].order || 0 - settings[b].order || 0)
   
-  let labels = false
+  if (!descriptions.fig.length && !descriptions.tab.length) return
   
   let fallbackPosition = getCursorParagraphIndex() || 0 // must assign this to variable before deleting LoFs
   for (const code of sorted) {
     if (descriptions[code].length === 0) continue
-    labels = true
     insertDummyLoF(code, descriptions[code], positions[code] || fallbackPosition++) 
   }
-  
-  if (!labels) return
   
   const html = HtmlService.createTemplateFromFile('lof').evaluate()
   html.setWidth(250).setHeight(90)
