@@ -6,10 +6,10 @@ function onOpen(e) {
   DocumentApp.getUi()
     .createAddonMenu()
     .addItem('Update document', 'updateDoc')
-    .addItem('Configure', 'showSidebar')
+    .addItem('Configure references', 'showSidebar')
     .addSeparator()
-    .addItem('Create list of figures', 'createLoF')
-    .addItem('Configure', 'showLofConfig')
+    .addItem('Update lists', 'createLoF')
+    .addItem('Configure lists', 'showLofConfig')
     .addToUi()
 }
 
