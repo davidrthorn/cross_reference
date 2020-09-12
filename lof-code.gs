@@ -7,10 +7,6 @@ const saveLofConfig = settings => PropertiesService.getDocumentProperties().setP
 const getLofConfig = () => JSON.parse(PropertiesService.getDocumentProperties().getProperty('entityTablesSettings'))
 
 
-//TODO:
-// 1. incrementing position breaks when there is a heading separating lists (which there will usually be). We need to position of each LoF.
-// 2. Switching from 1 back to 2 LoFs is not respected
-
 function createLoF() {
   if (updateDoc() === 'error') return
   
@@ -28,9 +24,10 @@ function createLoF() {
   if (!descriptions.fig.length && !descriptions.tab.length) return
   
   let fallbackPosition = getCursorParagraphIndex() || 0 // must assign this to variable before deleting LoFs
-  for (const code of codes) {
+  for (const i in codes) {
+    const code = codes[i]
     if (descriptions[code].length === 0) continue
-    insertDummyLoF(code, descriptions[code], positions[code] || fallbackPosition++) 
+    insertDummyLoF(code, descriptions[code], positions[i] || fallbackPosition++) 
   }
   
   const html = HtmlService.createTemplateFromFile('lof').evaluate()
@@ -42,23 +39,22 @@ function createLoF() {
 const getElementIndex = el => el.getParent().getChildIndex(el)
 
 
-function getPositions() {  
+function getPositions() {
   const figTable = findLoF('fig')
   const tabTable = findLoF('tab')
   
-  const result = {}
+  const positions = []
   if (figTable) {
-    result.fig = getElementIndex(figTable)
+    positions.push(getElementIndex(figTable))
   }
-  
   if (tabTable) {
-    result.tab = getElementIndex(tabTable)
+    positions.push(getElementIndex(tabTable))
   }
   
   figTable && figTable.removeFromParent()
   tabTable && tabTable.removeFromParent()
 
-  return result
+  return positions.sort()
 }
 
 function filterObjectByKeys(object, keys) {
