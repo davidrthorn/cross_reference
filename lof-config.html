@@ -3,35 +3,78 @@
   <head>
     <base target="_top">
     <link rel='stylesheet' href='https://ssl.gstatic.com/docs/script/css/add-ons1.css'>
+    <?!= include('loader-style'); ?>
+    <style>
+    .load-overlay {
+      margin-top: 60px;
+    }
+    .order-box {
+      width: 40px;
+    }
+    .title {
+      font-weight: bold;
+      height: 1.2rem;
+    }
+    .row {
+      height: 50px;
+    }
+    .buttons {
+      margin-top: 26px;
+    }
+    .actions__button {
+      margin-right: 8px !important;
+    }
+    </style>
   </head>
   <body>
-    <form id='form__main'>
+    <div class='load-overlay'>
+      <div class='loader'>
+        <span class='l-1'></span>
+        <span class='l-2'></span>
+        <span class='l-3'></span>
+        <span class='l-4'></span>
+        <span class='l-5'></span>
+        <span class='l-6'></span>
+      </div>
+    </div>
+    <form id='form__main' hidden>
       <div class='row'>
-        <div id='fig'>List of figures</div>
+        <div id='fig' class='title'>Figures</div>
+        <div class='inputs'>
+          <label for="fig-enabled">Enabled</label>
           <input id='fig-enabled' name='fig-enabled' type='checkbox'>
-          <input id='fig-order' name='fig-order' type='number'>
+          <label for="fig-order">Order</label>
+          <input id='fig-order' class='order-box' value=0 name='fig-order' type='number'>
+        </div>
       </div>
       <div class='row'>
-        <div id='tab'>List of tables</div>
+        <div id='tab' class='title'>Tables</div>
+        <div class='inputs'>
+          <label for="tab-enabled">Enabled</label>
           <input id='tab-enabled' name='tab-enabled' type='checkbox'>
-          <input id='tab-order' name='tab-order' type='number'>
+          <label for="tab-order">Order</label>
+          <input id='tab-order' class='order-box' value=0 name='tab-order' type='number'>
+        </div>
       </div>
-      <input type='submit' name='save' class='actions__button blue' id='save' value='Save'>
-      <button class='actions__button' id='cancel' onclick='close()'>Cancel</button>
+      <div class='buttons'>
+        <input type='submit' name='save' class='actions__button blue' id='save' value='Save'>
+        <button class='actions__button' id='cancel' onclick='close()'>Cancel</button>
+      </div>
     </form>
   </body>
   <script src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script>
   <script>
-    $(function () {
+  $(function () {
     google.script.run.withSuccessHandler(initialise).getLofConfig()
   })
   
   function initialise(lofSettings) {
-    console.log(lofSettings)
     for (const code in lofSettings) {
       $('#' + code + '-enabled').prop('checked', true)
       $('#' + code + '-order').val(lofSettings[code].order)
     }
+    $('.load-overlay').hide()
+    $('#form__main').show()
   }
   
   $('#form__main').submit(function (e) {

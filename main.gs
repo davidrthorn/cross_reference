@@ -9,11 +9,18 @@ function onOpen(e) {
     .addItem('Configure', 'showSidebar')
     .addSeparator()
     .addItem('Create list of figures', 'createLoF')
+    .addItem('Configure', 'showLofConfig')
     .addToUi()
 }
 
 function include(filename) {
   return HtmlService.createHtmlOutputFromFile(filename).getContent()
+}
+
+function showLofConfig() {
+  const html = HtmlService.createTemplateFromFile('lof-config').evaluate()
+  html.setWidth(280).setHeight(180)
+  DocumentApp.getUi().showModalDialog(html, 'Configure entity lists')
 }
 
 function showSidebar() {

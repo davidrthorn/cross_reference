@@ -1,5 +1,3 @@
-// TODO: not renumbering when reordrering!
-
 const isFigLab = url => /^#figur_/.test(url)
 
 const getDocAsPDF = () => DocumentApp.getActiveDocument().getBlob().getBytes()
@@ -133,7 +131,7 @@ function findLoF(code) {
   if (!el) return
   
   const element = el.getElement()
-  return getTable(element) || getTable(element.getNextSibling())
+  return getTable(element) || getTable(element.getNextSibling()) // Fallback because swapping order of two tables gets preceding paragraph rather than table (for some reason)
 }
 
 const getTable = element => element && element.getType() === DocumentApp.ElementType.TABLE ? element.asTable() : null
@@ -187,9 +185,8 @@ function styleLoF(lofTable) {
 function insertLoFNumbers(pageNumbers) {
   for (const code of ['fig', 'tab']) {
     const lofTable = findLoF(code)
-    console.log(lofTable)
-    
     if (!lofTable) continue
+    
     let currentRow = 0
    
     for (let i = 0; i < pageNumbers[code].length; i++) {
