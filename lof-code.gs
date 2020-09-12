@@ -128,11 +128,15 @@ function deleteLoF(code) {
 function findLoF(code) {
   const lof = DocumentApp.getActiveDocument().getNamedRanges('lofTable_' + code)[0]
   if (!lof) return
+  
   const el = lof.getRange().getRangeElements()[0]
   if (!el) return
+  
   const element = el.getElement()
-  return element.getType() === DocumentApp.ElementType.TABLE ? element.asTable() : null
+  return getTable(element) || getTable(element.getNextSibling())
 }
+
+const getTable = element => element && element.getType() === DocumentApp.ElementType.TABLE ? element.asTable() : null
 
 
 function insertDummyLoF(code, descriptions=[], position) {
@@ -183,6 +187,8 @@ function styleLoF(lofTable) {
 function insertLoFNumbers(pageNumbers) {
   for (const code of ['fig', 'tab']) {
     const lofTable = findLoF(code)
+    console.log(lofTable)
+    
     if (!lofTable) continue
     let currentRow = 0
    
