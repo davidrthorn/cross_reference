@@ -10,7 +10,7 @@ const getLofConfig = () => JSON.parse(PropertiesService.getDocumentProperties().
 function createLoF() {
   if (updateDoc() === 'error') return
   
-  const settings = getLofConfig() || {'fig': {'order': 0}, 'tab': {'order': 1}}
+  const settings = getLofConfig() || {'fig': {'order': 0}}
   const codes = Object.keys(settings).sort((a, b) => settings[a].order || 0 - settings[b].order || 0)
   
   const signs = filterObjectByKeys({
