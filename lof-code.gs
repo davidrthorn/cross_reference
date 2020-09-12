@@ -1,3 +1,5 @@
+// TODO: not renumbering when reordrering!
+
 const isFigLab = url => /^#figur_/.test(url)
 
 const getDocAsPDF = () => DocumentApp.getActiveDocument().getBlob().getBytes()

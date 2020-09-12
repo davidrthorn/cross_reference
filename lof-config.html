@@ -2,6 +2,7 @@
 <html>
   <head>
     <base target="_top">
+    <link rel='stylesheet' href='https://ssl.gstatic.com/docs/script/css/add-ons1.css'>
   </head>
   <body>
     <form id='form__main'>
@@ -15,12 +16,24 @@
           <input id='tab-enabled' name='tab-enabled' type='checkbox'>
           <input id='tab-order' name='tab-order' type='number'>
       </div>
-      <input type='submit' name='save' class='actions__button' id='save' value='Save'>
-      <input type='button' name='cancel' class='actions__button' id='cancel' value='Cancel'>
+      <input type='submit' name='save' class='actions__button blue' id='save' value='Save'>
+      <button class='actions__button' id='cancel' onclick='close()'>Cancel</button>
     </form>
   </body>
   <script src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script>
   <script>
+    $(function () {
+    google.script.run.withSuccessHandler(initialise).getLofConfig()
+  })
+  
+  function initialise(lofSettings) {
+    console.log(lofSettings)
+    for (const code in lofSettings) {
+      $('#' + code + '-enabled').prop('checked', true)
+      $('#' + code + '-order').val(lofSettings[code].order)
+    }
+  }
+  
   $('#form__main').submit(function (e) {
     e.preventDefault()
     
@@ -31,7 +44,6 @@
     }
     google.script.run.withSuccessHandler(close).saveLofConfig(values)
   }) 
-  
   
   function close() {
     google.script.host.close()
