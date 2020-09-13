@@ -32,7 +32,7 @@ function createLoF() {
   
   const html = HtmlService.createTemplateFromFile('lof').evaluate()
   html.setWidth(250).setHeight(90)
-  DocumentApp.getUi().showModalDialog(html, 'Generating list of figures...')
+  DocumentApp.getUi().showModalDialog(html, 'Generating lists')
 }
 
 
