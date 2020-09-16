@@ -22,9 +22,9 @@ const storeCustom = setting => PropertiesService.getUserProperties().setProperty
 
 
 function getDefaults() {
-  const userProps = PropertiesService.getUserProperties().getProperties()
+  const userPropStore = PropertiesService.getUserProperties()
   const settings = getDefaultSettings()
-  return patchSettings(settings, userProps)
+  return patchSettings(settings, userPropStore)
 }
 
 
