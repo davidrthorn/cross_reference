@@ -21,8 +21,8 @@ hyperlinks to create labels. These have the following syntax: `#figur_population
 
 To create this label, you simply need to create some dummy text and add the link. You don't need to add any numbering, as
 this is taken care of by Cross Reference.
-So in the caption you could add the word 'figure', highlight that word, goto 'Tools->Insert link' and add `#figur_population` as
-the URL. (The dummy text will replaced by the add-on, so don't highlight text that you want to keep, such as other parts
+So in the caption you could add the word 'figure', highlight that word, go to 'Tools->Insert link' and add `#figur_population` as
+the URL. (The dummy text will be replaced by the add-on, so don't highlight text that you want to keep, such as other parts
 of the caption.)
 
 You now have a label that can be referred to. Creating references is similar to creating labels. First, create some dummy
@@ -30,7 +30,7 @@ text, such as the word 'figure' -- so you might write something like "for an exa
 you don't need any numbering, as the add-on will take care of this. Now you need to apply another hyperlink, in this case to the word 'figure'. Reference syntax, however, is slightly
 different; in our case, it will be `#fig_population`. This must be identical to the label hyperlink, except that the code is now `fig` not `figur` (reference codes always use the first three letters of the code used for labels.)
 
-If you now goto the 'Add-ons->Cross Reference->Update document', your text should be replaced with a numbered label and
+If you now go to 'Add-ons->Cross Reference->Update document', your text should be replaced with a numbered label and
 a reference with the same number.
 
 Because Cross Reference replaces your dummy text, you can use a short word or even one letter, and you can also use the `Ctrl+K` shortcut to add the link. These two additions to the process should make things quicker.
