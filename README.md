@@ -1,5 +1,4 @@
-## WARNING
-This add on is not longer actively maintained. I don't have time to fix bugs or add features unless they completely break the add on.
+## ⚠️ This add on is not longer actively maintained. I don't have time to fix bugs or add features unless they completely break the add on.
 
 <img src="/images/Panel_small.png" width="220px">
 
