@@ -1,3 +1,5 @@
+WARNING: This add on is not longer actively maintained. I don't have time to fix bugs or add features unless they completely break the add on.
+
 <img src="/images/Panel_small.png" width="220px">
 
 Cross Reference is an open source cross referencing add-on for Google Docs that automatically numbers elements such as figures and updates and formats in-text references to them. [Install](https://chrome.google.com/webstore/detail/cross-reference/hknkaiempgninehdhkgekoeoilkapgob?hl=en-GB).
